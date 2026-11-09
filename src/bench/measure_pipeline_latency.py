@@ -76,3 +76,4 @@ def benchmark_pipeline_latency(n_runs: int = 20):
 
 if __name__ == "__main__":
     benchmark_pipeline_latency()
+

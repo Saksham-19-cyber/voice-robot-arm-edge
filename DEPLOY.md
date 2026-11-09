@@ -58,3 +58,4 @@ After the cloud build completes, verify the following in the live application:
 2. **Preset Command**: Click "⬅️ Reach Left" and click "🚀 Execute Command". Confirm that the MuJoCo simulation executes, early terminates within ~11 steps, and displays the rendered rollout video.
 3. **Voice Input (Optional)**: If testing on a device with a microphone, test recording or allow faster-whisper `tiny.en` to initialize.
 4. **Update `results/cloud_deploy.json`**: Populate the verification fields once deployed.
+
