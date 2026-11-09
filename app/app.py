@@ -295,7 +295,9 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                             fixed_goal=target_goal,
                         )
                     except Exception as env_err:
+                        import traceback
                         st.session_state["sim_env"] = None
+                        st.session_state["sim_env_error"] = traceback.format_exc()
 
                 with st.spinner("Simulating MuJoCo physics rollout..."):
                     try:
@@ -316,6 +318,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                             "asr_latency_ms": asr_latency_ms,
                         }
                     except Exception as exc:
+                        import traceback
                         import mujoco
                         import gymnasium_robotics
                         st.session_state["last_result"] = {
@@ -323,6 +326,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                             "intent_res": intent_res,
                             "error_type": type(exc).__name__,
                             "error_msg": str(exc),
+                            "traceback": traceback.format_exc(),
                             "mujoco_ver": getattr(mujoco, "__version__", "unknown"),
                             "robotics_ver": getattr(gymnasium_robotics, "__version__", "unknown"),
                         }
@@ -353,6 +357,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                 f"❌ Rollout Simulation Failed: `{res['error_type']}`: {res['error_msg']}\n\n"
                 f"Installed versions: `mujoco=={res['mujoco_ver']}`, `gymnasium-robotics=={res['robotics_ver']}`."
             )
+            st.code(res.get("traceback", "no traceback"), language="text")
             fallback_video = os.path.join(BASE_DIR, "results", "demo_prerendered.mp4")
             if os.path.exists(fallback_video):
                 st.markdown("##### 📺 Fallback Pre-Rendered Demo (Not Your Command)")
