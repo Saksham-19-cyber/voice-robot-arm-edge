@@ -22,10 +22,7 @@
       "p99_us": 4019.45,
       "mean_us": 371.07,
       "std_us": 1385.95,
-      "min_us": 73.5,
-      "max_us": 21067.4,
-      "throughput_fps": 2694.9,
-      "memory_delta_mb": 0.0352
+      "throughput_fps": 2694.9
     },
     "int8": {
       "model_path": "models/fetch_reach_actor_int8.onnx",
@@ -37,34 +34,50 @@
       "p99_us": 9991.83,
       "mean_us": 715.06,
       "std_us": 5653.94,
-      "min_us": 62.5,
-      "max_us": 115944.8,
-      "throughput_fps": 1398.5,
-      "memory_delta_mb": 0.0078
+      "throughput_fps": 1398.5
     },
     "speedup_ratio": 1.086,
     "compression_ratio": 3.58,
-    "quantization_analysis": "INT8 provides 1.09x latency speedup and 3.58x size reduction."
+    "quantization_analysis": "Measured 1.09x latency speedup and 3.58x model file size reduction. The underlying causes of the modest latency speedup (e.g. instruction overhead vs memory bandwidth on this specific 2-layer MLP) remain unprofiled with low-level performance counters."
   },
   "asr_benchmark": {
     "model": "faster-whisper-tiny.en-int8",
-    "latency_ms": 4418.1,
     "audio_duration_sec": 1.404,
-    "real_time_factor": 3.1461
+    "cold_start_load_time_sec": 7.094,
+    "warmup_call_latency_sec": 2.223,
+    "warm_inference_mean_ms": 1673.34,
+    "warm_inference_p50_ms": 1631.86,
+    "warm_inference_std_ms": 82.16,
+    "real_time_factor": 1.192
   },
   "nlu_benchmark": {
-    "latency_ms": 10.59
+    "p50_ms": 2.07,
+    "mean_ms": 4.542
+  },
+  "rollout_benchmarks": {
+    "policy_inference_only_50steps_ms": 5.02,
+    "full_mujoco_physics_and_onnx_50steps_p50_ms": 583.72,
+    "full_mujoco_physics_and_onnx_per_step_p50_ms": 11.674,
+    "full_mujoco_effective_fps": 85.7,
+    "rollout_with_rgb_rendering_50steps_p50_ms": 2900.38,
+    "mp4_video_encoding_50frames_p50_ms": 698.70,
+    "total_rollout_render_encode_ms": 3599.08
+  },
+  "memory_benchmark": {
+    "process_rss_after_full_demo_mb": 330.18,
+    "streamlit_cloud_limit_mb": 1024.0,
+    "headroom_mb": 693.82
   },
   "end_to_end_breakdown": {
-    "asr_stage_ms": 4418.1,
-    "asr_percentage": 98.4,
-    "nlu_stage_ms": 10.59,
-    "nlu_percentage": 0.2,
-    "policy_rollout_50steps_ms": 8.7,
-    "policy_percentage": 0.2,
-    "tts_stage_ms": 50.64,
-    "tts_percentage": 1.1,
-    "total_e2e_latency_ms": 4488.02,
-    "finding": "ASR dominates end-to-end latency (>90%), while the quantized ONNX policy executes a full 50-step trajectory in under 15ms."
+    "asr_warm_ms": 1673.34,
+    "asr_percentage": 74.1,
+    "nlu_stage_ms": 2.07,
+    "nlu_percentage": 0.1,
+    "full_mujoco_rollout_50steps_ms": 583.72,
+    "rollout_percentage": 25.8,
+    "tts_stage_ms": 0.5,
+    "total_live_robot_control_ms": 2259.63,
+    "total_with_video_generation_ms": 5274.99,
+    "finding": "In warm execution, ASR accounts for 74.1% of robot response latency (1.67s), while 50 steps of closed-loop MuJoCo physics + ONNX policy execute in 583.7ms (25.8%). Visual rendering and MP4 encoding add 3.60s when generating client rollout video."
   }
 }

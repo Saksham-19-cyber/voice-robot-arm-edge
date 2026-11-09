@@ -1,0 +1,50 @@
+{
+  "asr": {
+    "model": "faster-whisper-tiny.en-int8",
+    "audio_duration_sec": 1.404,
+    "cold_start_load_time_sec": 7.094,
+    "warmup_call_latency_sec": 2.223,
+    "warm_inference_mean_ms": 1673.34,
+    "warm_inference_p50_ms": 1631.86,
+    "warm_inference_std_ms": 82.16,
+    "real_time_factor": 1.192
+  },
+  "nlu": {
+    "p50_ms": 2.07,
+    "mean_ms": 4.542
+  },
+  "policy_inference_only": {
+    "per_step_p50_us": 100.5,
+    "per_step_mean_us": 470.3,
+    "fifty_steps_inference_ms": 5.02
+  },
+  "full_rollout_mujoco_plus_onnx_no_render": {
+    "fifty_steps_total_p50_ms": 583.72,
+    "fifty_steps_total_mean_ms": 508.32,
+    "per_step_p50_ms": 11.674,
+    "effective_fps": 85.7
+  },
+  "memory": {
+    "process_rss_mb": 330.18
+  },
+  "full_rollout_with_rendering_and_encoding": {
+    "rollout_and_render_50steps_p50_ms": 2900.38,
+    "rollout_and_render_per_frame_ms": 58.01,
+    "mp4_encoding_50frames_p50_ms": 698.7,
+    "total_rollout_render_encode_ms": 3599.08
+  },
+  "pipeline_summary": {
+    "asr_warm_ms": 1673.34,
+    "nlu_ms": 2.07,
+    "policy_inference_50steps_ms": 5.02,
+    "full_mujoco_rollout_50steps_ms": 583.72,
+    "rollout_rendering_and_encoding_ms": 3599.08,
+    "e2e_realtime_robot_control_ms": 2259.63,
+    "e2e_with_video_generation_ms": 5274.99,
+    "breakdown_percentages_control": {
+      "asr_pct": 74.1,
+      "nlu_pct": 0.1,
+      "rollout_pct": 25.8
+    }
+  }
+}

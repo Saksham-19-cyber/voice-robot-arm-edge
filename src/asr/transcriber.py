@@ -86,3 +86,4 @@ class WhisperASR:
                     os.unlink(temp_audio_file.name)
                 except Exception:
                     pass
+

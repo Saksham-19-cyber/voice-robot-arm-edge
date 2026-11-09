@@ -113,3 +113,4 @@ def run_onnx_rollout(
         "rollout_time_ms": round(rollout_time_ms, 2),
         "encoding_time_ms": round(encoding_time_ms, 2),
     }
+

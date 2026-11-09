@@ -142,3 +142,4 @@ def run_stretch(env_id="FetchPickAndPlace-v4", total_timesteps=3000, seed=42):
 
 if __name__ == "__main__":
     run_stretch()
+

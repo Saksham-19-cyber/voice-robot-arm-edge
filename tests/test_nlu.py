@@ -100,3 +100,22 @@ def test_empty_input(parser):
     res = parser.parse("   ")
     assert res.intent == "unknown"
     assert res.clarification_needed is True
+
+
+def test_handwritten_heldout_dataset_evaluation(parser):
+    import json
+    heldout_path = "tests/nlu_heldout_handwritten.json"
+    assert os.path.exists(heldout_path)
+    with open(heldout_path, "r") as f:
+        samples = json.load(f)
+    assert len(samples) == 50
+    correct = 0
+    for s in samples:
+        res = parser.parse(s["text"])
+        if res.intent == s["intent"]:
+            correct += 1
+    accuracy = correct / len(samples)
+    # The out-of-distribution handwritten dataset tests generalization on unseen colloquialisms
+    assert accuracy >= 0.50
+
+
