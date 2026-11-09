@@ -1,0 +1,24 @@
+{
+  "ort_session_init_ms": 41.53,
+  "env_construction_ms": 110.98,
+  "env_reset_ms": 2.46,
+  "first_render_init_ms": 1254.34,
+  "steps_executed": 11,
+  "policy_inference_per_step_ms": {
+    "mean": 1.093,
+    "total": 12.02
+  },
+  "physics_step_per_step_ms": {
+    "mean": 5.485,
+    "total": 60.34
+  },
+  "render_per_frame_ms": {
+    "mean": 19.438,
+    "total": 213.82
+  },
+  "mp4_encode_ms": 1264.85,
+  "mp4_size_bytes": 16038,
+  "gif_encode_ms": 2933.66,
+  "gif_size_bytes": 186792,
+  "total_request_latency_ms": 2918.81
+}

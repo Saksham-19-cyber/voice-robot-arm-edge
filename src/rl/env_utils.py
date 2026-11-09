@@ -115,11 +115,22 @@ class GoalOverrideWrapper(gym.Wrapper):
         return obs, info
 
 
-def make_fetch_env(env_id: str = "FetchReach-v4", render_mode: str = None, fixed_goal: np.ndarray = None):
-    """Factory creating Fetch env with headless rendering and optional goal override."""
+def make_fetch_env(
+    env_id: str = "FetchReach-v4",
+    render_mode: str = None,
+    fixed_goal: np.ndarray = None,
+    width: int = 320,
+    height: int = 320,
+    **kwargs,
+):
+    """Factory creating Fetch env with headless rendering and dynamic goal override."""
     setup_headless_rendering()
-    env = gym.make(env_id, render_mode=render_mode)
-    if fixed_goal is not None:
-        env = GoalOverrideWrapper(env, fixed_goal=fixed_goal)
-    return env
+    extra_args = {}
+    if render_mode is not None:
+        extra_args["render_mode"] = render_mode
+        extra_args["width"] = width
+        extra_args["height"] = height
+    extra_args.update(kwargs)
+    env = gym.make(env_id, **extra_args)
+    return GoalOverrideWrapper(env, fixed_goal=fixed_goal)
 

@@ -1,99 +1,113 @@
 """
-ASR Speed Ablation Study:
-Tests configuration changes one at a time on faster-whisper tiny.en:
-1. Baseline: default settings (beam_size=5, vad_filter=True, language=None, condition_on_prev=True)
-2. beam_size=1
-3. vad_filter=False (for clips < 3s)
-4. cpu_threads=4 (vs default 1 or system default)
-5. language="en" (fixed language bypasses language detection)
-6. condition_on_previous_text=False
-7. Optimal combined combination (keeps all changes that lower latency without altering transcript)
+ASR Ablation Study:
+Systematic comparison across model size, quantization, and thread counts:
+- model: tiny.en vs base.en
+- compute_type: int8 vs float32
+- cpu_threads: 1 vs 4
+
+Evaluated with 5 warmup calls and 20 timed iterations on a fixed 2.0s audio clip.
+Reports p50, p95, mean latency, and peak process RSS memory.
 """
 
 import os
 import sys
 import time
 import json
+import psutil
 import numpy as np
+import soundfile as sf
 from faster_whisper import WhisperModel
 
-def run_asr_ablation():
-    audio_path = "results/sample_speech.wav"
-    assert os.path.exists(audio_path), f"Audio missing: {audio_path}"
+def prepare_2s_clip(source_path: str = "results/sample_speech.wav", target_path: str = "results/sample_2s.wav") -> str:
+    """Creates a guaranteed 2.0s audio clip."""
+    if not os.path.exists(source_path):
+        raise FileNotFoundError(f"Source audio {source_path} not found.")
+    data, sr = sf.read(source_path)
+    target_samples = int(2.0 * sr)
+    if len(data) < target_samples:
+        padded = np.zeros(target_samples, dtype=data.dtype)
+        padded[:len(data)] = data
+    else:
+        padded = data[:target_samples]
+    sf.write(target_path, padded, sr)
+    return target_path
+
+def run_asr_ablation(n_warmup: int = 5, n_runs: int = 20):
+    audio_path = prepare_2s_clip()
+    print(f"Prepared 2.0s audio clip at {audio_path}")
     
-    # Baseline model
-    print("Testing ASR configurations one by one...", flush=True)
-    results = []
-    
-    experiments = [
-        ("Baseline (defaults)", dict(model_threads=4, beam_size=5, vad_filter=True, language=None, condition_on_prev=True)),
-        ("+ beam_size=1", dict(model_threads=4, beam_size=1, vad_filter=True, language=None, condition_on_prev=True)),
-        ("+ vad_filter=False (<3s)", dict(model_threads=4, beam_size=5, vad_filter=False, language=None, condition_on_prev=True)),
-        ("+ cpu_threads=1", dict(model_threads=1, beam_size=5, vad_filter=True, language=None, condition_on_prev=True)),
-        ("+ cpu_threads=8", dict(model_threads=8, beam_size=5, vad_filter=True, language=None, condition_on_prev=True)),
-        ("+ language='en' (fixed)", dict(model_threads=4, beam_size=5, vad_filter=True, language="en", condition_on_prev=True)),
-        ("+ condition_on_prev=False", dict(model_threads=4, beam_size=5, vad_filter=True, language=None, condition_on_prev=False)),
-        ("Optimal Combined", dict(model_threads=4, beam_size=1, vad_filter=False, language="en", condition_on_prev=False)),
+    configs = [
+        {"model": "tiny.en", "compute_type": "int8", "cpu_threads": 1},
+        {"model": "tiny.en", "compute_type": "int8", "cpu_threads": 4},
+        {"model": "tiny.en", "compute_type": "float32", "cpu_threads": 1},
+        {"model": "tiny.en", "compute_type": "float32", "cpu_threads": 4},
+        {"model": "base.en", "compute_type": "int8", "cpu_threads": 1},
+        {"model": "base.en", "compute_type": "int8", "cpu_threads": 4},
+        {"model": "base.en", "compute_type": "float32", "cpu_threads": 1},
+        {"model": "base.en", "compute_type": "float32", "cpu_threads": 4},
     ]
-    
-    # Cache models by thread count to avoid reloading
-    models = {}
-    for threads in [1, 4, 8]:
-        models[threads] = WhisperModel("tiny.en", device="cpu", compute_type="int8", cpu_threads=threads)
-        
-    for name, cfg in experiments:
-        m = models[cfg["model_threads"]]
-        
-        # Warmup pass
-        _ = list(m.transcribe(
-            audio_path,
-            beam_size=cfg["beam_size"],
-            vad_filter=cfg["vad_filter"],
-            language=cfg["language"],
-            condition_on_previous_text=cfg["condition_on_prev"],
-        )[0])
-        
-        # 5 timed runs
+
+    results = []
+    proc = psutil.Process()
+
+    print(f"Running ASR ablation ({len(configs)} configs, {n_warmup} warmup, {n_runs} timed runs each)...")
+
+    for cfg in configs:
+        name = f"{cfg['model']}_{cfg['compute_type']}_threads{cfg['cpu_threads']}"
+        print(f"\n--- Testing config: {name} ---", flush=True)
+
+        t_load_start = time.perf_counter()
+        model = WhisperModel(
+            cfg["model"],
+            device="cpu",
+            compute_type=cfg["compute_type"],
+            cpu_threads=cfg["cpu_threads"],
+        )
+        load_time_ms = (time.perf_counter() - t_load_start) * 1000
+
+        # Warm-up calls
+        for _ in range(n_warmup):
+            _ = list(model.transcribe(audio_path, beam_size=1, language="en")[0])
+
+        # Timed runs
         latencies = []
         transcript = ""
-        for _ in range(5):
+        for i in range(n_runs):
             t0 = time.perf_counter()
-            segs, _ = m.transcribe(
-                audio_path,
-                beam_size=cfg["beam_size"],
-                vad_filter=cfg["vad_filter"],
-                language=cfg["language"],
-                condition_on_previous_text=cfg["condition_on_prev"],
-            )
+            segs, _ = model.transcribe(audio_path, beam_size=1, language="en")
             text = " ".join([s.text.strip() for s in segs]).strip()
-            latencies.append((time.perf_counter() - t0) * 1000)
+            lat_ms = (time.perf_counter() - t0) * 1000
+            latencies.append(lat_ms)
             transcript = text
-            
-        mean_lat = float(np.mean(latencies))
-        std_lat = float(np.std(latencies))
-        p50_lat = float(np.median(latencies))
-        
-        row = {
+
+        rss_mb = proc.memory_info().rss / (1024 * 1024)
+
+        entry = {
+            "config": cfg,
             "config_name": name,
-            "mean_latency_ms": round(mean_lat, 1),
-            "std_latency_ms": round(std_lat, 1),
-            "p50_latency_ms": round(p50_lat, 1),
+            "n_runs": n_runs,
+            "audio_duration_s": 2.0,
+            "load_time_ms": round(load_time_ms, 1),
+            "latency_p50_ms": round(float(np.median(latencies)), 1),
+            "latency_p95_ms": round(float(np.percentile(latencies, 95)), 1),
+            "latency_mean_ms": round(float(np.mean(latencies)), 1),
+            "latency_std_ms": round(float(np.std(latencies)), 1),
+            "peak_rss_mb": round(rss_mb, 1),
             "transcript": transcript,
-            "transcript_preserved": (transcript.lower() == "reach to the left."),
-            "speedup_vs_baseline": None,
         }
-        results.append(row)
-        print(f"[{name}] {mean_lat:.1f} +/- {std_lat:.1f} ms | transcript: '{transcript}'", flush=True)
-        
-    base_lat = results[0]["mean_latency_ms"]
-    for r in results:
-        r["speedup_vs_baseline"] = round(base_lat / r["mean_latency_ms"], 2)
-        
-    with open("results/asr_ablation.json", "w") as f:
+        print(f"[{name}] p50: {entry['latency_p50_ms']} ms | p95: {entry['latency_p95_ms']} ms | RSS: {entry['peak_rss_mb']} MB")
+        results.append(entry)
+
+        # Free model reference
+        del model
+
+    out_file = "results/asr_ablation.json"
+    os.makedirs("results", exist_ok=True)
+    with open(out_file, "w") as f:
         json.dump(results, f, indent=2)
-    print("\nSaved ASR ablation results to results/asr_ablation.json", flush=True)
+
+    print(f"\nSaved ASR ablation results to {out_file}")
     return results
 
 if __name__ == "__main__":
     run_asr_ablation()
-

@@ -36,3 +36,4 @@ def test_fetch_reach_smoke_lifecycle():
         assert frame.shape[0] > 0 and frame.shape[1] > 0
     finally:
         env.close()
+

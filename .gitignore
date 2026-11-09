@@ -11,10 +11,14 @@ env/
 
 # Temporary artifacts and test files
 temp/
+scratch/
+MUJOCO_LOG.TXT
 *.tmp
 *.mp4
 *.gif
+!assets/*.gif
 !results/*.png
+!results/**/*.png
 !results/*.wav
 !results/*.json
 !results/demo_prerendered.mp4

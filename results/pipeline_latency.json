@@ -1,44 +1,79 @@
 {
+  "cold_start": {
+    "asr_model_load_ms": 5109.1,
+    "asr_inference_ms": 3119.6,
+    "nlu_parse_ms": 44.75,
+    "env_construction_ms": 346.8,
+    "ort_session_init_ms": 50.2,
+    "rollout_and_render_ms": 2063.5,
+    "video_encode_ms": 2627.4,
+    "total_cold_start_ms": 13363.9
+  },
+  "env_reuse_comparison": {
+    "env_recreate_with_first_render_mean_ms": 692.7,
+    "env_warm_reset_with_render_mean_ms": 4.3,
+    "speedup_factor": 163.0
+  },
   "early_termination": {
     "n_runs": 20,
     "hold_steps_constant": 10,
-    "mean_steps_taken": 11.0,
-    "mean_first_success_step": 1.0,
-    "rollout_ms": {
-      "mean": 1186.5,
-      "p50": 1094.7,
-      "std": 252.1
+    "mean_steps_taken": 13.1,
+    "mean_first_success_step": 3.0,
+    "asr_inference_ms": {
+      "mean": 1685.9,
+      "p50": 1619.1,
+      "p95": 2431.4
     },
-    "encode_ms": {
-      "mean": 289.7,
-      "p50": 276.8,
-      "std": 45.0
+    "nlu_parse_ms": {
+      "mean": 7.5,
+      "p50": 8.97,
+      "p95": 11.4
     },
-    "total_ms": {
-      "mean": 1697.3,
-      "p50": 1607.9,
-      "std": 325.7
+    "rollout_and_render_ms": {
+      "mean": 87.1,
+      "p50": 59.3,
+      "p95": 220.8
+    },
+    "video_encode_ms": {
+      "mean": 344.6,
+      "p50": 322.8,
+      "p95": 497.1
+    },
+    "total_user_wait_ms": {
+      "mean": 2128.6,
+      "p50": 1990.1,
+      "p95": 2912.5
     }
   },
   "full_50_steps": {
     "n_runs": 20,
     "hold_steps_constant": 10,
     "mean_steps_taken": 50.0,
-    "mean_first_success_step": 1.0,
-    "rollout_ms": {
-      "mean": 1810.0,
-      "p50": 1736.8,
-      "std": 185.0
+    "mean_first_success_step": 3.0,
+    "asr_inference_ms": {
+      "mean": 1540.8,
+      "p50": 1529.9,
+      "p95": 1732.6
     },
-    "encode_ms": {
-      "mean": 517.7,
-      "p50": 507.6,
-      "std": 35.7
+    "nlu_parse_ms": {
+      "mean": 8.97,
+      "p50": 9.71,
+      "p95": 10.15
     },
-    "total_ms": {
-      "mean": 2511.2,
-      "p50": 2441.7,
-      "std": 215.7
+    "rollout_and_render_ms": {
+      "mean": 245.1,
+      "p50": 229.5,
+      "p95": 367.6
+    },
+    "video_encode_ms": {
+      "mean": 678.8,
+      "p50": 637.3,
+      "p95": 825.7
+    },
+    "total_user_wait_ms": {
+      "mean": 2478.4,
+      "p50": 2357.5,
+      "p95": 2917.5
     }
   }
 }
