@@ -5,3 +5,4 @@ Please take a real browser screenshot of the deployed app in action and save it 
   assets/screenshots/cloud_app_live.png
 
 Do NOT fabricate or simulate this screenshot.
+
