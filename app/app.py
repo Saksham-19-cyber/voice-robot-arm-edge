@@ -12,6 +12,7 @@ import json
 import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
+from importlib.metadata import version, PackageNotFoundError
 
 # Configure page metadata
 st.set_page_config(
@@ -93,27 +94,39 @@ def main():
     )
 
     # System Info expander
-    with st.sidebar.expander("ℹ️ System Info", expanded=False):
-        import platform
-        import psutil
-        import onnxruntime as ort
-        import mujoco
-        import gymnasium_robotics
-        proc = psutil.Process()
-        rss_mb = proc.memory_info().rss / (1024 * 1024)
-        peak_mb = getattr(proc.memory_info(), "peak_wset", proc.memory_info().rss) / (1024 * 1024)
-        st.markdown(f"- **Python:** `{platform.python_version()}`")
-        st.markdown(f"- **Current RSS:** `{rss_mb:.1f} MB`")
-        st.markdown(f"- **Peak Working Set:** `{peak_mb:.1f} MB`")
-        st.markdown(f"- **ONNX Runtime:** `{ort.__version__}`")
-        st.markdown(f"- **MuJoCo:** `{mujoco.__version__}`")
-        st.markdown(f"- **Gymnasium:** `{gym.__version__}`")
-        st.markdown(f"- **Gymnasium-Robotics:** `{gymnasium_robotics.__version__}`")
-        st.markdown(f"- **Effective MUJOCO_GL:** `{os.environ.get('MUJOCO_GL', 'default')}`")
-        st.markdown(f"- **Render Resolution:** `{render_w}x{render_h}`")
-        st.markdown(f"- **Platform:** `{platform.system()} {platform.machine()}`")
-        st.markdown(f"- **CPU Threads:** `{os.cpu_count()}`")
+        with st.sidebar.expander("ℹ️ System Info", expanded=False):
+        try:
+            import platform
+            import psutil
 
+            def pkg_version(name):
+                try:
+                    return version(name)
+                except PackageNotFoundError:
+                    return "not installed"
+
+            mem = psutil.Process().memory_info()
+            rss_mb = mem.rss / (1024 * 1024)
+            if hasattr(mem, "peak_wset"):  # Windows
+                peak_mb = mem.peak_wset / (1024 * 1024)
+            else:  # Linux (Streamlit Cloud): ru_maxrss is in KB
+                import resource
+                peak_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
+
+            st.markdown(f"- **Python:** `{platform.python_version()}`")
+            st.markdown(f"- **Current RSS:** `{rss_mb:.1f} MB`")
+            st.markdown(f"- **Peak memory:** `{peak_mb:.1f} MB`")
+            st.markdown(f"- **ONNX Runtime:** `{pkg_version('onnxruntime')}`")
+            st.markdown(f"- **MuJoCo:** `{pkg_version('mujoco')}`")
+            st.markdown(f"- **Gymnasium:** `{pkg_version('gymnasium')}`")
+            st.markdown(f"- **Gymnasium-Robotics:** `{pkg_version('gymnasium-robotics')}`")
+            st.markdown(f"- **Effective MUJOCO_GL:** `{os.environ.get('MUJOCO_GL', 'default')}`")
+            st.markdown(f"- **Render Resolution:** `{render_w}x{render_h}`")
+            st.markdown(f"- **Platform:** `{platform.system()} {platform.machine()}`")
+            st.markdown(f"- **CPU Threads:** `{os.cpu_count()}`")
+        except Exception as e:
+            st.warning(f"System info unavailable: {e}")
+            
     page = st.sidebar.radio(
         "Navigation",
         ["🎮 Interactive Demo", "📊 Benchmarks & Results", "📐 Architecture & Notes"],
