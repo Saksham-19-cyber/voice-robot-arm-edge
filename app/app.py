@@ -94,7 +94,7 @@ def main():
     )
 
     # System Info expander
-        with st.sidebar.expander("ℹ️ System Info", expanded=False):
+    with st.sidebar.expander("ℹ️ System Info", expanded=False):
         try:
             import platform
             import psutil
