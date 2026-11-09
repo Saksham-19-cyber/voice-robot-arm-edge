@@ -1,5 +1,6 @@
-libgl1-mesa-glx
+libgl1
+libglu1-mesa
+libosmesa6
 libosmesa6-dev
 libglfw3
 ffmpeg
-

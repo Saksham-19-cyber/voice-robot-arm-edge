@@ -1,9 +1,11 @@
+import os
+os.environ.setdefault("MUJOCO_GL", "osmesa")
+
 """
 Voice-Commanded Robot Arm with Quantized RL Policy on Edge
 Streamlit Web Application for Inference, Rollout Visualization, and Benchmarking.
 """
 
-import os
 import sys
 import time
 import json
