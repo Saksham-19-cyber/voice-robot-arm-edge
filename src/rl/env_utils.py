@@ -193,10 +193,20 @@ class GoalOverrideWrapper(gym.Wrapper):
         super().__init__(env)
         self.fixed_goal = np.array(fixed_goal, dtype=np.float32)
 
+    def set_goal(self, goal: np.ndarray):
+        """Updates the fixed target goal and refreshes the MuJoCo target site."""
+        self.fixed_goal = np.array(goal, dtype=np.float32)
+        if hasattr(self.env.unwrapped, "goal"):
+            self.env.unwrapped.goal = self.fixed_goal.copy()
+        if hasattr(self.env.unwrapped, "_render_callback"):
+            self.env.unwrapped._render_callback()
+
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         if self.fixed_goal is not None:
             self.env.unwrapped.goal = self.fixed_goal.copy()
+            if hasattr(self.env.unwrapped, "_render_callback"):
+                self.env.unwrapped._render_callback()
             obs["desired_goal"] = self.fixed_goal.copy()
         return obs, info
 

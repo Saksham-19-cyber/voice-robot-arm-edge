@@ -40,7 +40,7 @@ def get_asr_model():
     try:
         from src.asr.transcriber import WhisperASR
         # Uses optimal single-thread execution for minimum CPU latency on edge
-        return WhisperASR(model_size="tiny.en", device="cpu", compute_type="int8")
+        return WhisperASR(model_size="tiny.en", device="cpu", compute_type="int8", cpu_threads=1)
     except Exception as e:
         st.warning(
             f"⚠️ ASR engine failed to initialize: {e}. "
@@ -225,7 +225,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                             st.session_state["command_text"] = transcribed
                             st.success(f"🗣️ Transcribed: **\"{transcribed}\"** ({asr_latency_ms:.1f}ms, RTF: {asr_rtf:.2f})")
                         else:
-                            st.warning("No speech detected. Please speak clearly or use text input.")
+                            st.warning("I didn't hear a command. Please speak clearly or use text input.")
                 else:
                     st.error("ASR model unavailable.")
 
@@ -285,6 +285,15 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
             elif intent_res.goal_xyz is not None:
                 target_goal = np.array(intent_res.goal_xyz, dtype=np.float32)
 
+                # Check if render resolution changed in sidebar
+                current_res = (render_w, render_h)
+                if st.session_state.get("sim_env_res") != current_res and st.session_state["sim_env"] is not None:
+                    try:
+                        st.session_state["sim_env"].close()
+                    except Exception:
+                        pass
+                    st.session_state["sim_env"] = None
+
                 # Reuse session environment or initialize once
                 env_creation_failed = False
                 if st.session_state["sim_env"] is None:
@@ -296,6 +305,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                             height=render_h,
                             fixed_goal=target_goal,
                         )
+                        st.session_state["sim_env_res"] = current_res
                     except Exception as env_err:
                         import mujoco
                         import gymnasium_robotics
@@ -589,8 +599,22 @@ def render_results_page():
 
 def render_about_page():
     st.title("📐 System Architecture & Edge Design")
+
+    pipeline_data = load_json_file("results/pipeline_latency.json") or {}
+    env_reuse_info = pipeline_data.get("env_reuse_comparison", {})
+    recreate_ms = env_reuse_info.get("env_recreate_with_first_render_mean_ms", 692.7)
+    warm_reset_ms = env_reuse_info.get("env_warm_reset_with_render_mean_ms", 4.3)
+    speedup_x = env_reuse_info.get("speedup_factor", 163.0)
+
+    early_term_info = pipeline_data.get("early_termination", {})
+    asr_p50_ms = early_term_info.get("asr_inference_ms", {}).get("p50", 1322.8)
+    nlu_p50_ms = early_term_info.get("nlu_parse_ms", {}).get("p50", 2.1)
+
+    mem_data = load_json_file("results/streamlit_memory.json") or {}
+    mem_peak_wset = mem_data.get("peak_working_set_mb", 291.7)
+
     st.markdown(
-        """
+        f"""
         ### End-to-End Pipeline
         This system executes a voice-directed continuous manipulation policy deployed to edge and cloud CPU instances.
         
@@ -598,10 +622,10 @@ def render_about_page():
         [User Speech / Browser Mic]
                     │
                     ▼
-        [faster-whisper (tiny.en INT8)]  --> ~1.30s warm inference on CPU (cpu_threads=1)
+        [faster-whisper (tiny.en INT8)]  --> ~{asr_p50_ms/1000:.2f}s warm inference on CPU (cpu_threads=1)
                     │
                     ▼
-        [NLU Dual-Engine Parser]         --> ~2.1ms (Entity Extraction & Bounds Clipping)
+        [NLU Dual-Engine Parser]         --> ~{nlu_p50_ms:.1f}ms (Entity Extraction & Bounds Clipping)
                     │
                     ▼
         [SAC Actor in ONNX INT8]         --> ~90 µs per step; early-terminates at first success + 10 hold steps
@@ -615,11 +639,11 @@ def render_about_page():
         
         ### Key Design Decisions for Streamlit Community Cloud (~1 GB RAM)
         1. **Zero PyTorch in Deployment:**
-           The PyTorch runtime is completely eliminated from the serving path. Inference is executed entirely through `onnxruntime`, keeping the application memory footprint at **~292 MB peak working set** after full Whisper transcription, MuJoCo rollout, and video encoding (well below the 1 GB platform limit).
+           The PyTorch runtime is completely eliminated from the serving path. Inference is executed entirely through `onnxruntime`, keeping the application memory footprint at **~{mem_peak_wset:.1f} MB peak working set** (measured on Windows laptop, Intel Core i5-1235U, GLFW rendering) after full Whisper transcription, MuJoCo rollout, and video encoding (well below the 1 GB platform limit).
         2. **Observation Normalization Baked into ONNX:**
            Running mean and running variance statistics from training are embedded directly as constant buffers inside the ONNX graph. The web app sends raw coordinate arrays without maintaining separate normalization objects.
         3. **Environment Reuse in Session State:**
-           Keeping the simulation environment in `st.session_state` eliminates the ~1.2s cold start of renderer initialization on subsequent requests.
+           Keeping the simulation environment in `st.session_state` eliminates repeated renderer initialization, reducing per-request env overhead from **{recreate_ms:.1f} ms** down to **{warm_reset_ms:.1f} ms** warm reset (**{speedup_x:.0f}x speedup**).
         4. **Client-Side Speech Synthesis:**
            Server-side TTS libraries (`pyttsx3`, `espeak`) fail in headless Linux containers lacking audio hardware. The app injects a zero-overhead HTML5 Web Speech API snippet executed inside the client browser.
         5. **Honest Quantization Reporting:**

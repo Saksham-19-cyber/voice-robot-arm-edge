@@ -2,7 +2,7 @@ name: Linux Smoke & MuJoCo Compatibility
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, cleanup-experiments ]
   workflow_dispatch:
 
 jobs:
@@ -175,4 +175,110 @@ jobs:
               traceback.print_exc()
               raise e
           "
+
+  numpy-1-26-experiment:
+    name: NumPy 1.26.4 Compatibility Experiment (NO Patch)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $(cat packages.txt)
+
+      - name: Install Requirements and Force NumPy 1.26.4
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          echo "=== FORCING NUMPY 1.26.4 ==="
+          pip install --force-reinstall "numpy==1.26.4" || true
+          echo "=== PIP CHECK CONFLICTS ==="
+          pip check || true
+
+      - name: Inspect Package Versions & Enum Types under NumPy 1.26.4
+        run: |
+          python -c "
+          import numpy as np
+          import mujoco
+          import gymnasium
+          import gymnasium_robotics
+          print('=== VERSIONS UNDER EXPERIMENT ===')
+          print('numpy:', np.__version__)
+          print('mujoco:', mujoco.__version__)
+          print('gymnasium:', gymnasium.__version__)
+          print('gymnasium_robotics:', gymnasium_robotics.__version__)
+
+          xml = '''<mujoco><worldbody><body name=\"b1\"><joint type=\"hinge\" name=\"j1\"/><geom size=\"0.1\" type=\"sphere\"/></body></worldbody></mujoco>'''
+          m = mujoco.MjModel.from_xml_string(xml)
+          raw_type = m.jnt_type[0]
+          print('raw_type repr:', repr(raw_type), 'type:', type(raw_type), 'dtype:', getattr(raw_type, 'dtype', None))
+          print('mjtJoint.mjJNT_HINGE repr:', repr(mujoco.mjtJoint.mjJNT_HINGE))
+          print('raw_type == mjtJoint.mjJNT_HINGE:', raw_type == mujoco.mjtJoint.mjJNT_HINGE)
+          print('raw_type in (mjtJoint.mjJNT_HINGE,):', raw_type in (mujoco.mjtJoint.mjJNT_HINGE,))
+          "
+
+      - name: Test Env Creation with NumPy 1.26.4 and NO Patch
+        env:
+          MUJOCO_GL: osmesa
+          DISABLE_MUJOCO_UTILS_PATCH: "1"
+        run: |
+          python -c "
+          import os
+          import traceback
+          import gymnasium as gym
+          import gymnasium_robotics
+
+          try:
+              env = gym.make('FetchReach-v4', render_mode='rgb_array')
+              obs, info = env.reset(seed=42)
+              print('NumPy 1.26.4 Stock Env Creation: PASSED!')
+              env.close()
+          except Exception as e:
+              print('NumPy 1.26.4 Stock Env Creation: FAILED with', type(e).__name__, e)
+              traceback.print_exc()
+          "
+
+  linux-memory-benchmark:
+    name: Linux Memory Benchmark (1 session vs 3 concurrent)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $(cat packages.txt)
+
+      - name: Install Python Dependencies & Selenium
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt pytest selenium
+
+      - name: Run Linux Streamlit Server Memory Benchmark
+        env:
+          MUJOCO_GL: osmesa
+        run: |
+          python src/bench/measure_streamlit_linux.py
+
+      - name: Upload Memory Results Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: streamlit_memory_v2
+          path: results/streamlit_memory_v2.json
 

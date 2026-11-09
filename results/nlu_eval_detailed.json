@@ -51,49 +51,8 @@
   },
   "human_written_heldout": {
     "dataset_label": "human_written_heldout",
-    "sample_count": 1,
-    "class_distribution": {
-      "reach": 1
-    },
-    "majority_class_baseline": {
-      "majority_class": "reach",
-      "wilson_ci": {
-        "accuracy": 1.0,
-        "ci_low": 0.2065,
-        "ci_high": 1.0
-      }
-    },
-    "rule_parser": {
-      "intent_accuracy": {
-        "accuracy": 1.0,
-        "ci_low": 0.2065,
-        "ci_high": 1.0
-      },
-      "end_to_end_accuracy": {
-        "accuracy": 1.0,
-        "ci_low": 0.2065,
-        "ci_high": 1.0
-      }
-    },
-    "classifier_alone": {
-      "intent_accuracy": {
-        "accuracy": 1.0,
-        "ci_low": 0.2065,
-        "ci_high": 1.0
-      },
-      "note": "Classifier predicts intent class only; goal coordinates are produced by rule parser."
-    },
-    "hybrid_parser": {
-      "intent_accuracy": {
-        "accuracy": 1.0,
-        "ci_low": 0.2065,
-        "ci_high": 1.0
-      },
-      "end_to_end_accuracy": {
-        "accuracy": 1.0,
-        "ci_low": 0.2065,
-        "ci_high": 1.0
-      }
-    }
+    "sample_count": 0,
+    "status": "not measured (N=0; awaiting human-collected heldout sentences in tests/nlu_heldout_human.json)",
+    "accuracy": null
   }
 }

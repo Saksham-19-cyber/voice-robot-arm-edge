@@ -47,6 +47,27 @@ def get_hardware_info():
                         break
     except Exception:
         info["cpu_model"] = platform.processor()
+
+    # GPU name detection if available
+    if "CUDAExecutionProvider" in ort.get_available_providers():
+        try:
+            import subprocess
+            gpu_out = subprocess.check_output(
+                ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
+                text=True,
+                stderr=subprocess.DEVNULL,
+            )
+            info["gpu_model"] = gpu_out.strip()
+        except Exception:
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    info["gpu_model"] = torch.cuda.get_device_name(0)
+            except Exception:
+                pass
+        if "gpu_model" not in info:
+            info["gpu_model"] = "CUDA-enabled GPU"
+
     return info
 
 
@@ -55,7 +76,8 @@ def benchmark_policy(onnx_path: str, n_warmup: int = 100, n_runs: int = 1000):
     Measures p50, p95, p99, mean, std per-inference latency in microseconds.
     Excludes warm-up passes.
     """
-    session = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
+    providers = ["CUDAExecutionProvider", "CPUExecutionProvider"] if "CUDAExecutionProvider" in ort.get_available_providers() else ["CPUExecutionProvider"]
+    session = ort.InferenceSession(onnx_path, providers=providers)
     dummy_input = np.random.randn(1, 16).astype(np.float32)
 
     # Warm-up passes

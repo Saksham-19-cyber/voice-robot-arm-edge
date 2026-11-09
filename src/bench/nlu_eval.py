@@ -75,8 +75,17 @@ def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
     with open(dataset_path, "r", encoding="utf-8") as f:
         samples = json.load(f)
 
-    if not samples:
-        return {"dataset_label": dataset_label, "sample_count": 0, "status": "empty template (awaiting inputs)"}
+    real_samples = [s for s in samples if not s.get("text", "").startswith("example:")]
+
+    if not real_samples:
+        return {
+            "dataset_label": dataset_label,
+            "sample_count": 0,
+            "status": f"not measured (N=0; awaiting human-collected heldout sentences in {dataset_path})",
+            "accuracy": None,
+        }
+
+    samples = real_samples
 
     rule_parser = RuleBasedParser()
     hybrid_parser = VoiceCommandParser("models/intent_classifier.pkl")

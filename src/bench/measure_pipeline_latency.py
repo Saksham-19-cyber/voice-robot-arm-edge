@@ -38,7 +38,7 @@ def benchmark_pipeline_latency(n_runs: int = 20):
     t_cold_start = time.perf_counter()
     
     t0 = time.perf_counter()
-    cold_asr = WhisperASR(model_size="tiny.en", compute_type="int8")
+    cold_asr = WhisperASR(model_size="tiny.en", compute_type="int8", cpu_threads=1)
     cold_asr_load_ms = (time.perf_counter() - t0) * 1000
     
     t0 = time.perf_counter()

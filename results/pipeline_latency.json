@@ -1,48 +1,48 @@
 {
   "cold_start": {
-    "asr_model_load_ms": 5109.1,
-    "asr_inference_ms": 3119.6,
-    "nlu_parse_ms": 44.75,
-    "env_construction_ms": 346.8,
-    "ort_session_init_ms": 50.2,
-    "rollout_and_render_ms": 2063.5,
-    "video_encode_ms": 2627.4,
-    "total_cold_start_ms": 13363.9
+    "asr_model_load_ms": 5304.6,
+    "asr_inference_ms": 1527.0,
+    "nlu_parse_ms": 24.62,
+    "env_construction_ms": 322.9,
+    "ort_session_init_ms": 19.9,
+    "rollout_and_render_ms": 2245.0,
+    "video_encode_ms": 8235.5,
+    "total_cold_start_ms": 17680.7
   },
   "env_reuse_comparison": {
-    "env_recreate_with_first_render_mean_ms": 692.7,
-    "env_warm_reset_with_render_mean_ms": 4.3,
-    "speedup_factor": 163.0
+    "env_recreate_with_first_render_mean_ms": 488.6,
+    "env_warm_reset_with_render_mean_ms": 0.9,
+    "speedup_factor": 515.0
   },
   "early_termination": {
     "n_runs": 20,
     "hold_steps_constant": 10,
-    "mean_steps_taken": 13.1,
+    "mean_steps_taken": 13.0,
     "mean_first_success_step": 3.0,
     "asr_inference_ms": {
-      "mean": 1685.9,
-      "p50": 1619.1,
-      "p95": 2431.4
+      "mean": 1392.8,
+      "p50": 1337.4,
+      "p95": 1915.5
     },
     "nlu_parse_ms": {
-      "mean": 7.5,
-      "p50": 8.97,
-      "p95": 11.4
+      "mean": 2.66,
+      "p50": 2.76,
+      "p95": 4.45
     },
     "rollout_and_render_ms": {
-      "mean": 87.1,
-      "p50": 59.3,
-      "p95": 220.8
+      "mean": 33.9,
+      "p50": 30.9,
+      "p95": 56.8
     },
     "video_encode_ms": {
-      "mean": 344.6,
-      "p50": 322.8,
-      "p95": 497.1
+      "mean": 208.4,
+      "p50": 203.1,
+      "p95": 274.9
     },
     "total_user_wait_ms": {
-      "mean": 2128.6,
-      "p50": 1990.1,
-      "p95": 2912.5
+      "mean": 1639.4,
+      "p50": 1562.7,
+      "p95": 2175.4
     }
   },
   "full_50_steps": {
@@ -51,29 +51,29 @@
     "mean_steps_taken": 50.0,
     "mean_first_success_step": 3.0,
     "asr_inference_ms": {
-      "mean": 1540.8,
-      "p50": 1529.9,
-      "p95": 1732.6
+      "mean": 1545.1,
+      "p50": 1536.0,
+      "p95": 1895.9
     },
     "nlu_parse_ms": {
-      "mean": 8.97,
-      "p50": 9.71,
-      "p95": 10.15
+      "mean": 3.0,
+      "p50": 3.01,
+      "p95": 4.79
     },
     "rollout_and_render_ms": {
-      "mean": 245.1,
-      "p50": 229.5,
-      "p95": 367.6
+      "mean": 97.2,
+      "p50": 93.2,
+      "p95": 169.3
     },
     "video_encode_ms": {
-      "mean": 678.8,
-      "p50": 637.3,
-      "p95": 825.7
+      "mean": 531.8,
+      "p50": 453.2,
+      "p95": 849.0
     },
     "total_user_wait_ms": {
-      "mean": 2478.4,
-      "p50": 2357.5,
-      "p95": 2917.5
+      "mean": 2180.7,
+      "p50": 2078.5,
+      "p95": 2885.6
     }
   }
 }
