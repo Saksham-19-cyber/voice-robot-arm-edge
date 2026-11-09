@@ -4,7 +4,7 @@
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zero PyTorch in Serving](https://img.shields.io/badge/Serving-Zero_PyTorch_(ONNX_Only)-orange.svg)](https://onnxruntime.ai/)
-[![Tests: 18 Passed](https://img.shields.io/badge/Tests-18%20Passed-brightgreen.svg)](tests/)
+[![Tests: 20 Passed](https://img.shields.io/badge/Tests-20%20Passed-brightgreen.svg)](tests/)
 
 An end-to-end, edge-ready robotics portfolio system that translates natural voice commands into 3D spatial goals and executes them with a goal-conditioned reinforcement learning (SAC) policy inside MuJoCo physics simulation.
 
@@ -30,10 +30,11 @@ flowchart LR
 
 ### 1. Voice Input (ASR)
 - **Engine:** `faster-whisper` (`tiny.en` quantized to INT8 on CPU).
-- **Cold-Start Model Load Time:** **5.11 s** (measured separately; cached in memory via `@st.cache_resource`).
-- **Warm Inference Latency:** **1619.1 ms (p50)** on a 2.0s audio clip (`cpu_threads=1` / `4`).
-- **Ablation & Thread Tuning:** Single-thread CPU execution (`cpu_threads=1`) avoids thread scheduling and context-switching overhead on short clips, yielding **1322.8 ms (p50)** vs **1740.2 ms (p50)** with 4 threads (see ASR Ablation Study below).
-- **ASR Accuracy Note:** ASR accuracy is **not benchmarked** on real user speech because no labeled human voice dataset is included in this repository ($N=0$ real clips in `tests/asr/manifest.csv`; `sample_speech.wav` is a synthetic formant sine wave used for pipeline integration testing). When tested on 1.4s of silence or white noise, the unconstrained Whisper decoder hallucinates `"You"`.
+- **Cold-Start Model Load Time:** **5.30 s** (measured separately; cached in memory via `@st.cache_resource`).
+- **Warm Inference Latency:** **1,337.4 ms (p50)** on a 2.0s audio clip with `cpu_threads=1` (mean: 1,392.8 ms, p95: 1,915.5 ms).
+- **Ablation & Thread Tuning:** Single-thread CPU execution (`cpu_threads=1`) avoids thread scheduling and synchronization overhead on short clips, yielding **1,322.8 ms (p50)** vs **1,740.2 ms (p50)** with 4 threads (see ASR Ablation Study below).
+- **Silence & Noise Guard:** Audio energy is computed before ASR decoding; inputs with RMS $< 0.003$ or high `no_speech_prob` (> 0.6) are intercepted, displaying *"I didn't hear a command"* with **zero rollout simulation run**, preventing Whisper hallucinations (e.g. `"You"`).
+- **ASR Accuracy Note:** ASR accuracy is **not benchmarked** on real user speech because no labeled human voice dataset is included in this repository ($N=0$ real clips in `tests/asr/manifest.csv`; `sample_speech.wav` is a synthetic formant sine wave used for pipeline integration testing).
 
 ### 2. Natural Language Understanding (NLU)
 - **Dual-Engine Architecture:**
@@ -50,8 +51,8 @@ flowchart LR
 
 ### 4. Headless Visual Rendering & Interactive UI Tabs
 - **Rendering:** Headless OSMesa software rasterization on Linux / GLFW on Windows, rendered at 320x320 and encoded via `imageio-ffmpeg` to browser-playable MP4 with `-movflags +faststart`.
-- **Environment Reuse:** Reusing the simulation environment in `st.session_state` eliminates the ~690 ms context re-creation overhead, reducing warm reset to **4.3 ms** (163x speedup).
-- **Early Termination:** Rollout automatically terminates 10 steps after first reaching the goal (`HOLD_STEPS = 10`), reducing total user wait time from **2357.5 ms** down to **1990.1 ms (p50)**. A toggle in the UI allows users to request the full 50-step rollout if desired.
+- **Environment Reuse:** Reusing the simulation environment in `st.session_state` eliminates repeated context creation, reducing per-request env overhead from **488.6 ms** down to **0.9 ms** warm reset (**515x speedup**). Goal updates and target visual sites reposition dynamically on reuse.
+- **Early Termination:** Rollout automatically terminates 10 steps after first reaching the goal (`HOLD_STEPS = 10`), reducing total user wait time from **2,078.5 ms** down to **1,562.7 ms (p50)**. A toggle in the UI allows users to request the full 50-step rollout if desired.
 - **Three UI Visualization Tabs:**
   - 🎬 **Replay:** Streamable MP4 video with autoplay and animated GIF fallback.
   - 🖼️ **Rollout Frames:** Interactive frame scrubber allowing step-by-step frame inspection.
@@ -63,28 +64,21 @@ flowchart LR
 
 All metrics below are strictly derived from benchmark output files in `results/`.
 
-### 1. Policy Convergence & Steps-to-Goal
+### 1. Policy Convergence & Quantization Parity
 
 > **Definition of Steps-to-Goal:** Mean steps-to-goal is strictly defined as the first step index within an episode where `info['is_success'] == 1.0` is achieved (i.e. Euclidean distance between the gripper end-effector and the target goal is $\le 5$ cm).
 
-Across two separate 100-episode evaluations:
-1. **Initial SB3 Training Evaluation (`results/reach_eval.json`):**
-   - Environment: `VecNormalize(DummyVecEnv)` with initial environment seed 42 over 100 consecutive episodes.
-   - **Success Rate:** **100.0%** (100/100).
-   - **Mean Steps to Goal:** **2.85 ± 0.83** steps (min: 1, max: 4).
-2. **Post-Export Parity & Quantization Comparison (`results/quantization_eval.json`):**
-   - Environment: 100 discrete episode seeds (`seed = 42 + ep` for `ep` $\in [0, 99]$) evaluated identically across PyTorch, ONNX FP32, and ONNX INT8.
-   - **Success Rate:** **100.0%** across all three engines.
-   - **Mean Steps to Goal:** **2.65 ± 0.93** steps across all three engines.
+*Measured on Windows laptop, Intel Core i5-1235U, GLFW rendering.*
 
-| Policy Engine | Precision | Model Size | 100-Ep Success Rate | Mean Steps to Goal |
-|---|---|---|---|---|
-| PyTorch SAC Actor | FP32 | 3.2 MB (.zip) | **100.0%** | 2.65 ± 0.93 |
-| ONNX Runtime | FP32 | 281.0 KB | **100.0%** | 2.65 ± 0.93 |
-| **ONNX Runtime (Edge)** | **INT8 Dynamic** | **78.5 KB** | **100.0%** | **2.65 ± 0.93** |
+| Policy Engine | Precision | Model Size | 100-Ep Success Rate | Mean Steps to Goal | Platform / Rendering |
+|---|---|---|---|---|---|
+| PyTorch SAC Actor | FP32 | 3.2 MB (.zip) | **100.0%** | 2.65 ± 0.93 | Windows / GLFW |
+| ONNX Runtime | FP32 | 281.0 KB | **100.0%** | 2.65 ± 0.93 | Windows / GLFW |
+| **ONNX Runtime (Edge)** | **INT8 Dynamic** | **78.5 KB** | **100.0%** | **2.65 ± 0.93** | Windows / GLFW |
+| **Cloud Deployed App** | INT8 Dynamic | 78.5 KB | not measured | not measured | Cloud (OSMesa) — fields in `results/cloud_deploy.json` are null until verified on deployed app |
 
 Numerical consistency check on 1,000 random inputs:
-- PyTorch vs ONNX FP32 max absolute error: **$7.79 \times 10^{-7}$** (tolerance $< 10^{-4}$ verified ✅).
+- PyTorch vs ONNX FP32 max absolute error: **$2.44 \times 10^{-5}$** (tolerance $< 10^{-4}$ verified ✅).
 
 ---
 
@@ -92,15 +86,18 @@ Numerical consistency check on 1,000 random inputs:
 
 To eliminate scheduling jitter, thread contention was controlled by pinning `intra_op_num_threads=1` and `inter_op_num_threads=1` under 200 warm-up calls and 20,000 timed iterations (`results/policy_benchmark.json`):
 
-| Model Precision | Model Size | Mean Latency | Median (p50) | 95th Percentile (p95) | 99th Percentile (p99) | Throughput |
-|---|---|---|---|---|---|---|
-| **ONNX FP32** | 280.97 KB | 325.06 µs | 255.70 µs | 920.73 µs | 2,693.44 µs | 3,076.4 FPS |
-| **ONNX INT8** | 78.46 KB | 127.55 µs | 90.00 µs | 325.00 µs | 732.11 µs | 7,839.9 FPS |
+*Measured on Windows laptop, Intel Core i5-1235U, GLFW rendering.*
 
-- **Bootstrap 95% Confidence Interval on Median Difference (FP32 p50 − INT8 p50):** `[162.90, 167.75] µs` (2,000 bootstrap resamples).
+| Model Precision | Model Size | Mean Latency | Median (p50) | 95th Percentile (p95) | 99th Percentile (p99) | Throughput | Platform / Rendering |
+|---|---|---|---|---|---|---|---|
+| **ONNX FP32** | 281.0 KB | 121.3 µs | 114.7 µs | 168.3 µs | 217.3 µs | 8,245.9 FPS | Windows / Intel Core i5-1235U |
+| **ONNX INT8** | 78.5 KB | 88.6 µs | 85.9 µs | 108.9 µs | 156.4 µs | 11,289.4 FPS | Windows / Intel Core i5-1235U |
+| **Cloud (OSMesa)** | 78.5 KB | not measured | not measured | not measured | not measured | not measured | Cloud (OSMesa) — fields in `results/cloud_deploy.json` are null |
+
+- **Bootstrap 95% Confidence Interval on Median Difference (FP32 p50 − INT8 p50):** `[28.2, 29.4] µs` (2,000 bootstrap resamples). Zero is outside the interval, confirming measurable single-thread INT8 speedup.
 - **Hardware Context:** Measured on **12th Gen Intel(R) Core(TM) i5-1235U**, single-thread pinned (`intra_op_num_threads=1, inter_op_num_threads=1`).
 - **Reconciliation of Per-Step Figures:**
-  - *Single-thread pinned microbenchmark:* INT8 p50 is **90.0 µs** vs FP32 p50 **255.7 µs**.
+  - *Single-thread pinned microbenchmark (`results/policy_benchmark.json`):* INT8 p50 is **85.9 µs** vs FP32 p50 **114.7 µs**.
   - *Multi-threaded unconstrained session (`results/bench_cpu.json`):* INT8 p50 was **160.1 µs** vs FP32 p50 **173.9 µs** (difference within noise due to thread pool management overhead on small MLPs).
   - *File Size Compression:* INT8 provides a **3.58x compression** (78.5 KB vs 281.0 KB), fitting comfortably in edge L2/L3 cache.
 
@@ -111,27 +108,32 @@ To eliminate scheduling jitter, thread contention was controlled by pinning `int
 It is critical to distinguish between raw closed-loop physics stepping and full web application serving:
 
 1. **Closed-Loop Physics + Policy Step (No Rendering, `results/rollout_fps_audit.json`):**
-   - Mean Step Time: **4.58 ms / step** (**218.3 FPS**) under default multi-threading.
-   - Single-threaded ORT: **7.93 ms / step** (**126.1 FPS**).
+   - Single-thread pinned (INT8 policy + MuJoCo step): **6.39 ms / step** (**156.4 FPS**).
+   - Multi-threaded unconstrained ORT: **4.38 ms / step** (**228.3 FPS**).
    - Physics-only stepping (`mj_step`): **3.53 ms / step**.
 
 2. **Full End-to-End Pipeline Latency (`results/pipeline_latency.json`):**
-   Measured over 20 runs each with audio transcription, NLU, physics rollout, 320x320 rendering, and MP4 video encoding:
+   Measured over 20 runs each with audio transcription (`cpu_threads=1`), NLU, physics rollout, 320x320 rendering, and MP4 video encoding:
 
-| Execution Mode | Mean Steps | ASR (p50) | NLU (p50) | Rollout+Render (p50) | MP4 Encode (p50) | **Total User Wait (p50)** | Total Mean ± Std |
-|---|---|---|---|---|---|---|---|
-| **Cold Start (1st run)** | 11.0 steps | 3119.6 ms | 44.8 ms | 2063.5 ms | 2627.4 ms | **13363.9 ms** | 13.36 s (incl. model loads) |
-| **Warm Early-Term (`HOLD=10`)** | **13.1 steps** | **1619.1 ms** | **9.0 ms** | **59.3 ms** | **322.8 ms** | **1990.1 ms** | **2128.6 ± 395.2 ms** |
-| Warm Full Trajectory (50 steps) | 50.0 steps | 1529.9 ms | 9.7 ms | 229.5 ms | 637.3 ms | **2357.5 ms** | 2478.4 ± 341.1 ms |
+*Measured on Windows laptop, Intel Core i5-1235U, GLFW rendering.*
 
-- **Environment Reuse Speedup:** Recreating the MuJoCo OpenGL renderer context takes **692.7 ms** per request. Reusing the environment in `st.session_state` drops warm reset + render to **4.3 ms** (**163.0x speedup**).
-- **Early Termination Gain:** Stopping at `first_success_step + 10` saves **367.4 ms** per interaction.
+| Execution Mode | Mean Steps | ASR (p50) | NLU (p50) | Rollout+Render (p50) | MP4 Encode (p50) | **Total User Wait (p50)** | Total Mean ± Std | Platform |
+|---|---|---|---|---|---|---|---|---|
+| **Cold Start (1st run)** | 11.0 steps | 1527.0 ms | 24.6 ms | 2245.0 ms | 8235.5 ms | **17680.7 ms** | 17.68 s (incl. model loads) | Windows / GLFW |
+| **Warm Early-Term (`HOLD=10`)** | **13.0 steps** | **1337.4 ms** | **2.8 ms** | **30.9 ms** | **203.1 ms** | **1562.7 ms** | **1639.4 ± 316.5 ms** | Windows / GLFW |
+| Warm Full Trajectory (50 steps) | 50.0 steps | 1536.0 ms | 3.0 ms | 93.2 ms | 453.2 ms | **2078.5 ms** | 2180.7 ± 359.8 ms | Windows / GLFW |
+| **Cloud (OSMesa)** | not measured | not measured | not measured | not measured | not measured | **not measured** | not measured | Cloud (OSMesa) — `results/cloud_deploy.json` null |
+
+- **Environment Reuse Speedup:** Recreating the MuJoCo renderer context takes **488.6 ms** per request. Reusing the environment in `st.session_state` drops warm reset + render to **0.9 ms** (**515.0x speedup**).
+- **Early Termination Gain:** Stopping at `first_success_step + 10` saves **515.8 ms** per interaction.
 
 ---
 
 ### 4. ASR Model & Thread Ablation Study
 
 Evaluated on a fixed 2.0s audio clip across 8 configurations (5 warmup passes, 20 timed iterations each, `results/asr_ablation.json`):
+
+*Measured on Windows laptop, Intel Core i5-1235U, GLFW rendering.*
 
 | Model | Precision | CPU Threads | Latency p50 | Latency p95 | Latency Mean ± Std | Process Peak RSS |
 |---|---|---|---|---|---|---|
@@ -163,13 +165,17 @@ Evaluated on synthetic template test split and agent-written out-of-distribution
 
 ### 6. Memory Footprint & Live Process Audit
 
-Measured directly on the live Streamlit server process tree (`results/streamlit_memory.json`):
+*Measured on Linux Ubuntu (CI Runner, OSMesa rendering) and Windows laptop (GLFW rendering).*
 
-- **Streamlit Community Cloud Budget:** ~1024 MB (1.0 GB).
-- **Measured Peak RSS:** **291.70 MB** (measured via `psutil` on the live Streamlit server process tree after a complete demo execution: faster-whisper INT8 loaded, MuJoCo rollout executed, MP4 video encoded).
-- **Peak Working Set:** **291.70 MB**.
-- **Available Cloud Headroom:** **~732.3 MB** (~71.5% headroom remaining).
-- **Zero PyTorch in Serving:** PyTorch is completely omitted from production requirements.
+| Platform & Environment | Concurrency / Workload | Peak RSS | Peak Working Set | Headroom under 1 GB Budget |
+|---|---|---|---|---|
+| **Linux Ubuntu (CI Runner)** | Streamlit server idle baseline | **54.20 MB** | **54.20 MB** | ~970 MB (94.7%) |
+| **Linux Ubuntu (CI Runner)** | **1 session** (3 presets sequentially + Whisper loaded) | **103.92 MB** | **103.92 MB** | **~920 MB (89.9%)** |
+| **Linux Ubuntu (CI Runner)** | **3 concurrent sessions** (3 presets each + Whisper loaded) | **193.65 MB** | **193.65 MB** | **~830 MB (81.1%)** |
+| Windows Laptop (Local) | 1 session (`results/streamlit_memory.json`, GLFW) | 243.60 MB | 291.70 MB | ~732 MB (71.5%) |
+| Cloud Deployed App | Live Streamlit Cloud (`results/cloud_deploy.json`) | not measured | not measured | not measured (values null until verified on deployed container) |
+
+- **Zero PyTorch in Serving:** PyTorch is completely omitted from production requirements, keeping the application memory well within the 1 GB container ceiling under concurrent multi-user load.
 
 ---
 
@@ -182,12 +188,28 @@ Measured directly on the live Streamlit server process tree (`results/streamlit_
 
 ## ⚙️ Compatibility & Linux Runtime Diagnosis
 
-### MuJoCo PyBind11 Enum Comparison on Linux
-Under Linux GCC environments (such as Streamlit Community Cloud running Debian Trixie / Ubuntu), evaluating `np.int32(joint_type) in (mjtJoint.mjJNT_HINGE, mjtJoint.mjJNT_SLIDE)` inside `gymnasium_robotics/utils/mujoco_utils.py` causes an `AssertionError` because pybind11's enum equality comparison returns `False` when comparing pybind11 enums against `numpy.int32` scalars from model arrays under NumPy >= 2.0.
+### Observed Behavior on Linux
+Stock `gymnasium-robotics==1.4.2` fails on Linux when instantiating `FetchReach-v4` across all evaluated MuJoCo versions (`3.1.6`, `3.2.7`, `3.12.0`, `3.17.0`, `4.0.0`) with `AssertionError` in `gymnasium_robotics/utils/mujoco_utils.py` (line 142 in `set_joint_qpos` and line 192 in `get_joint_qpos`).
 
-- **Strategy A (Stock Testing):** Multi-version evaluation across `mujoco` 3.x candidates (`3.17.0`, `3.12.0`, `3.2.7`, `3.1.6`) is tracked via the Linux CI workflow (`.github/workflows/linux-smoke.yml`).
-- **Strategy B (Module Patch):** `src/rl/env_utils.py` applies a non-invasive import-time compatibility patch to `gymnasium_robotics.utils.mujoco_utils` (`get_joint_qpos`, `set_joint_qpos`, `get_joint_qvel`, `set_joint_qvel`, `reset_mocap_welds`, `reset_mocap2body_xpos`), coercing array values and enum variants to Python `int()`.
-- **Reproducibility:** A dedicated test suite (`tests/test_enum_patch.py`) validates that accessor operations execute cleanly without assertion failures.
+- **Root-Cause Experiment (Branch `cleanup-experiments`):** Tested with `numpy==1.26.4` and stock packages without the patch. The environment had zero package conflicts (`pip check: No broken requirements found.`), but stock env creation **still failed with `AssertionError`**. Under Linux GCC, `raw_type == mjtJoint.mjJNT_HINGE` evaluates to `True`, but Python tuple membership `raw_type in (mjtJoint.mjJNT_HINGE, mjtJoint.mjJNT_SLIDE)` evaluates to `False`. Thus, the earlier hypothesis that NumPy $\ge 2.0$ was the root cause was **not confirmed**; the issue stems directly from pybind11 enum tuple membership resolution in CPython on Linux.
+- **The Fix:** `src/rl/env_utils.py` applies a targeted import-time compatibility patch to `gymnasium_robotics.utils.mujoco_utils` (`get_joint_qpos`, `set_joint_qpos`, `get_joint_qvel`, `set_joint_qvel`, `reset_mocap_welds`, `reset_mocap2body_xpos`), coercing array values and enum variants to Python `int()`.
+- **Validation:** Validated via `tests/test_enum_patch.py` and GitHub Actions CI workflow (`.github/workflows/linux-smoke.yml`) on Ubuntu Linux with `MUJOCO_GL=osmesa`.
+
+---
+
+## 🎧 Human Evaluation Collection Instructions
+
+To evaluate the system on real human voices and natural phrasing distributions:
+
+### Adding Real Audio Recordings for ASR Evaluation (20 clips)
+1. Record 20 WAV audio clips (16 kHz, 16-bit mono) of command phrasings and place them in `tests/asr/recordings/`.
+2. Open `tests/asr/manifest.csv` and add a row for each clip: `tests/asr/recordings/clip01.wav,"reach to the left",human`.
+3. Run `python src/bench/asr_eval.py` to evaluate Word Error Rate (WER) and update `results/asr_eval.json`.
+
+### Adding Natural Human Phrasings for NLU Evaluation (30+ phrasings)
+1. Open `tests/nlu_heldout_human.json` and append your custom test utterances: `{"text": "nudge the arm a bit to the right", "expected_intent": "reach", "expected_goal_region": "right"}`.
+2. Ensure at least 30 diverse phrasings are added across `reach`, `stop`, `pick`, and out-of-domain intents.
+3. Run `python src/bench/nlu_eval.py` to compute Wilson 95% confidence intervals and update `results/nlu_eval_detailed.json`.
 
 ---
 
@@ -225,12 +247,12 @@ Open your browser at `http://localhost:8501`.
 
 ## 🧪 Unit Tests
 
-Run the full 16-test suite covering environment smoke lifecycles, preset rollout visual generation, video encoding (`h264`, `yuv420p`), ASR silence handling, NLU bounds, unsupported manipulation intents, handwritten held-out phrasings, and closed-loop ONNX rollouts:
+Run the full 20-test suite covering environment smoke lifecycles, environment state reuse, preset rollout visual generation, video encoding (`h264`, `yuv420p`), ASR silence handling, faint white noise rejection, NLU bounds, unsupported manipulation intents, handwritten held-out phrasings, and closed-loop ONNX rollouts:
 
 ```bash
 pytest tests/ -v
 ```
-*(All 16 unit tests pass cleanly in ~40s).*
+*(All 20 unit tests pass cleanly in ~45s).*
 
 ---
 
@@ -243,7 +265,7 @@ All evaluation figures can be re-generated with the scripts below:
 - **ASR Ablation Study (8 configs):** `python src/bench/asr_ablation.py`
 - **ASR Evaluation (WER & Provenance Check):** `python src/bench/asr_eval.py`
 - **NLU Detailed Evaluation (Wilson CIs):** `python src/bench/nlu_eval.py`
-- **Streamlit Server Process Peak RSS:** `python src/bench/measure_streamlit_rss.py`
+- **Streamlit Server Process Memory (Linux OSMesa):** `python src/bench/measure_streamlit_linux.py`
 
 ---
 

@@ -47,7 +47,7 @@ Once the build completes and the app is running:
    - Python version is `3.11.x`.
    - `mujoco==4.0.0` and `gymnasium-robotics==1.4.2` are loaded.
    - `MUJOCO_GL` is `osmesa`.
-   - RSS memory is well below the 1.0 GB container limit (~290 MB peak).
+   - RSS memory is well below the 1.0 GB container limit (~104 MB peak single-session, ~194 MB 3 concurrent sessions on Linux CI; ~292 MB peak on Windows).
 2. **Preset Command**: Click "⬅️ Reach Left" and click "🚀 Execute Command". Confirm:
    - Physics simulation runs and early-terminates at target.
    - 🎬 Replay tab renders the MP4 video with browser playback.

@@ -1,0 +1,18 @@
+{
+  "platform": "linux",
+  "os": "Linux Ubuntu (CI Runner)",
+  "gl_backend": "osmesa",
+  "server_baseline_rss_mb": 54.2,
+  "single_session": {
+    "condition": "1 session running 3 presets sequentially (Reach Left, Right, Up) with faster-whisper int8 loaded",
+    "peak_rss_mb": 103.92,
+    "peak_working_set_mb": 103.92
+  },
+  "three_concurrent_sessions": {
+    "condition": "3 concurrent sessions simultaneously running 3 presets with faster-whisper int8 loaded",
+    "peak_rss_mb": 193.65,
+    "peak_working_set_mb": 193.65
+  },
+  "timestamp": "2026-11-09T13:27:36Z"
+}
+
