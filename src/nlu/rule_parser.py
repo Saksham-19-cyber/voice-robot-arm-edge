@@ -1,7 +1,7 @@
-"""
-Rule-based intent parser mapping natural language commands to structured robot goals.
-Handles directionals, compound regions, distances, and bounds clipping.
-"""
+"""Rule-based spatial parser and workspace clipper."""
+
+
+
 
 import re
 from typing import Optional, List, Tuple
@@ -11,7 +11,7 @@ from src.rl.env_utils import WORKSPACE_BOUNDS, WORKSPACE_CENTER, clip_to_workspa
 from src.nlu.schema import IntentResult
 
 
-# Workspace reference anchors
+
 ANCHORS = {
     "center": np.array([1.34, 0.75, 0.53], dtype=np.float32),
     "table": np.array([1.34, 0.75, 0.42], dtype=np.float32),
@@ -20,10 +20,10 @@ ANCHORS = {
     "target": np.array([1.34, 0.75, 0.53], dtype=np.float32),
 }
 
-# Unit vectors and offsets (Fetch coordinate frame:
-# +x is front (forward away from torso), -x is back (towards robot)
-# +y is left (Fetch arm's left side), -y is right
-# +z is up (higher elevation), -z is down (towards tabletop)
+
+
+
+
 DIRECTION_VECTORS = {
     "front": np.array([0.10, 0.0, 0.0], dtype=np.float32),
     "forward": np.array([0.10, 0.0, 0.0], dtype=np.float32),
@@ -41,11 +41,11 @@ DIRECTION_VECTORS = {
 
 
 def extract_distance(text: str) -> Optional[float]:
-    """
-    Extracts explicit distance in meters (e.g., '10 cm', '5 centimeters', '0.1 m').
-    Returns distance in meters or None.
-    """
-    # Matches patterns like '10 cm', '5cm', '15 centimeters', '0.2 m', '20 mm'
+
+
+
+
+
     cm_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:cm|centimeters?)\b', text, re.IGNORECASE)
     if cm_match:
         return float(cm_match.group(1)) / 100.0
@@ -62,7 +62,7 @@ def extract_distance(text: str) -> Optional[float]:
 
 
 class RuleBasedParser:
-    """Deterministic rule-based parser for voice manipulation commands."""
+
 
     def __init__(self):
         self.stop_words = {"stop", "halt", "pause", "freeze", "abort", "cancel", "stand by"}
@@ -83,7 +83,7 @@ class RuleBasedParser:
                 raw_text=raw_text,
             )
 
-        # 1. Stop / Halt intent
+
         for sw in self.stop_words:
             if re.search(rf"\b{sw}\b", cleaned):
                 goal = current_gripper_pos.tolist() if current_gripper_pos is not None else WORKSPACE_CENTER.tolist()
@@ -97,13 +97,13 @@ class RuleBasedParser:
                     raw_text=raw_text,
                 )
 
-        # 2. Pick / Grasp intent
+
         is_pick = any(re.search(rf"\b{pw}\b", cleaned) for pw in self.pick_words)
 
-        # 3. Reach / Move intent
+
         is_reach = any(re.search(rf"\b{rw}\b", cleaned) for rw in self.reach_words)
 
-        # Check for target object or direction
+
         detected_directions = []
         for word, vec in DIRECTION_VECTORS.items():
             if re.search(rf"\b{word}\b", cleaned):
@@ -115,7 +115,7 @@ class RuleBasedParser:
                 detected_anchor = anchor_name
                 break
 
-        # If no explicit action verb, but directions or objects present (e.g. "to the left", "up")
+
         if not is_pick and not is_reach and not detected_directions and not detected_anchor:
             return IntentResult(
                 intent="unknown",
@@ -126,8 +126,8 @@ class RuleBasedParser:
                 raw_text=raw_text,
             )
 
-        # Determine Primary Intent
-        # Unsupported manipulation intents: Policy only supports Reach
+
+
         if is_pick or any(re.search(rf"\b{w}\b", cleaned) for w in ["pick", "grab", "snatch", "release", "clasp", "grasp"]):
             return IntentResult(
                 intent="pick",
@@ -145,7 +145,7 @@ class RuleBasedParser:
         else:
             intent = "move"
 
-        # Calculate target coordinates
+
         base_origin = current_gripper_pos.copy() if current_gripper_pos is not None else WORKSPACE_CENTER.copy()
         explicit_dist = extract_distance(cleaned)
 
@@ -157,7 +157,7 @@ class RuleBasedParser:
             offset = np.zeros(3, dtype=np.float32)
             for word, vec in detected_directions:
                 if explicit_dist is not None:
-                    # Scale unit direction vector by explicit distance
+
                     unit_v = vec / (np.linalg.norm(vec) + 1e-8)
                     offset += unit_v * explicit_dist
                 else:
@@ -167,7 +167,7 @@ class RuleBasedParser:
             target_name = "center"
             goal_pos = WORKSPACE_CENTER.copy()
 
-        # Clip goal to reachable workspace
+
         clipped_goal = clip_to_workspace(goal_pos)
         was_clipped = not np.allclose(goal_pos, clipped_goal, atol=1e-3)
 
@@ -193,4 +193,3 @@ class RuleBasedParser:
             raw_text=raw_text,
             metadata={"was_clipped": was_clipped},
         )
-

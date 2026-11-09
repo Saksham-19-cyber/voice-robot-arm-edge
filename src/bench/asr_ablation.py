@@ -1,13 +1,13 @@
-"""
-ASR Ablation Study:
-Systematic comparison across model size, quantization, and thread counts:
-- model: tiny.en vs base.en
-- compute_type: int8 vs float32
-- cpu_threads: 1 vs 4
+"""ASR latency ablation benchmark."""
 
-Evaluated with 5 warmup calls and 20 timed iterations on a fixed 2.0s audio clip.
-Reports p50, p95, mean latency, and peak process RSS memory.
-"""
+
+
+
+
+
+
+
+
 
 import os
 import sys
@@ -19,7 +19,7 @@ import soundfile as sf
 from faster_whisper import WhisperModel
 
 def prepare_2s_clip(source_path: str = "results/sample_speech.wav", target_path: str = "results/sample_2s.wav") -> str:
-    """Creates a guaranteed 2.0s audio clip."""
+
     if not os.path.exists(source_path):
         raise FileNotFoundError(f"Source audio {source_path} not found.")
     data, sr = sf.read(source_path)
@@ -65,11 +65,11 @@ def run_asr_ablation(n_warmup: int = 5, n_runs: int = 20):
         )
         load_time_ms = (time.perf_counter() - t_load_start) * 1000
 
-        # Warm-up calls
+
         for _ in range(n_warmup):
             _ = list(model.transcribe(audio_path, beam_size=1, language="en")[0])
 
-        # Timed runs
+
         latencies = []
         transcript = ""
         for i in range(n_runs):
@@ -98,7 +98,7 @@ def run_asr_ablation(n_warmup: int = 5, n_runs: int = 20):
         print(f"[{name}] p50: {entry['latency_p50_ms']} ms | p95: {entry['latency_p95_ms']} ms | RSS: {entry['peak_rss_mb']} MB")
         results.append(entry)
 
-        # Free model reference
+
         del model
 
     out_file = "results/asr_ablation.json"

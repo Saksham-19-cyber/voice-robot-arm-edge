@@ -1,12 +1,12 @@
-"""
-Rollout FPS In-Depth Audit:
-Deconstructs closed-loop execution step-by-step:
-1. MuJoCo step only (step physics)
-2. Observation formatting / numpy flattening
-3. ONNX policy inference (single-threaded vs default)
-4. Full closed-loop rollout (obs prep + ONNX infer + env.step)
-Measures over 100 episodes (5,000 steps total) with warm-up.
-"""
+"""Closed-loop rollout throughput benchmark."""
+
+
+
+
+
+
+
+
 
 import os
 import sys
@@ -24,16 +24,16 @@ def audit_rollout_fps():
     setup_headless_rendering()
     env = gym.make("FetchReach-v4")
     
-    # Session with 1 thread
+
     opts1 = ort.SessionOptions()
     opts1.intra_op_num_threads = 1
     opts1.inter_op_num_threads = 1
     session_st = ort.InferenceSession("models/fetch_reach_actor_int8.onnx", sess_options=opts1, providers=["CPUExecutionProvider"])
     
-    # Session with default threads
+
     session_mt = ort.InferenceSession("models/fetch_reach_actor_int8.onnx", providers=["CPUExecutionProvider"])
     
-    # 1. Measure pure env.step(action) alone (500 steps)
+
     obs_dict, _ = env.reset(seed=42)
     zero_action = np.zeros(4, dtype=np.float32)
     t0 = time.perf_counter()
@@ -41,7 +41,7 @@ def audit_rollout_fps():
         obs_dict, _, _, _, _ = env.step(zero_action)
     t_env_step_ms = ((time.perf_counter() - t0) / 500) * 1000
     
-    # 2. Measure obs formatting alone (500 iterations)
+
     t0 = time.perf_counter()
     for _ in range(500):
         ob = obs_dict["observation"]
@@ -50,7 +50,7 @@ def audit_rollout_fps():
         obs_flat = np.concatenate([ob, ag, dg], axis=0).astype(np.float32).reshape(1, 16)
     t_obs_prep_ms = ((time.perf_counter() - t0) / 500) * 1000
     
-    # 3. Measure full closed-loop rollout with Single-Thread ORT (50 episodes x 50 steps = 2500 steps)
+
     t0 = time.perf_counter()
     total_steps_st = 0
     for ep in range(50):
@@ -67,7 +67,7 @@ def audit_rollout_fps():
     fps_st = total_steps_st / total_time_st
     ms_per_step_st = (total_time_st / total_steps_st) * 1000
     
-    # 4. Measure full closed-loop rollout with Default-Thread ORT (50 episodes x 50 steps = 2500 steps)
+
     t0 = time.perf_counter()
     total_steps_mt = 0
     for ep in range(50):
@@ -118,4 +118,3 @@ def audit_rollout_fps():
 
 if __name__ == "__main__":
     audit_rollout_fps()
-

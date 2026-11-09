@@ -1,7 +1,7 @@
-"""
-Stretch training run for FetchPickAndPlace-v4 / FetchPush-v4 on CPU with a strict time/step budget.
-Records honest evaluation metrics (including low/zero success rates if not converged).
-"""
+"""Exploratory SAC training on FetchPickAndPlace-v4."""
+
+
+
 
 import os
 import sys
@@ -106,7 +106,7 @@ def run_stretch(env_id="FetchPickAndPlace-v4", total_timesteps=3000, seed=42):
     model.learn(total_timesteps=total_timesteps, callback=callback)
     duration = time.time() - t0
 
-    # Final evaluation over 50 episodes
+
     print("Evaluating stretch policy over 50 episodes...", flush=True)
     eval_env.obs_rms = train_env.obs_rms
     successes = []
@@ -142,4 +142,3 @@ def run_stretch(env_id="FetchPickAndPlace-v4", total_timesteps=3000, seed=42):
 
 if __name__ == "__main__":
     run_stretch()
-

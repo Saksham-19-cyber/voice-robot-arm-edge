@@ -1,13 +1,13 @@
-"""
-Audit Benchmark Script:
-Measures:
-1. Cold-start model load time for WhisperModel vs warm inference latency (warm-up excluded).
-2. Pure ONNX policy inference (per-step and 50-step total).
-3. Full closed-loop ONNX + MuJoCo rollout (physics simulation + observation prep + ONNX inference per step).
-4. Full rollout WITH headless RGB rendering (physics + ONNX + camera render per step).
-5. Video encoding latency (MP4).
-6. End-to-end breakdown properly labeled.
-"""
+"""Benchmark consistency auditor."""
+
+
+
+
+
+
+
+
+
 
 import os
 import sys
@@ -30,7 +30,7 @@ def run_audit_benchmark():
     print("=== 1. Benchmarking ASR: Cold-Start vs Warm Inference ===", flush=True)
     from faster_whisper import WhisperModel
 
-    # Cold start load time
+
     t_load_0 = time.perf_counter()
     whisper_model = WhisperModel("tiny.en", device="cpu", compute_type="int8")
     cold_load_sec = time.perf_counter() - t_load_0
@@ -39,13 +39,13 @@ def run_audit_benchmark():
     sample_wav = "results/sample_speech.wav"
     assert os.path.exists(sample_wav), f"Missing {sample_wav}"
 
-    # Warm-up call (excluded from inference stats)
+
     t_warm_0 = time.perf_counter()
     _ = list(whisper_model.transcribe(sample_wav, beam_size=1, vad_filter=True)[0])
     warmup_latency_sec = time.perf_counter() - t_warm_0
     print(f"Whisper Warm-up Call Latency: {warmup_latency_sec:.3f} s", flush=True)
 
-    # Timed inference runs (warm-up excluded)
+
     asr_times = []
     audio_dur = None
     for _ in range(5):
@@ -75,7 +75,7 @@ def run_audit_benchmark():
 
     print("\n=== 2. Benchmarking NLU Parsing ===", flush=True)
     parser = VoiceCommandParser("models/intent_classifier.pkl")
-    # Warm-up
+
     parser.parse("reach left by 10cm")
     nlu_times = []
     for _ in range(500):
@@ -96,7 +96,7 @@ def run_audit_benchmark():
     session_int8 = ort.InferenceSession(int8_path, providers=["CPUExecutionProvider"])
     dummy_obs = np.random.randn(1, 16).astype(np.float32)
 
-    # Warm-up
+
     for _ in range(50):
         session_int8.run(None, {"observation_flat": dummy_obs})
 
@@ -121,7 +121,7 @@ def run_audit_benchmark():
     env = make_fetch_env("FetchReach-v4", render_mode=None)
     rollout_no_render_times_ms = []
 
-    # 10 rollouts of 50 steps each
+
     for _ in range(10):
         obs_dict, _ = env.reset(seed=42)
         t0 = time.perf_counter()
@@ -172,7 +172,7 @@ def run_audit_benchmark():
     rollout_render_mean = float(np.mean(rollout_with_render_times_ms))
     print(f"50-step Rollout + RGB Rendering: {rollout_render_p50:.2f} ms ({rollout_render_p50/50:.2f} ms/frame)", flush=True)
 
-    # Measure video encoding time for 50 frames
+
     import tempfile
     import imageio
     tmp_video = os.path.join(tempfile.gettempdir(), "bench_rollout.mp4")
@@ -187,7 +187,7 @@ def run_audit_benchmark():
     enc_p50_ms = float(np.median(enc_times))
     print(f"MP4 Video Encoding (50 frames): {enc_p50_ms:.2f} ms", flush=True)
 
-    # Process RSS measurement
+
     import psutil
     proc = psutil.Process()
     current_rss_mb = proc.memory_info().rss / (1024 * 1024)
@@ -205,13 +205,13 @@ def run_audit_benchmark():
         "total_rollout_render_encode_ms": round(rollout_render_p50 + enc_p50_ms, 2),
     }
 
-    # Pipeline Latency Comparison
+
     t_asr_warm = mean_asr_sec * 1000
     t_nlu = nlu_p50
     t_pol_infer_only = pol_50step_infer_ms
     t_pol_full_sim = rollout_no_render_p50
     t_render_encode = rollout_render_p50 + enc_p50_ms
-    t_tts_html = 0.5  # sub-millisecond client HTML generation
+    t_tts_html = 0.5
 
     e2e_live_service_ms = t_asr_warm + t_nlu + t_pol_full_sim + t_tts_html
     e2e_with_video_ms = t_asr_warm + t_nlu + t_render_encode + t_tts_html

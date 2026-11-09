@@ -1,8 +1,8 @@
-"""
-Training script for Fetch environments using SAC + HerReplayBuffer.
-Logs success rate vs. timesteps, saves VecNormalize statistics,
-generates training curves, and evaluates closed-loop performance over >=100 episodes.
-"""
+"""SAC training on FetchReach-v4 with HER."""
+
+
+
+
 
 import os
 import sys
@@ -16,23 +16,23 @@ import matplotlib.pyplot as plt
 import gymnasium as gym
 import gymnasium_robotics
 
-# Optimize CPU thread allocation on hybrid P/E core architectures
+
 torch.set_num_threads(min(4, torch.get_num_threads()))
 
 from stable_baselines3 import SAC, HerReplayBuffer
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.callbacks import BaseCallback
 
-# Ensure project root is in sys.path
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.rl.env_utils import setup_headless_rendering, WORKSPACE_CENTER
 
 
 class SuccessLoggerCallback(BaseCallback):
-    """
-    Logs evaluation success rate and episode lengths periodically during training.
-    Also saves periodic checkpoints.
-    """
+
+
+
+
     def __init__(self, eval_env, eval_freq=500, n_eval_episodes=10, checkpoint_dir="models", verbose=1):
         super().__init__(verbose)
         self.eval_env = eval_env
@@ -72,7 +72,7 @@ class SuccessLoggerCallback(BaseCallback):
             if self.verbose > 0:
                 print(f"[Step {self.num_timesteps:6d}] Eval Success Rate: {mean_success * 100:5.1f}% | Mean Ep Length: {mean_length:4.1f}", flush=True)
 
-            # Checkpoint model and stats periodically
+
             ckpt_path = os.path.join(self.checkpoint_dir, "checkpoint_fetch_reach_sac")
             self.model.save(ckpt_path)
             eval_env_norm = self.eval_env
@@ -82,10 +82,10 @@ class SuccessLoggerCallback(BaseCallback):
 
 
 def evaluate_policy(model, env, n_episodes=100, seed=42):
-    """
-    Rigorous closed-loop evaluation over n_episodes with fixed seed.
-    Returns success rate, steps-to-goal stats, and per-episode metrics.
-    """
+
+
+
+
     successes = []
     steps_to_goal = []
 
@@ -173,10 +173,10 @@ def train_fetch_reach(total_timesteps=4000, seed=42, output_dir="models", result
     train_duration = time.time() - t0
     print(f"Training completed in {train_duration:.2f} seconds.", flush=True)
 
-    # Sync latest normalization stats to eval env
+
     eval_env.obs_rms = train_env.obs_rms
 
-    # Save final model and VecNormalize statistics
+
     model_path = os.path.join(output_dir, "fetch_reach_sac")
     model.save(model_path)
     print(f"Model saved to {model_path}.zip", flush=True)
@@ -185,7 +185,7 @@ def train_fetch_reach(total_timesteps=4000, seed=42, output_dir="models", result
     train_env.save(vec_norm_path)
     print(f"VecNormalize stats saved to {vec_norm_path}", flush=True)
 
-    # Save raw observation RMS stats as JSON for standalone ONNX inference
+
     rms_dict = {}
     for key in train_env.obs_rms.keys():
         rms_dict[f"{key}_mean"] = train_env.obs_rms[key].mean.tolist()
@@ -195,7 +195,7 @@ def train_fetch_reach(total_timesteps=4000, seed=42, output_dir="models", result
         json.dump(rms_dict, f, indent=2)
     print(f"Raw obs RMS exported to {rms_json_path}", flush=True)
 
-    # Rigorous final evaluation over 100 episodes
+
     print("\n--- Running Final Evaluation (100 episodes, fixed seed=42) ---", flush=True)
     eval_metrics = evaluate_policy(model, eval_env, n_episodes=100, seed=42)
     eval_metrics["train_duration_sec"] = round(train_duration, 2)
@@ -211,7 +211,7 @@ def train_fetch_reach(total_timesteps=4000, seed=42, output_dir="models", result
     with open(history_json_path, "w") as f:
         json.dump(callback.history, f, indent=2)
 
-    # Generate and save plot
+
     steps = [h["step"] for h in callback.history]
     success_rates = [h["success_rate"] * 100 for h in callback.history]
 

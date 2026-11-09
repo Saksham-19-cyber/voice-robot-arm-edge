@@ -1,11 +1,11 @@
-"""
-Rigorous CPU Policy Microbenchmark:
-- Fixed thread counts (intra_op=1, inter_op=1)
-- 200 warm-up calls
-- 20,000 timed iterations
-- High-resolution timing (perf_counter_ns)
-- 95% bootstrap confidence interval on p50 difference
-"""
+"""Single-thread CPU policy microbenchmark."""
+
+
+
+
+
+
+
 
 import os
 import sys
@@ -23,22 +23,22 @@ def benchmark_policy_isolated(model_path: str, n_warmup: int = 200, n_iterations
     session = ort.InferenceSession(model_path, sess_options=opts, providers=["CPUExecutionProvider"])
     
     input_name = session.get_inputs()[0].name
-    # Fixed dummy input
+
     np.random.seed(42)
     dummy_input = np.random.randn(1, 16).astype(np.float32)
     
-    # 200 warm-up iterations
+
     for _ in range(n_warmup):
         session.run(None, {input_name: dummy_input})
         
     latencies_us = np.empty(n_iterations, dtype=np.float64)
     
-    # Timed iterations
+
     for i in range(n_iterations):
         t0 = time.perf_counter_ns()
         session.run(None, {input_name: dummy_input})
         t1 = time.perf_counter_ns()
-        latencies_us[i] = (t1 - t0) / 1000.0  # convert ns to us
+        latencies_us[i] = (t1 - t0) / 1000.0
         
     p50 = float(np.percentile(latencies_us, 50))
     p95 = float(np.percentile(latencies_us, 95))
@@ -96,11 +96,11 @@ def run_policy_benchmark():
     boot_res = bootstrap_p50_diff(fp32_res["latencies_us"], int8_res["latencies_us"])
     print(f"Bootstrap CI (FP32 p50 - INT8 p50): [{boot_res['ci_95_low_us']}, {boot_res['ci_95_high_us']}] us", flush=True)
     
-    # Exclude raw array from json
+
     del fp32_res["latencies_us"]
     del int8_res["latencies_us"]
     
-    # Check whether 0 is in the confidence interval
+
     zero_in_ci = (boot_res["ci_95_low_us"] <= 0.0 <= boot_res["ci_95_high_us"])
     p50_diff = fp32_res["p50_us"] - int8_res["p50_us"]
     
@@ -135,4 +135,3 @@ def run_policy_benchmark():
 
 if __name__ == "__main__":
     run_policy_benchmark()
-

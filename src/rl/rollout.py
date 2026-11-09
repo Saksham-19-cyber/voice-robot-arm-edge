@@ -1,10 +1,10 @@
-"""
-Inference-only rollout generator for Streamlit app and edge deployment.
-Runs ONNX policy (FP32 or INT8) in MuJoCo FetchReach-v4, renders frames,
-and encodes to browser-compatible MP4 (H.264 yuv420p + faststart) and GIF.
-Supports environment reuse to eliminate ~1.2s cold start on warm requests.
-Uses zero PyTorch dependencies during inference.
-"""
+"""Closed-loop ONNX policy rollout."""
+
+
+
+
+
+
 
 import os
 import sys
@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from src.rl.env_utils import make_fetch_env, clip_to_workspace, setup_headless_rendering
 
 
-HOLD_STEPS = 10  # Constant: number of steps to hold position after first is_success
+HOLD_STEPS = 10
 
 
 def run_onnx_rollout(
@@ -36,16 +36,16 @@ def run_onnx_rollout(
     env: Optional[gym.Env] = None,
     session: Optional[ort.InferenceSession] = None,
 ) -> Dict[str, Any]:
-    """
-    Executes closed-loop rollout using ONNX policy in MuJoCo.
-    - If env is passed in, reuses it without re-constructing renderer context.
-    - If early_termination is True, stops at first_success_step + hold_steps.
-    - Encodes MP4 with H.264 yuv420p and -movflags +faststart for browser playback.
-    - Returns full trajectory metrics, video bytes, gif bytes, and frames for UI tabs.
-    """
+
+
+
+
+
+
+
     setup_headless_rendering()
 
-    # Ensure even dimensions for yuv420p compatibility
+
     rw = render_width if render_width % 2 == 0 else render_width + 1
     rh = render_height if render_height % 2 == 0 else render_height + 1
 
@@ -53,12 +53,12 @@ def run_onnx_rollout(
     clipped_goal = clip_to_workspace(goal_arr)
     is_clipped = bool(not np.allclose(goal_arr, clipped_goal, atol=1e-4))
 
-    # Reuse or create ONNX session
+
     if session is None:
         opts = ort.SessionOptions()
         session = ort.InferenceSession(onnx_path, opts, providers=["CPUExecutionProvider"])
 
-    # Reuse or create environment
+
     owns_env = False
     if env is None:
         env = make_fetch_env("FetchReach-v4", render_mode="rgb_array", width=rw, height=rh, fixed_goal=clipped_goal)
@@ -74,7 +74,7 @@ def run_onnx_rollout(
     frames: List[np.ndarray] = []
     render_times_ms: List[float] = []
 
-    # Initial frame capture
+
     t_r0 = time.perf_counter()
     f0 = env.render()
     render_times_ms.append((time.perf_counter() - t_r0) * 1000)
@@ -89,17 +89,17 @@ def run_onnx_rollout(
     actions_taken: List[List[float]] = []
 
     while step < max_steps:
-        # Obs layout: [observation (10), achieved_goal (3), desired_goal (3)]
+
         ob = obs_dict["observation"]
         ag = obs_dict["achieved_goal"]
         dg = obs_dict["desired_goal"]
         obs_flat = np.concatenate([ob, ag, dg], axis=0).astype(np.float32).reshape(1, 16)
 
-        # Policy inference
+
         action = session.run(None, {"observation_flat": obs_flat})[0][0]
         actions_taken.append([round(float(a), 4) for a in action])
 
-        # Step physics
+
         obs_dict, reward, terminated, truncated, info = env.step(action)
         step += 1
 
@@ -113,14 +113,14 @@ def run_onnx_rollout(
             succeeded = True
             first_success_step = step
 
-        # Render frame
+
         t_r = time.perf_counter()
         frame = env.render()
         render_times_ms.append((time.perf_counter() - t_r) * 1000)
         if frame is not None:
             frames.append(frame)
 
-        # Early termination
+
         if early_termination and succeeded and (step - first_success_step) >= hold_steps:
             break
 
@@ -129,7 +129,7 @@ def run_onnx_rollout(
     if owns_env:
         env.close()
 
-    # Encode MP4 with H.264 yuv420p and +faststart
+
     temp_dir = tempfile.gettempdir()
     timestamp = int(time.time() * 1000)
     mp4_path = os.path.join(temp_dir, f"rollout_{timestamp}.mp4")
@@ -154,7 +154,7 @@ def run_onnx_rollout(
         print(f"Warning: MP4 encoding fallback: {e}")
 
     try:
-        # Generate GIF fallback (useful for browser fallback & frames tab)
+
         imageio.mimwrite(gif_path, frames, fps=12)
         with open(gif_path, "rb") as fp:
             gif_bytes = fp.read()

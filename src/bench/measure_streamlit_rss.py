@@ -1,3 +1,4 @@
+"""Streamlit server memory auditor on Windows."""
 import os
 import sys
 import time
@@ -29,7 +30,7 @@ def measure_streamlit_server_memory():
     server_proc = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
     try:
-        # Wait for server to become responsive
+
         import urllib.request
         health_url = f"http://localhost:{port}/_stcore/health"
         server_ready = False
@@ -55,12 +56,12 @@ def measure_streamlit_server_memory():
             driver.get(f"http://localhost:{port}")
             print("Connected to Streamlit page. Allowing demo rollout and Whisper to execute...")
             
-            # Monitor memory of the Streamlit process tree during execution
+
             parent = psutil.Process(server_proc.pid)
             peak_wset_bytes = 0
             peak_rss_bytes = 0
 
-            # Monitor for 20 seconds or until peak stabilizes
+
             for _ in range(40):
                 time.sleep(0.5)
                 procs = [parent] + parent.children(recursive=True)
@@ -119,4 +120,3 @@ def measure_streamlit_server_memory():
 
 if __name__ == "__main__":
     measure_streamlit_server_memory()
-

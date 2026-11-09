@@ -1,10 +1,10 @@
-"""
-Standalone Benchmark Runner CLI for CPU, GPU (Colab/Kaggle), and Edge Jetson devices.
-Usage:
-  python src/bench/bench_runner.py --device cpu    # writes results/bench_cpu.json
-  python src/bench/bench_runner.py --device gpu    # writes results/bench_gpu.json
-  python src/bench/bench_runner.py --device jetson # writes results/bench_jetson.json
-"""
+"""Multi-device benchmark runner."""
+
+
+
+
+
+
 
 import os
 import sys
@@ -41,7 +41,7 @@ def main():
             sys.exit(1)
         print(f"CUDA GPU detected: {torch.cuda.get_device_name(0)}")
     elif args.device == "jetson":
-        # Check for Tegra / Jetson platform
+
         is_tegra = os.path.exists("/etc/nv_tegra_release") or "tegra" in os.uname().release.lower() if hasattr(os, "uname") else False
         if not is_tegra:
             print("Notice: Running on non-Tegra machine with --device jetson flag. Measuring edge CPU performance.")
@@ -56,4 +56,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

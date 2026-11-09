@@ -1,11 +1,11 @@
-"""
-Comprehensive honest benchmarking suite for Voice-Commanded Edge Robot Arm.
-Measures:
-- Policy microbenchmark: FP32 vs INT8 ONNX (p50, p95, p99 latency over 1,000 passes, memory, model size)
-- Whisper ASR stage latency & RTF
-- End-to-end pipeline breakdown (Audio -> ASR -> NLU -> Policy rollout -> TTS)
-- Hardware metadata (CPU, cores, library versions)
-"""
+"""Policy latency benchmark."""
+
+
+
+
+
+
+
 
 import io
 import os
@@ -17,14 +17,14 @@ import psutil
 import numpy as np
 import onnxruntime as ort
 
-# Ensure root in sys.path
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.nlu.parser import VoiceCommandParser
 from src.asr.transcriber import WhisperASR
 
 
 def get_hardware_info():
-    """Captures honest system hardware and runtime environment metadata."""
+
     info = {
         "os": platform.platform(),
         "processor": platform.processor(),
@@ -35,7 +35,7 @@ def get_hardware_info():
         "total_ram_gb": round(psutil.virtual_memory().total / (1024**3), 2),
         "onnxruntime_version": ort.__version__,
     }
-    # CPU brand name detection
+
     try:
         if platform.system() == "Windows":
             info["cpu_model"] = "12th Gen Intel(R) Core(TM) i5-1235U"
@@ -48,7 +48,7 @@ def get_hardware_info():
     except Exception:
         info["cpu_model"] = platform.processor()
 
-    # GPU name detection if available
+
     if "CUDAExecutionProvider" in ort.get_available_providers():
         try:
             import subprocess
@@ -72,19 +72,19 @@ def get_hardware_info():
 
 
 def benchmark_policy(onnx_path: str, n_warmup: int = 100, n_runs: int = 1000):
-    """
-    Measures p50, p95, p99, mean, std per-inference latency in microseconds.
-    Excludes warm-up passes.
-    """
+
+
+
+
     providers = ["CUDAExecutionProvider", "CPUExecutionProvider"] if "CUDAExecutionProvider" in ort.get_available_providers() else ["CPUExecutionProvider"]
     session = ort.InferenceSession(onnx_path, providers=providers)
     dummy_input = np.random.randn(1, 16).astype(np.float32)
 
-    # Warm-up passes
+
     for _ in range(n_warmup):
         session.run(None, {"observation_flat": dummy_input})
 
-    # Timed passes
+
     latencies_us = []
     mem_before = psutil.Process().memory_info().rss
     for _ in range(n_runs):
@@ -115,11 +115,11 @@ def benchmark_policy(onnx_path: str, n_warmup: int = 100, n_runs: int = 1000):
 
 
 def create_synthetic_wav(duration_sec: float = 1.5, sample_rate: int = 16000) -> bytes:
-    """Generates synthetic spoken-frequency WAV bytes for benchmark test without hardware mic."""
+
     import wave
     import struct
     n_samples = int(duration_sec * sample_rate)
-    # Sine wave with harmonics approximating speech formant frequencies (250Hz, 800Hz, 2200Hz)
+
     t = np.linspace(0, duration_sec, n_samples, endpoint=False)
     signal = 0.4 * np.sin(2 * np.pi * 250 * t) + 0.3 * np.sin(2 * np.pi * 800 * t) + 0.2 * np.sin(2 * np.pi * 2200 * t)
     signal_int16 = (signal * 32767).astype(np.int16)
@@ -141,7 +141,7 @@ def run_full_benchmark(output_path: str = "results/bench_cpu.json"):
     hw_info = get_hardware_info()
     print(f"Hardware: {hw_info.get('cpu_model', 'CPU')} | {hw_info['logical_cores']} threads | RAM: {hw_info['total_ram_gb']} GB")
 
-    # 1. Policy Benchmarks
+
     fp32_path = "models/fetch_reach_actor_fp32.onnx"
     int8_path = "models/fetch_reach_actor_int8.onnx"
 
@@ -153,7 +153,7 @@ def run_full_benchmark(output_path: str = "results/bench_cpu.json"):
     int8_bench = benchmark_policy(int8_path)
     print(f"INT8 Latency: p50={int8_bench['p50_us']}us, p95={int8_bench['p95_us']}us, p99={int8_bench['p99_us']}us | Size: {int8_bench['file_size_kb']} KB")
 
-    # Honest quantization speedup calculation
+
     latency_ratio = fp32_bench["p50_us"] / int8_bench["p50_us"]
     size_ratio = fp32_bench["file_size_bytes"] / int8_bench["file_size_bytes"]
     print(f"\nSize Reduction: {size_ratio:.2f}x")
@@ -169,18 +169,18 @@ def run_full_benchmark(output_path: str = "results/bench_cpu.json"):
         quant_note = f"INT8 provides {latency_ratio:.2f}x latency speedup and {size_ratio:.2f}x size reduction."
     print(f"Quantization finding: {quant_note}\n")
 
-    # 2. Whisper ASR Benchmark
+
     print("--- Benchmarking faster-whisper (tiny.en INT8 on CPU) ---", flush=True)
     asr = WhisperASR(model_size="tiny.en", device="cpu", compute_type="int8")
     speech_file = "results/sample_speech.wav"
     test_wav = speech_file if os.path.exists(speech_file) else create_synthetic_wav(duration_sec=2.0)
-    # Warm-up pass
+
     asr.transcribe(test_wav)
-    # Timed pass
+
     asr_res = asr.transcribe(test_wav)
     print(f"ASR Latency: {asr_res['latency_sec'] * 1000:.1f}ms for {asr_res['audio_duration_sec']}s audio | RTF: {asr_res['rtf']}")
 
-    # 3. NLU Benchmark
+
     print("--- Benchmarking NLU Parser ---", flush=True)
     parser = VoiceCommandParser("models/intent_classifier.pkl")
     t0 = time.perf_counter()
@@ -189,16 +189,16 @@ def run_full_benchmark(output_path: str = "results/bench_cpu.json"):
     nlu_latency_ms = ((time.perf_counter() - t0) / 500) * 1000
     print(f"NLU Mean Latency: {nlu_latency_ms:.3f}ms")
 
-    # 4. End-to-End Pipeline Latency
+
     print("--- End-to-End Pipeline Latency Breakdown ---", flush=True)
-    # Stage 1: ASR
+
     t_asr = asr_res['latency_sec'] * 1000
-    # Stage 2: NLU
+
     t_nlu = nlu_latency_ms
-    # Stage 3: Policy 50-step rollout
+
     t_policy_step_ms = fp32_bench["p50_us"] / 1000
     t_policy_rollout_ms = t_policy_step_ms * 50
-    # Stage 4: TTS generation
+
     t0 = time.perf_counter()
     from src.tts.speaker import generate_web_speech_html
     generate_web_speech_html("Moving arm towards left by 10cm.")

@@ -1,3 +1,4 @@
+"""ASR Word Error Rate evaluator."""
 import csv
 import json
 import os
@@ -13,7 +14,7 @@ from src.nlu.parser import VoiceCommandParser
 
 
 def normalize_text(text: str) -> list[str]:
-    """Tokenize and normalize text for WER calculation."""
+
     text = text.lower()
     text = text.translate(str.maketrans("", "", string.punctuation))
     words = text.strip().split()
@@ -21,7 +22,7 @@ def normalize_text(text: str) -> list[str]:
 
 
 def compute_word_error_rate(ref_words: list[str], hyp_words: list[str]) -> float:
-    """Compute standard Levenshtein-based Word Error Rate."""
+
     if not ref_words:
         return 0.0 if not hyp_words else 1.0
 
@@ -40,9 +41,9 @@ def compute_word_error_rate(ref_words: list[str], hyp_words: list[str]) -> float
                 dp[i][j] = dp[i - 1][j - 1]
             else:
                 dp[i][j] = min(
-                    dp[i - 1][j - 1] + 1,  # substitution
-                    dp[i][j - 1] + 1,      # insertion
-                    dp[i - 1][j] + 1       # deletion
+                    dp[i - 1][j - 1] + 1,
+                    dp[i][j - 1] + 1,
+                    dp[i - 1][j] + 1
                 )
 
     return float(dp[r][h]) / float(r)
@@ -63,7 +64,7 @@ def evaluate_asr(manifest_path: str = "tests/asr/manifest.csv") -> dict:
     transcriber = WhisperASR(model_size="tiny.en", compute_type="int8")
     parser = VoiceCommandParser()
 
-    # Check whether real human voice recordings exist
+
     human_samples = [r for r in rows if r.get("provenance", "").lower() == "human"]
     has_real_benchmark = len(human_samples) >= 10
 

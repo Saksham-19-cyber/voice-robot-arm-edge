@@ -1,15 +1,15 @@
-"""
-End-to-End Pipeline Latency Benchmark:
-Measures end-to-end user wait time:
-1. Cold start (first request without cached env/models)
-2. Warm start with env reuse (session_state cached):
-   - ASR transcription (faster-whisper tiny.en, int8)
-   - NLU intent & coordinate extraction
-   - ONNX policy rollout + MuJoCo physics step + 320x320 RGB rendering
-   - MP4 video encoding (H.264 yuv420p + faststart)
-3. Compares early termination (first success + 10 hold steps) vs full 50 steps.
-4. Quantifies env recreate vs warm reset latency.
-"""
+"""Pipeline latency and early termination benchmark."""
+
+
+
+
+
+
+
+
+
+
+
 
 import os
 import sys
@@ -33,7 +33,7 @@ def benchmark_pipeline_latency(n_runs: int = 20):
     
     print(f"Benchmarking End-to-End Pipeline Latency over {n_runs} runs...")
     
-    # --- 1. Cold Start Measurement ---
+
     print("\nMeasuring Cold Start (first request from scratch)...")
     t_cold_start = time.perf_counter()
     
@@ -79,7 +79,7 @@ def benchmark_pipeline_latency(n_runs: int = 20):
     }
     print(f"Cold Start Total: {cold_total_user_wait_ms:.1f} ms")
     
-    # --- 2. Measure Env Recreate vs Warm Reset ---
+
     recreate_times = []
     for _ in range(5):
         t0 = time.perf_counter()
@@ -103,7 +103,7 @@ def benchmark_pipeline_latency(n_runs: int = 20):
     }
     print(f"Env Recreate vs Warm Reset: {env_reuse_metrics['env_recreate_with_first_render_mean_ms']} ms vs {env_reuse_metrics['env_warm_reset_with_render_mean_ms']} ms ({env_reuse_metrics['speedup_factor']}x faster)")
 
-    # --- 3. Warm Request Pipeline Benchmarks (>=20 runs) ---
+
     shared_env = cold_env
     shared_session = cold_session
     shared_asr = cold_asr
@@ -127,12 +127,12 @@ def benchmark_pipeline_latency(n_runs: int = 20):
         for i in range(n_runs):
             t_req_start = time.perf_counter()
 
-            # ASR
+
             t0 = time.perf_counter()
             asr_out = shared_asr.transcribe(audio_path)
             t_asr = (time.perf_counter() - t0) * 1000
 
-            # NLU
+
             t0 = time.perf_counter()
             nlu_out = shared_parser.parse(asr_out["text"])
             t_nlu = (time.perf_counter() - t0) * 1000
@@ -140,7 +140,7 @@ def benchmark_pipeline_latency(n_runs: int = 20):
             offset = np.array([0.02 * ((i % 3) - 1), 0.03 * (((i + 1) % 3) - 1), 0.02 * (((i + 2) % 3) - 1)], dtype=np.float32)
             goal = (nlu_out.goal_xyz if nlu_out.goal_xyz is not None else WORKSPACE_CENTER) + offset
 
-            # Rollout + Render + Encode (warm env & session reused)
+
             res = run_onnx_rollout(
                 goal_xyz=goal,
                 onnx_path="models/fetch_reach_actor_int8.onnx",

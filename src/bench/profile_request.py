@@ -1,3 +1,4 @@
+"""Per-stage request latency profiler."""
 import os
 import sys
 import time
@@ -26,27 +27,27 @@ def profile_single_request():
 
     timings = {}
 
-    # 1. ORT Session init
+
     t0 = time.perf_counter()
     session = ort.InferenceSession(onnx_path, providers=["CPUExecutionProvider"])
     timings["ort_session_init_ms"] = round((time.perf_counter() - t0) * 1000, 2)
 
-    # 2. make_env
+
     t0 = time.perf_counter()
     env = make_fetch_env("FetchReach-v4", render_mode="rgb_array", fixed_goal=target)
     timings["env_construction_ms"] = round((time.perf_counter() - t0) * 1000, 2)
 
-    # 3. env.reset
+
     t0 = time.perf_counter()
     obs_dict, _ = env.reset(seed=42)
     timings["env_reset_ms"] = round((time.perf_counter() - t0) * 1000, 2)
 
-    # 4. First render (renderer initialization & GL context binding)
+
     t0 = time.perf_counter()
     f0 = env.render()
     timings["first_render_init_ms"] = round((time.perf_counter() - t0) * 1000, 2)
 
-    # 5. Stepping & Subsequent renders
+
     step_times = []
     policy_times = []
     physics_times = []
@@ -91,7 +92,7 @@ def profile_single_request():
         "total": round(float(np.sum(subsequent_render_times)), 2),
     }
 
-    # 6. MP4 encoding
+
     import tempfile
     temp_mp4 = os.path.join(tempfile.gettempdir(), "test_prof.mp4")
     t0 = time.perf_counter()
@@ -106,7 +107,7 @@ def profile_single_request():
     timings["mp4_encode_ms"] = round((time.perf_counter() - t0) * 1000, 2)
     timings["mp4_size_bytes"] = os.path.getsize(temp_mp4)
 
-    # 7. GIF encoding
+
     temp_gif = os.path.join(tempfile.gettempdir(), "test_prof.gif")
     t0 = time.perf_counter()
     imageio.mimwrite(temp_gif, frames, fps=12)
@@ -137,4 +138,3 @@ def profile_single_request():
 
 if __name__ == "__main__":
     profile_single_request()
-

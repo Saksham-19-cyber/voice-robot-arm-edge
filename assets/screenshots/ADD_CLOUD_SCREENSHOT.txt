@@ -1,0 +1,7 @@
+TODO: Add a screenshot of the live Cloud app deployed on Streamlit Community Cloud
+URL: https://voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app/
+
+Please take a real browser screenshot of the deployed app in action and save it to:
+  assets/screenshots/cloud_app_live.png
+
+Do NOT fabricate or simulate this screenshot.

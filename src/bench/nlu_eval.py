@@ -1,11 +1,11 @@
-"""
-NLU Evaluation Suite with 95% Wilson Score Confidence Intervals & End-to-End Accuracy:
-- Majority-class baseline
-- Wilson score interval for binomial proportions
-- Evaluates Rule Parser, TF-IDF Classifier, and Hybrid Parser
-- Reports both Intent Accuracy and End-to-End Accuracy (Intent + Goal Region)
-- Evaluates synthetic split, agent-written split, and human-written split
-"""
+"""NLU accuracy evaluator with Wilson intervals."""
+
+
+
+
+
+
+
 
 import os
 import sys
@@ -22,7 +22,7 @@ from src.rl.env_utils import WORKSPACE_CENTER
 
 
 def wilson_score_interval(successes: int, total: int, z: float = 1.96) -> Dict[str, float]:
-    """Computes 95% Wilson score confidence interval for a binomial proportion."""
+
     if total == 0:
         return {"accuracy": 0.0, "ci_low": 0.0, "ci_high": 0.0}
     p = successes / total
@@ -39,7 +39,7 @@ def wilson_score_interval(successes: int, total: int, z: float = 1.96) -> Dict[s
 
 
 def verify_goal_region(goal_xyz: np.ndarray, expected_region: str) -> bool:
-    """Verifies whether generated 3D goal matches the expected spatial region relative to center."""
+
     if expected_region in ("none", "null", "unsupported", "") or expected_region is None:
         return goal_xyz is None
     if goal_xyz is None:
@@ -91,7 +91,7 @@ def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
     hybrid_parser = VoiceCommandParser("models/intent_classifier.pkl")
     classifier = hybrid_parser.classifier
 
-    # Compute majority class
+
     intents = [s.get("expected_intent") or s.get("intent") for s in samples]
     from collections import Counter
     counts = Counter(intents)
@@ -109,13 +109,13 @@ def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
         expected_intent = s.get("expected_intent") or s.get("intent")
         expected_region = s.get("expected_goal_region")
         if not expected_region and expected_intent == "reach":
-            # infer expected region from text keywords if not explicitly annotated
+
             for kw in ["left", "right", "up", "down", "forward", "front", "back", "backward", "center"]:
                 if kw in text.lower():
                     expected_region = kw
                     break
 
-        # 1. Rule parser
+
         r_res = rule_parser.parse(text)
         r_intent_match = (r_res.intent == expected_intent)
         r_e2e_match = r_intent_match and (verify_goal_region(r_res.goal_xyz, expected_region) if expected_intent == "reach" else (r_res.goal_xyz is None))
@@ -124,12 +124,12 @@ def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
         if r_e2e_match:
             rule_e2e_ok += 1
 
-        # 2. Classifier (intent only)
+
         c_pred, _, _ = classifier.predict_with_prob(text)
         if c_pred == expected_intent:
             clf_intent_ok += 1
 
-        # 3. Hybrid parser
+
         h_res = hybrid_parser.parse(text)
         h_intent_match = (h_res.intent == expected_intent)
         h_e2e_match = h_intent_match and (verify_goal_region(h_res.goal_xyz, expected_region) if expected_intent == "reach" else (h_res.goal_xyz is None))

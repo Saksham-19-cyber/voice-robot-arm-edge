@@ -1,3 +1,4 @@
+"""Integration tests for preset rollouts and video encoding."""
 import os
 import sys
 import subprocess
@@ -39,7 +40,7 @@ def test_three_presets_rollout_visuals_and_video_encoding():
             render_height=320,
         )
 
-        # Expected keys check
+
         required_keys = [
             "video_path", "video_bytes", "gif_path", "gif_bytes", "frames",
             "n_frames", "steps_taken", "succeeded", "first_success_step",
@@ -50,7 +51,7 @@ def test_three_presets_rollout_visuals_and_video_encoding():
         for k in required_keys:
             assert k in res, f"Missing key {k} in rollout result for {cmd}"
 
-        # Frames check: not all black and motion occurred
+
         frames = res["frames"]
         assert len(frames) >= 2, f"Expected at least 2 frames for {cmd}"
         f0 = frames[0]
@@ -62,11 +63,10 @@ def test_three_presets_rollout_visuals_and_video_encoding():
         pixel_diff = float(np.mean(np.abs(flast.astype(float) - f0.astype(float))))
         assert pixel_diff > 1.0, f"No visual motion detected for {cmd} (diff={pixel_diff})"
 
-        # Verify MP4 codec (h264) and pixel format (yuv420p)
+
         assert os.path.exists(res["video_path"])
         p = subprocess.run([ffmpeg_exe, "-i", res["video_path"]], capture_output=True, text=True)
         ffmpeg_log = p.stderr
         assert "h264" in ffmpeg_log, f"MP4 not encoded with h264 for {cmd}: {ffmpeg_log}"
         assert "yuv420p" in ffmpeg_log, f"MP4 not yuv420p for {cmd}: {ffmpeg_log}"
         assert "320x320" in ffmpeg_log, f"MP4 resolution mismatch for {cmd}: {ffmpeg_log}"
-

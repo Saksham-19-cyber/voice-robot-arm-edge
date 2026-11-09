@@ -1,7 +1,7 @@
 {
   "measured_process": "streamlit_server_process_tree",
   "condition": "full demo run (faster-whisper int8 model loaded + MuJoCo rollout rendered + video encoded)",
-  "peak_rss_mb": 291.7,
+  "peak_rss_mb": 243.6,
   "peak_working_set_mb": 291.7,
   "platform": "win32",
   "python_version": "3.12.4"

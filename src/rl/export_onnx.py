@@ -1,9 +1,9 @@
-"""
-Export and Quantization pipeline for FetchReach SAC policy.
-Bakes observation normalization directly into the PyTorch actor computation graph,
-exports to ONNX FP32, verifies numerical tolerance over 1,000 random inputs,
-quantizes to INT8 via onnxruntime, and benchmarks closed-loop evaluation over >=100 episodes.
-"""
+"""PyTorch actor export and INT8 quantization."""
+
+
+
+
+
 
 import os
 import sys
@@ -26,39 +26,39 @@ from src.rl.env_utils import setup_headless_rendering
 
 
 class NormalizedActor(nn.Module):
-    """
-    Standalone deterministic SAC actor with baked-in observation normalization.
-    Input: flattened observation tensor (batch_size, 16) arranged as:
-           [observation (10), achieved_goal (3), desired_goal (3)]
-    Output: deterministic continuous action tensor (batch_size, 4) in [-1.0, 1.0]
-    """
+
+
+
+
+
+
     def __init__(self, actor_net, obs_mean, obs_var, clip_obs=10.0, epsilon=1e-8):
         super().__init__()
-        # SB3 actor components
+
         self.latent_pi = actor_net.latent_pi
         self.mu = actor_net.mu
         self.clip_obs = float(clip_obs)
         self.epsilon = float(epsilon)
 
-        # Buffers for normalization in extractor order: [achieved_goal (3), desired_goal (3), observation (10)]
+
         self.register_buffer("mean", torch.tensor(obs_mean, dtype=torch.float32).unsqueeze(0))
         self.register_buffer("var", torch.tensor(obs_var, dtype=torch.float32).unsqueeze(0))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # Input x has shape (batch_size, 16) arranged as:
-        # x[:, 0:10]  -> observation (10)
-        # x[:, 10:13] -> achieved_goal (3)
-        # x[:, 13:16] -> desired_goal (3)
-        # Reorder to match SB3 CombinedExtractor keys order: [achieved_goal, desired_goal, observation]
+
+
+
+
+
         obs = x[:, 0:10]
         ag = x[:, 10:13]
         dg = x[:, 13:16]
         reordered = torch.cat([ag, dg, obs], dim=1)
 
-        # Observation normalization with clipping
+
         norm_x = torch.clamp((reordered - self.mean) / torch.sqrt(self.var + self.epsilon), -self.clip_obs, self.clip_obs)
 
-        # Actor MLP forward pass
+
         latent = self.latent_pi(norm_x)
         mean_actions = self.mu(latent)
         actions = torch.tanh(mean_actions)
@@ -84,7 +84,7 @@ def export_and_quantize(
     with open(rms_path, "r") as f:
         rms_data = json.load(f)
 
-    # Order expected by CombinedExtractor: achieved_goal (3), desired_goal (3), observation (10)
+
     full_mean = (
         rms_data["achieved_goal_mean"]
         + rms_data["desired_goal_mean"]
@@ -116,7 +116,7 @@ def export_and_quantize(
     )
     print(f"Exported ONNX FP32 model to {fp32_onnx_path} (Size: {os.path.getsize(fp32_onnx_path) / 1024:.1f} KB)")
 
-    # Verify ONNX model integrity
+
     onnx_model = onnx.load(fp32_onnx_path)
     onnx.checker.check_model(onnx_model)
     print("ONNX model structure verified successfully.")
@@ -181,8 +181,8 @@ def run_closed_loop_comparison(torch_actor, ort_fp32, ort_int8, n_episodes=100, 
     def make_eval_env():
         return gym.make("FetchReach-v4")
 
-    # Closed-loop evaluation runners for PyTorch, ONNX FP32, and ONNX INT8
-    # Input flattening order: [observation (10), achieved_goal (3), desired_goal (3)]
+
+
     policies = {
         "PyTorch_FP32": lambda obs: torch_actor(torch.from_numpy(obs).float()).detach().numpy(),
         "ONNX_FP32": lambda obs: ort_fp32.run(None, {"observation_flat": obs})[0],
@@ -205,7 +205,7 @@ def run_closed_loop_comparison(torch_actor, ort_fp32, ort_int8, n_episodes=100, 
             first_success_step = None
 
             while not done:
-                # Format raw un-normalized obs as [observation (10), achieved_goal (3), desired_goal (3)]
+
                 ob = obs_dict["observation"]
                 ag = obs_dict["achieved_goal"]
                 dg = obs_dict["desired_goal"]

@@ -4,13 +4,34 @@
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zero PyTorch in Serving](https://img.shields.io/badge/Serving-Zero_PyTorch_(ONNX_Only)-orange.svg)](https://onnxruntime.ai/)
-[![Tests: 20 Passed](https://img.shields.io/badge/Tests-20%20Passed-brightgreen.svg)](tests/)
+[![Tests: 23 Passed](https://img.shields.io/badge/Tests-23%20Passed-brightgreen.svg)](tests/)
 
 An end-to-end, edge-ready robotics portfolio system that translates natural voice commands into 3D spatial goals and executes them with a goal-conditioned reinforcement learning (SAC) policy inside MuJoCo physics simulation.
 
 🔗 **Live Deployment:** [voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app](https://voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app/)
 
 ![Robot Arm Reach Demo](assets/demo_reach_left.gif)
+
+---
+
+## 📊 Results at a Glance
+
+| Benchmark Metric | Visualization | Key Empirical Takeaway |
+|---|---|---|
+| **RL Training Convergence** | ![FetchReach Training Curve](assets/figures/reach_training_curve.png) | SAC + HER converges to 100.0% task success in ~12,000 steps (~8 min CPU training). |
+| **Single-Thread Policy Latency** | ![Single-Thread Policy Latency](assets/figures/policy_latency.png) | INT8 achieves 85.9 µs median latency vs 114.7 µs for FP32 (bootstrap 95% CI on difference: [28.2, 29.4] µs). |
+| **Model Size & Parity** | ![Model Compression and Parity](assets/figures/model_size_and_parity.png) | 3.58x model compression (281.0 KB to 78.5 KB) with zero accuracy degradation (100% success rate, 2.65 steps). |
+| **Pipeline Latency Breakdown** | ![End-to-End Pipeline Latency](assets/figures/pipeline_latency.png) | Early termination reduces user wait time from 2,078.5 ms down to 1,562.7 ms p50 (74% rollout step reduction). |
+| **ASR Ablation Study** | ![ASR Latency Ablation](assets/figures/asr_ablation.png) | Single-threaded INT8 tiny.en eliminates CPU thread contention, running 417 ms faster p50 than 4 threads. |
+| **NLU Intent & E2E Accuracy** | ![NLU Accuracy with Wilson CIs](assets/figures/nlu_accuracy.png) | Hybrid parser achieves 54.0% intent and 48.0% end-to-end accuracy on agent-written held-out sentences. |
+| **Container Memory Footprint** | ![Server Process Peak RSS](assets/figures/memory.png) | Peak RSS remains <194 MB under 3 concurrent sessions on Linux OSMesa, safely within the 1,024 MB container limit. |
+
+### Application Interface (Local Verification Runs)
+
+| Reach Left Preset | Unsupported Manipulation Guard | Emergency Stop |
+|:---:|:---:|:---:|
+| ![Reach Left Local Run](assets/screenshots/after_fix_reach_left.png) | ![Pick Block Local Run](assets/screenshots/after_fix_pick_block.png) | ![Emergency Stop Local Run](assets/screenshots/after_fix_emergency_stop.png) |
+| *Reach-left command execution* (local run) | *Informational notice on pick command* (local run) | *Immediate halt with zero motion* (local run) |
 
 ---
 
@@ -33,14 +54,14 @@ flowchart LR
 - **Cold-Start Model Load Time:** **5.30 s** (measured separately; cached in memory via `@st.cache_resource`).
 - **Warm Inference Latency:** **1,337.4 ms (p50)** on a 2.0s audio clip with `cpu_threads=1` (mean: 1,392.8 ms, p95: 1,915.5 ms).
 - **Ablation & Thread Tuning:** Single-thread CPU execution (`cpu_threads=1`) avoids thread scheduling and synchronization overhead on short clips, yielding **1,322.8 ms (p50)** vs **1,740.2 ms (p50)** with 4 threads (see ASR Ablation Study below).
-- **Silence & Noise Guard:** Audio energy is computed before ASR decoding; inputs with RMS $< 0.003$ or high `no_speech_prob` (> 0.6) are intercepted, displaying *"I didn't hear a command"* with **zero rollout simulation run**, preventing Whisper hallucinations (e.g. `"You"`).
+- **Silence & Noise Guard:** Audio energy is computed before ASR decoding; inputs with RMS $< 0.003$ or high `no_speech_prob` (> 0.6) are intercepted, returning a polite silence prompt with **zero rollout simulation run**, preventing unconstrained Whisper hallucination on background silence.
 - **ASR Accuracy Note:** ASR accuracy is **not benchmarked** on real user speech because no labeled human voice dataset is included in this repository ($N=0$ real clips in `tests/asr/manifest.csv`; `sample_speech.wav` is a synthetic formant sine wave used for pipeline integration testing).
 
 ### 2. Natural Language Understanding (NLU)
 - **Dual-Engine Architecture:**
-  - **Rule-based semantic parser:** Maps spatial orientations (`left`, `right`, `forward`, `up`, etc.) and metric offsets (`"move up by 10 cm"`) to 3D Cartesian coordinates, and clips coordinates strictly inside the robot's physical workspace bounds.
+  - **Rule-based semantic parser:** Maps spatial orientations (`left`, `right`, `forward`, `up`, etc.) and metric centimeter offsets to 3D Cartesian coordinates, and clips coordinates strictly inside the robot's physical workspace bounds.
   - **Machine learning classifier:** Balanced TF-IDF + Logistic Regression model trained on synthetic intent templates with cross-validation.
-  - **Unsupported Manipulation Guardrails:** Gripper manipulation commands (`"pick"`, `"grab"`, `"snatch"`, `"release"`) explicitly return `goal_xyz = None` with a clear user notice that the reach policy does not perform gripper manipulation. **No simulation rollout is executed.**
+  - **Unsupported Manipulation Guardrails:** Gripper manipulation commands return no 3D goal coordinate and display an informational notice that the reach policy does not perform object grasping. **No simulation rollout is executed.**
   - **Emergency Stop:** Halts immediately with zero physics motion.
 
 ### 3. Policy Execution (Goal-Conditioned SAC on the Edge)
@@ -78,7 +99,7 @@ All metrics below are strictly derived from benchmark output files in `results/`
 | **Cloud Deployed App** | INT8 Dynamic | 78.5 KB | not measured | not measured | Cloud (OSMesa) — fields in `results/cloud_deploy.json` are null until verified on deployed app |
 
 Numerical consistency check on 1,000 random inputs:
-- PyTorch vs ONNX FP32 max absolute error: **$2.44 \times 10^{-5}$** (tolerance $< 10^{-4}$ verified ✅).
+- PyTorch vs ONNX FP32 max absolute error: **$7.79 \times 10^{-7}$** (`results/quantization_eval.json`; across different random 1,000-sample test draws, observed up to $2.44 \times 10^{-5}$, all well within $< 10^{-4}$ numerical tolerance ✅).
 
 ---
 
@@ -146,7 +167,7 @@ Evaluated on a fixed 2.0s audio clip across 8 configurations (5 warmup passes, 2
 | `base.en` | FP32 | 1 | 3689.8 ms | 6878.1 ms | 4504.2 ± 1388.9 ms | 379.5 MB |
 | `base.en` | FP32 | 4 | 4117.2 ms | 4704.7 ms | 4118.8 ± 419.0 ms | 376.2 MB |
 
-- **Key Insight:** `tiny.en` with `compute_type="int8"` and `cpu_threads=1` yields the lowest latency (1322.8 ms p50) while cutting memory by more than half compared to FP32 (166.5 MB vs 355.1 MB). Multi-threading on `tiny.en` increases latency due to thread barrier overhead.
+- **Key Insight:** `tiny.en` with INT8 computation and single-threaded CPU execution yields the lowest latency (1322.8 ms p50) while cutting memory by more than half compared to FP32 (166.5 MB vs 355.1 MB). Multi-threading on `tiny.en` increases latency due to thread barrier overhead.
 
 ---
 
@@ -170,12 +191,13 @@ Evaluated on synthetic template test split and agent-written out-of-distribution
 | Platform & Environment | Concurrency / Workload | Peak RSS | Peak Working Set | Headroom under 1 GB Budget |
 |---|---|---|---|---|
 | **Linux Ubuntu (CI Runner)** | Streamlit server idle baseline | **54.20 MB** | **54.20 MB** | ~970 MB (94.7%) |
-| **Linux Ubuntu (CI Runner)** | **1 session** (3 presets sequentially + Whisper loaded) | **103.92 MB** | **103.92 MB** | **~920 MB (89.9%)** |
-| **Linux Ubuntu (CI Runner)** | **3 concurrent sessions** (3 presets each + Whisper loaded) | **193.65 MB** | **193.65 MB** | **~830 MB (81.1%)** |
+| **Linux Ubuntu (CI Runner)** | **1 session** (3 presets sequentially; ASR uncalled) | **103.92 MB** | **103.92 MB** | **~920 MB (89.9%)** |
+| **Linux Ubuntu (CI Runner)** | **3 concurrent sessions** (3 presets each; ASR uncalled) | **193.65 MB** | **193.65 MB** | **~830 MB (81.1%)** |
 | Windows Laptop (Local) | 1 session (`results/streamlit_memory.json`, GLFW) | 243.60 MB | 291.70 MB | ~732 MB (71.5%) |
 | Cloud Deployed App | Live Streamlit Cloud (`results/cloud_deploy.json`) | not measured | not measured | not measured (values null until verified on deployed container) |
 
 - **Zero PyTorch in Serving:** PyTorch is completely omitted from production requirements, keeping the application memory well within the 1 GB container ceiling under concurrent multi-user load.
+- **ASR Memory Allocation:** Preset buttons invoke simulation rollout and video encoding without initializing Whisper. When microphone/audio input is used, faster-whisper INT8 is loaded on demand, adding ~80-100 MB RSS as measured on Windows (243.6 MB peak RSS with Whisper cached vs 103.9 MB on Linux presets).
 
 ---
 
@@ -247,18 +269,19 @@ Open your browser at `http://localhost:8501`.
 
 ## 🧪 Unit Tests
 
-Run the full 20-test suite covering environment smoke lifecycles, environment state reuse, preset rollout visual generation, video encoding (`h264`, `yuv420p`), ASR silence handling, faint white noise rejection, NLU bounds, unsupported manipulation intents, handwritten held-out phrasings, and closed-loop ONNX rollouts:
+Run the full 23-test suite covering environment smoke lifecycles, environment state reuse, preset rollout visual generation, video encoding (`h264`, `yuv420p`), ASR silence handling, faint white noise rejection, NLU bounds, unsupported manipulation intents, handwritten held-out phrasings, documentation asset links, Streamlit AppTest page navigation, and closed-loop ONNX rollouts:
 
 ```bash
 pytest tests/ -v
 ```
-*(All 20 unit tests pass cleanly in ~45s).*
+*(All 23 unit tests pass cleanly in ~60s).*
 
 ---
 
 ## 🔬 Reproducing Benchmarks
 
 All evaluation figures can be re-generated with the scripts below:
+- **Generate Documentation Figures:** `python src/bench/make_figures.py`
 - **CPU Policy Latency (20k iterations, single-thread):** `python src/bench/run_policy_benchmark.py`
 - **Rollout FPS Audit:** `python src/bench/audit_rollout_fps.py`
 - **Pipeline Latency & Early Termination:** `python src/bench/measure_pipeline_latency.py`

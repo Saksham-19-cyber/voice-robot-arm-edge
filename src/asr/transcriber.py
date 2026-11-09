@@ -1,8 +1,8 @@
-"""
-ASR module powered by faster-whisper (tiny.en, int8 on CPU).
-Optimized for low-latency voice command transcription on edge and cloud CPU.
-Includes silence/RMS energy guard and hallucination suppression.
-"""
+"""faster-whisper ASR transcriber."""
+
+
+
+
 
 import io
 import os
@@ -18,10 +18,10 @@ HALLUCINATIONS = {
 
 
 def analyze_audio_source(audio_source: Union[str, bytes, io.BytesIO, np.ndarray]) -> Tuple[float, float]:
-    """
-    Computes root-mean-square (RMS) energy normalized to [0.0, 1.0] and duration in seconds.
-    Used to detect silence/faint background noise before ASR decoding.
-    """
+
+
+
+
     rms = 1.0
     duration = 0.0
     try:
@@ -89,7 +89,7 @@ def analyze_audio_source(audio_source: Union[str, bytes, io.BytesIO, np.ndarray]
 
 
 class WhisperASR:
-    """Wrapper for faster-whisper quantized edge speech recognition."""
+
 
     def __init__(
         self,
@@ -116,13 +116,13 @@ class WhisperASR:
         print(f"Loaded faster-whisper in {self.load_time}s", flush=True)
 
     def transcribe(self, audio_source: Union[str, bytes, io.BytesIO, np.ndarray]) -> Dict[str, Any]:
-        """
-        Transcribes audio from a filepath, raw audio bytes, BytesIO, or numpy array.
-        Returns dictionary containing transcript, latency, duration, and RTF.
-        """
+
+
+
+
         t0 = time.time()
 
-        # Check energy and duration before invoking ASR
+
         energy_rms, audio_duration = analyze_audio_source(audio_source)
         if energy_rms < self.min_rms:
             return {

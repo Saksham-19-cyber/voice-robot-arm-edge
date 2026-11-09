@@ -2,7 +2,7 @@ name: Linux Smoke & MuJoCo Compatibility
 
 on:
   push:
-    branches: [ main, cleanup-experiments ]
+    branches: [ main, cleanup-experiments, polish ]
   workflow_dispatch:
 
 jobs:

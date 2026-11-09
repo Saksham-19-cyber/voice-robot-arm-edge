@@ -15,7 +15,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from importlib.metadata import version, PackageNotFoundError
 
-# Configure page metadata
+
 st.set_page_config(
     page_title="Voice Robot Arm | Quantized Edge RL",
     page_icon="🦾",
@@ -23,7 +23,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Ensure project root in sys.path
+
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
@@ -34,12 +34,12 @@ from src.tts.speaker import render_tts
 from src.rl.env_utils import WORKSPACE_BOUNDS, WORKSPACE_CENTER, make_fetch_env
 
 
-# Cache heavy models to avoid reloading on each interaction
+
 @st.cache_resource(show_spinner="Downloading/loading faster-whisper int8 model...")
 def get_asr_model():
     try:
         from src.asr.transcriber import WhisperASR
-        # Uses optimal single-thread execution for minimum CPU latency on edge
+
         return WhisperASR(model_size="tiny.en", device="cpu", compute_type="int8", cpu_threads=1)
     except Exception as e:
         st.warning(
@@ -64,7 +64,7 @@ def load_json_file(rel_path):
 
 
 def main():
-    # Sidebar
+
     st.sidebar.title("🦾 Edge Robot Arm")
     st.sidebar.markdown(
         """
@@ -79,7 +79,7 @@ def main():
     )
     st.sidebar.markdown("---")
 
-    # Render resolution configuration
+
     res_choice = st.sidebar.selectbox(
         "Simulation Render Resolution",
         ["320x320 (Cloud Default, Fast)", "480x480 (High Detail)"],
@@ -87,14 +87,14 @@ def main():
     )
     render_w, render_h = (320, 320) if "320" in res_choice else (480, 480)
 
-    # Full 50-step rollout toggle
+
     full_rollout = st.sidebar.checkbox(
         "Full 50-step rollout (disable early termination)",
         value=False,
         help="By default, rollout terminates 10 steps after first reaching the goal to reduce latency and video encoding overhead.",
     )
 
-    # System Info expander
+
     with st.sidebar.expander("ℹ️ System Info", expanded=False):
         try:
             import platform
@@ -108,9 +108,9 @@ def main():
 
             mem = psutil.Process().memory_info()
             rss_mb = mem.rss / (1024 * 1024)
-            if hasattr(mem, "peak_wset"):  # Windows
+            if hasattr(mem, "peak_wset"):
                 peak_mb = mem.peak_wset / (1024 * 1024)
-            else:  # Linux (Streamlit Cloud): ru_maxrss is in KB
+            else:
                 import resource
                 peak_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
 
@@ -146,7 +146,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
     st.title("🎙️ Voice-Commanded Robot Arm")
     st.caption("Goal-conditioned Reinforcement Learning policy executed in MuJoCo physics via ONNX Runtime.")
 
-    # Initialize session state keys
+
     if "last_result" not in st.session_state:
         st.session_state["last_result"] = None
     if "command_text" not in st.session_state:
@@ -154,7 +154,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
     if "sim_env" not in st.session_state:
         st.session_state["sim_env"] = None
 
-    # Pre-rendered video preview expander
+
     prerendered_path = os.path.join(BASE_DIR, "results", "demo_prerendered.mp4")
     if os.path.exists(prerendered_path):
         with st.expander("📺 Quick Preview (Pre-rendered FetchReach Rollout)", expanded=False):
@@ -229,7 +229,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                 else:
                     st.error("ASR model unavailable.")
 
-        # Policy Model Selection (strictly deployment-ready ONNX models, zero torch)
+
         st.subheader("2. Policy Configuration")
         model_choice = st.selectbox(
             "Select RL Policy Checkpoint:",
@@ -251,7 +251,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
         if run_btn:
             trigger_run = True
 
-    # 3. Execution & Visualization
+
     with col_view:
         st.subheader("3. Execution & Visualization")
 
@@ -260,12 +260,12 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
         if trigger_run and active_command:
             nlu = get_nlu_parser()
 
-            # Stage 1: NLU Parsing
+
             t_nlu_0 = time.perf_counter()
             intent_res = nlu.parse(active_command)
             nlu_latency_ms = (time.perf_counter() - t_nlu_0) * 1000
 
-            # Guardrail: Pick & Grasp (unsupported by reach policy)
+
             if intent_res.intent == "pick" or any(w in active_command.lower() for w in ["pick", "grab", "snatch", "release", "clasp"]):
                 st.session_state["last_result"] = {
                     "kind": "unsupported",
@@ -273,7 +273,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                     "message": "I can only move the arm to a position. Gripper manipulation (pick and place) is not supported by this policy.",
                     "nlu_latency_ms": nlu_latency_ms,
                 }
-            # Guardrail: Emergency Stop
+
             elif intent_res.intent == "stop":
                 st.session_state["last_result"] = {
                     "kind": "stop",
@@ -281,11 +281,11 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                     "message": "Arm emergency brake engaged. Simulation halted with zero motion.",
                     "nlu_latency_ms": nlu_latency_ms,
                 }
-            # Standard Motion Command: Reach / Move
+
             elif intent_res.goal_xyz is not None:
                 target_goal = np.array(intent_res.goal_xyz, dtype=np.float32)
 
-                # Check if render resolution changed in sidebar
+
                 current_res = (render_w, render_h)
                 if st.session_state.get("sim_env_res") != current_res and st.session_state["sim_env"] is not None:
                     try:
@@ -294,7 +294,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                         pass
                     st.session_state["sim_env"] = None
 
-                # Reuse session environment or initialize once
+
                 env_creation_failed = False
                 if st.session_state["sim_env"] is None:
                     try:
@@ -362,7 +362,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                     "message": intent_res.message,
                 }
 
-        # Render current or persistent result from st.session_state
+
         res = st.session_state.get("last_result")
 
         if res is None:
@@ -394,7 +394,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
             r_data = res["rollout"]
             i_data = res["intent_res"]
 
-            # Real post-execution status computed strictly from result
+
             if r_data["succeeded"]:
                 status_msg = f"Goal reached in {r_data['first_success_step']} steps (final distance {r_data['final_distance_cm']} cm)"
                 st.success(f"✅ {status_msg}")
@@ -402,14 +402,14 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                 status_msg = f"Goal NOT reached after {r_data['steps_taken']} steps (final distance {r_data['final_distance_cm']} cm)"
                 st.warning(f"⚠️ {status_msg}")
 
-            # Trajectory spatial details
+
             c_pos1, c_pos2 = st.columns(2)
             c_pos1.markdown(f"**Start Position:** `[{r_data['start_pos_xyz'][0]:.2f}, {r_data['start_pos_xyz'][1]:.2f}, {r_data['start_pos_xyz'][2]:.2f}]`")
             c_pos2.markdown(f"**Target Goal:** `[{r_data['goal_xyz'][0]:.2f}, {r_data['goal_xyz'][1]:.2f}, {r_data['goal_xyz'][2]:.2f}]`")
             if r_data["clipped"]:
                 st.info("ℹ️ Target coordinate was clipped to stay within the robot's physical workspace bounds.")
 
-            # Tabbed Visualizations (Replay, Frames, Trajectory)
+
             tab_video, tab_frames, tab_traj = st.tabs(["🎬 Replay", "🖼️ Rollout Frames", "📈 Trajectory & Metrics"])
 
             with tab_video:
@@ -438,7 +438,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
             with tab_traj:
                 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 3.5), tight_layout=True)
 
-                # Distance vs Step plot
+
                 steps = list(range(1, len(r_data["distances_m"]) + 1))
                 dists_cm = [d * 100 for d in r_data["distances_m"]]
                 ax1.plot(steps, dists_cm, marker="o", color="#1f77b4", linewidth=2, label="Gripper Distance")
@@ -449,7 +449,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                 ax1.grid(True, alpha=0.3)
                 ax1.legend(loc="upper right")
 
-                # End-effector positions XYZ
+
                 ee_arr = np.array(r_data["ee_positions"])
                 ee_steps = list(range(len(ee_arr)))
                 ax2.plot(ee_steps, ee_arr[:, 0], label="EE X", color="#e377c2")
@@ -464,7 +464,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                 st.pyplot(fig)
                 plt.close(fig)
 
-                # Latency Breakdown
+
                 st.markdown("##### ⏱️ Stage Latency Metrics")
                 m1, m2, m3, m4 = st.columns(4)
                 m1.metric("NLU Parser", f"{res['nlu_latency_ms']:.1f} ms")
@@ -472,7 +472,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                 m3.metric("Video Encode", f"{r_data['encoding_time_ms']:.0f} ms")
                 m4.metric("Per-Frame Render", f"{r_data.get('render_time_per_frame_ms', 0):.1f} ms")
 
-            # TTS Confirmation
+
             render_tts(status_msg, st_module=st)
 
 
@@ -480,7 +480,7 @@ def render_results_page():
     st.title("📊 Empirical Results & Benchmarks")
     st.caption("All metrics are measured from real runs on this system without fabricated numbers.")
 
-    # 1. Training Curve
+
     st.subheader("1. RL Policy Training (FetchReach-v4)")
     curve_img_path = os.path.join(BASE_DIR, "results", "reach_training_curve.png")
     eval_reach = load_json_file("results/reach_eval.json")
@@ -501,7 +501,7 @@ def render_results_page():
             st.metric("CPU Training Duration", f"{eval_reach.get('train_duration_sec', 'N/A')} s")
             st.metric("Total Timesteps", f"{eval_reach.get('total_timesteps', '4000')}")
 
-    # 2. FP32 vs INT8 Comparison Table
+
     st.markdown("---")
     st.subheader("2. Quantization & Export Verification (PyTorch vs ONNX FP32 vs ONNX INT8)")
     quant_data = load_json_file("results/quantization_eval.json")
@@ -527,7 +527,7 @@ def render_results_page():
                 })
         st.table(rows)
 
-    # 3. CPU Microbenchmarks
+
     st.markdown("---")
     st.subheader("3. Hardware & Edge Latency Distribution")
     bench_cpu = load_json_file("results/policy_benchmark.json")
@@ -570,7 +570,7 @@ def render_results_page():
             f"Zero is outside the interval, confirming measurable single-thread INT8 speedup on this architecture."
         )
 
-    # 4. Multi-device Status
+
     st.markdown("---")
     st.subheader("4. Cross-Platform Benchmark Status")
     c1, c2, c3 = st.columns(3)
@@ -581,7 +581,7 @@ def render_results_page():
     with c3:
         st.warning("⚠️ **NVIDIA Jetson**: Not measured locally. Use `python src/bench/bench_runner.py --device jetson`")
 
-    # 5. Stretch Task
+
     st.markdown("---")
     st.subheader("5. Stretch Goal Exploration: FetchPickAndPlace-v4")
     stretch = load_json_file("results/stretch_eval.json")
@@ -628,7 +628,7 @@ def render_about_page():
         [NLU Dual-Engine Parser]         --> ~{nlu_p50_ms:.1f}ms (Entity Extraction & Bounds Clipping)
                     │
                     ▼
-        [SAC Actor in ONNX INT8]         --> ~90 µs per step; early-terminates at first success + 10 hold steps
+        [SAC Actor in ONNX INT8]         --> ~86 µs per step; early-terminates at first success + 10 hold steps
                     │
                     ▼
         [Rollout Video Stream]           --> Encoded MP4 rendered in browser (H.264 yuv420p + faststart)

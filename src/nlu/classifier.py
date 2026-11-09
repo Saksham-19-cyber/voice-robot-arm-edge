@@ -1,8 +1,8 @@
-"""
-Lightweight intent classifier using TF-IDF and Logistic Regression.
-Trained on synthetic template and paraphrased commands with held-out validation.
-Provides calibrated confidence scores and clarification thresholding.
-"""
+"""TF-IDF Logistic Regression intent classifier."""
+
+
+
+
 
 import os
 import json
@@ -15,7 +15,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 
 
-# Synthetic dataset generator for robotic voice commands
+
 INTENT_TEMPLATES = {
     "reach": [
         "reach to the {dir}",
@@ -92,7 +92,7 @@ def generate_synthetic_dataset(seed=42):
     for intent, templates in INTENT_TEMPLATES.items():
         intent_texts = []
         for template in templates:
-            # Generate variations
+
             if "{object}" in template and "{dir}" in template:
                 for obj in OBJECTS[:4]:
                     for d in ["left", "right"]:
@@ -113,7 +113,7 @@ def generate_synthetic_dataset(seed=42):
             else:
                 intent_texts.append(template)
 
-        # Balance class counts with natural conversational prefixes (e.g., "please", "can you", "robot")
+
         prefixes = ["", "please ", "robot ", "could you ", "now ", "kindly "]
         balanced = []
         for p in prefixes:
@@ -132,7 +132,7 @@ def generate_synthetic_dataset(seed=42):
 
 
 class IntentClassifier:
-    """Trained sklearn model wrapper for intent prediction."""
+
 
     def __init__(self, model_path=None):
         self.pipeline = None
@@ -203,4 +203,3 @@ def train_and_eval_classifier(model_save_path="models/intent_classifier.pkl", re
 
 if __name__ == "__main__":
     train_and_eval_classifier()
-

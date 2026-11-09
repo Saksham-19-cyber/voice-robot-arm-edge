@@ -1,11 +1,11 @@
-"""
-Unit tests for ASR speech transcription.
-Verifies faster-whisper tiny.en transcriber on:
-1. Real speech audio (results/sample_speech.wav)
-2. Synthetic pure silence (all zeros)
-3. Faint Gaussian white noise below energy threshold
-4. Energy RMS calculations and hallucination suppression
-"""
+"""Unit tests for ASR module."""
+
+
+
+
+
+
+
 
 import os
 import pytest
@@ -27,7 +27,7 @@ def test_transcribe_sample_wav(transcriber):
     result = transcriber.transcribe(sample_path)
     assert result["text"] != ""
     assert result["latency_sec"] > 0
-    # The speech in sample_speech.wav was "Reach to the left."
+
     text_lower = result["text"].lower()
     assert "reach" in text_lower or "left" in text_lower
     assert result["is_silent"] is False
@@ -35,7 +35,7 @@ def test_transcribe_sample_wav(transcriber):
 
 
 def test_transcribe_silent_audio(transcriber, tmp_path):
-    # Generate 1 second of pure silence
+
     silence_file = str(tmp_path / "silence.wav")
     sr = 16000
     with wave.open(silence_file, "wb") as wf:
@@ -52,11 +52,11 @@ def test_transcribe_silent_audio(transcriber, tmp_path):
 
 
 def test_transcribe_faint_white_noise(transcriber, tmp_path):
-    # Generate 1.5 seconds of faint Gaussian noise (amplitude well below min_rms = 0.003)
+
     sr = 16000
     duration = 1.5
     n_samples = int(sr * duration)
-    # std = 10 out of 32767 -> rms approx 0.0003
+
     np.random.seed(42)
     faint_noise = np.random.normal(0, 10, n_samples).astype(np.int16)
 

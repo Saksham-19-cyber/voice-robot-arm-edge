@@ -1,7 +1,7 @@
-"""
-Unit tests for NLU intent parser and classifier.
-Tests normal, boundary, ambiguous, and adversarial inputs.
-"""
+"""Unit tests for NLU parser and boundary clipping."""
+
+
+
 
 import os
 import pytest
@@ -43,7 +43,7 @@ def test_distance_extraction(parser):
     res = parser.parse("move up by 10 cm")
     assert res.intent == "reach"
     assert "up" in res.target
-    # Z coordinate should be elevated above center
+
     assert res.goal_xyz[2] > WORKSPACE_CENTER[2]
 
 
@@ -58,9 +58,9 @@ def test_unsupported_manipulation_commands(parser):
     for text in unsupported_commands:
         res = parser.parse(text)
         assert res.intent == "pick"
-        # Must NOT generate a goal coordinate for arm movement
+
         assert res.goal_xyz is None
-        # Must return explicit unsupported message
+
         assert "I can only move the arm to a position" in res.message
         assert res.clarification_needed is True
 
@@ -79,10 +79,10 @@ def test_stop_commands(parser):
 
 
 def test_workspace_clipping_bounds(parser):
-    # Adversarial command trying to reach 10 meters away
+
     res = parser.parse("move forward by 10 m")
     assert res.intent == "reach"
-    # Target coordinate must be strictly clamped inside WORKSPACE_BOUNDS
+
     assert res.goal_xyz[0] <= WORKSPACE_BOUNDS["x"][1]
     assert res.goal_xyz[0] >= WORKSPACE_BOUNDS["x"][0]
     assert res.metadata.get("was_clipped", False) is True
@@ -120,7 +120,5 @@ def test_handwritten_heldout_dataset_evaluation(parser):
         if res.intent == s["intent"]:
             correct += 1
     accuracy = correct / len(samples)
-    # The out-of-distribution handwritten dataset tests generalization on unseen colloquialisms
+
     assert accuracy >= 0.50
-
-

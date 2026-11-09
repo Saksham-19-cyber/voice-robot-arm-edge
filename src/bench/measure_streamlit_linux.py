@@ -1,11 +1,11 @@
-"""
-Measures peak memory of the Streamlit server process on Linux (OSMesa).
-Evaluates:
-1. Baseline + 1 active session running 3 presets (Reach Left, Reach Right, Reach Up)
-   with faster-whisper INT8 loaded and MuJoCo rollout rendered.
-2. 3 concurrent sessions each executing the 3 presets simultaneously.
-Saves measured memory metrics to results/streamlit_memory_v2.json.
-"""
+"""Streamlit server memory auditor on Linux."""
+
+
+
+
+
+
+
 
 import os
 import sys
@@ -15,12 +15,12 @@ import subprocess
 import threading
 import psutil
 
-# Ensure UTF-8
+
 sys.stdout.reconfigure(encoding="utf-8") if hasattr(sys.stdout, "reconfigure") else None
 
 
 def get_process_tree_memory(pid: int) -> dict:
-    """Calculates total RSS and peak memory across parent and all descendant processes."""
+
     try:
         parent = psutil.Process(pid)
         procs = [parent] + parent.children(recursive=True)
@@ -77,7 +77,7 @@ class MemoryMonitor:
 
 
 def run_session_with_selenium(port: int, session_id: int):
-    """Executes 3 presets (Reach Left, Reach Right, Reach Up) in a single browser session."""
+
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options
     from selenium.webdriver.common.by import By
@@ -95,7 +95,7 @@ def run_session_with_selenium(port: int, session_id: int):
     driver = webdriver.Chrome(options=options)
     try:
         driver.get(f"http://localhost:{port}")
-        # Wait for Streamlit app to load
+
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.TAG_NAME, "button"))
         )
@@ -104,12 +104,12 @@ def run_session_with_selenium(port: int, session_id: int):
         presets = ["Reach Left", "Reach Right", "Reach Up"]
         for p in presets:
             try:
-                # Find button containing preset label
+
                 buttons = driver.find_elements(By.XPATH, f"//button[contains(., '{p}')]")
                 if buttons:
                     buttons[0].click()
                     print(f"[Session {session_id}] Clicked '{p}', waiting for rollout...", flush=True)
-                    time.sleep(6)  # allow rollout + video encode
+                    time.sleep(6)
                 else:
                     print(f"[Session {session_id}] Button for '{p}' not found", flush=True)
             except Exception as e:
@@ -121,12 +121,12 @@ def run_session_with_selenium(port: int, session_id: int):
 
 
 def run_session_with_apptest(session_id: int):
-    """Fallback using AppTest if browser is not available."""
+
     from streamlit.testing.v1 import AppTest
     print(f"[AppTest Session {session_id}] Running AppTest session...", flush=True)
     at = AppTest.from_file("app/app.py", default_timeout=45)
     at.run()
-    # Click preset buttons if present
+
     for b in at.button:
         if any(kw in b.label for kw in ["Reach Left", "Reach Right", "Reach Up"]):
             print(f"[AppTest Session {session_id}] Clicking {b.label}", flush=True)
@@ -155,7 +155,7 @@ def main():
     server_proc = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
     try:
-        # Wait for server readiness
+
         import urllib.request
         health_url = f"http://localhost:{port}/_stcore/health"
         server_ready = False
@@ -172,12 +172,12 @@ def main():
             raise RuntimeError("Streamlit server failed to start within 20s")
         print("Streamlit server is ready.", flush=True)
 
-        # Baseline memory after server startup
+
         time.sleep(2)
         base_mem = get_process_tree_memory(server_proc.pid)
         print(f"Server Baseline Memory: {base_mem['rss_mb']} MB RSS", flush=True)
 
-        # Check if selenium and chrome are available
+
         has_selenium = False
         try:
             import selenium
@@ -185,9 +185,9 @@ def main():
         except ImportError:
             pass
 
-        # -------------------------------------------------------------
-        # 1. Single Session Measurement (3 presets run sequentially)
-        # -------------------------------------------------------------
+
+
+
         print("\n--- MEASURING 1 SESSION (3 Presets + Whisper Loaded) ---", flush=True)
         monitor1 = MemoryMonitor(server_proc.pid)
         monitor1.start()
@@ -204,9 +204,9 @@ def main():
         mem1 = monitor1.stop()
         print(f"1 Session Peak Memory: {mem1['peak_rss_mb']} MB RSS | {mem1['peak_wset_mb']} MB Working Set", flush=True)
 
-        # -------------------------------------------------------------
-        # 2. Three Concurrent Sessions (each running 3 presets)
-        # -------------------------------------------------------------
+
+
+
         print("\n--- MEASURING 3 CONCURRENT SESSIONS ---", flush=True)
         monitor3 = MemoryMonitor(server_proc.pid)
         monitor3.start()
@@ -226,7 +226,7 @@ def main():
         mem3 = monitor3.stop()
         print(f"3 Concurrent Sessions Peak Memory: {mem3['peak_rss_mb']} MB RSS | {mem3['peak_wset_mb']} MB Working Set", flush=True)
 
-        # Compile final results
+
         res = {
             "platform": sys.platform,
             "os": "Linux Ubuntu (CI Runner)",
@@ -268,4 +268,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
