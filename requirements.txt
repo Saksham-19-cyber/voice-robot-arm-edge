@@ -1,15 +1,15 @@
-# Core deployment dependencies for Streamlit Community Cloud (Python 3.11, CPU-only inference)
-# All dependencies have verified manylinux2014 / manylinux_2_28 binary wheels (zero compilation from source)
+# Pinned runtime dependencies for Streamlit Community Cloud (Python 3.11, CPU-only inference)
+# Verified binary wheels for manylinux2014_x86_64 (zero compilation from source)
 
 streamlit==1.51.0
-onnxruntime>=1.16.3
+onnxruntime==1.29.0
 gymnasium==1.4.0
 gymnasium-robotics==1.4.2
 mujoco==4.0.0
 faster-whisper==1.2.1
 av==13.1.0
-scikit-learn>=1.4.0
-numpy>=1.26.0,<2.2.0
+scikit-learn==1.6.1
+numpy==2.1.3
 imageio==2.38.1
-imageio-ffmpeg>=0.4.9
-psutil>=6.0.0
+imageio-ffmpeg==0.8.1
+psutil==6.0.0

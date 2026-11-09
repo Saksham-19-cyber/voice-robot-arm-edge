@@ -13,6 +13,38 @@ import gymnasium as gym
 try:
     import gymnasium_robotics
     gym.register_envs(gymnasium_robotics)
+
+    # Hotfix for pybind11 / MuJoCo enum comparison bug on Linux Debian trixie:
+    # In gymnasium_robotics.utils.mujoco_utils.set_joint_qpos, line 142:
+    # 'assert joint_type in (mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE)'
+    # evaluates `mjtJoint.__eq__(numpy.int32)` which returns False under pybind11 >= 3.1.0 on Linux.
+    # Coercing joint_type and enums to int prevents this AssertionError on Cloud containers.
+    import gymnasium_robotics.utils.mujoco_utils as _mu
+    import mujoco as _mj
+
+    def _safe_set_joint_qpos(model, data, name, value):
+        joint_id = _mj.mj_name2id(model, _mj.mjtObj.mjOBJ_JOINT, name)
+        assert joint_id != -1, f"Joint with name '{name}' is not part of the model!"
+        joint_type = int(model.jnt_type[joint_id])
+        joint_addr = model.jnt_qposadr[joint_id]
+
+        if joint_type == int(_mj.mjtJoint.mjJNT_FREE):
+            ndim = 7
+        elif joint_type == int(_mj.mjtJoint.mjJNT_BALL):
+            ndim = 4
+        else:
+            assert joint_type in (int(_mj.mjtJoint.mjJNT_HINGE), int(_mj.mjtJoint.mjJNT_SLIDE))
+            ndim = 1
+
+        start_idx = joint_addr
+        end_idx = joint_addr + ndim
+        val_arr = np.array(value)
+        if ndim > 1:
+            assert val_arr.shape == (end_idx - start_idx), f"Value has incorrect shape {name}: {value}"
+        data.qpos[start_idx:end_idx] = val_arr
+
+    _mu.set_joint_qpos = _safe_set_joint_qpos
+
 except ImportError:
     pass
 
