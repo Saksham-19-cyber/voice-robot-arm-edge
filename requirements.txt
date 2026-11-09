@@ -1,0 +1,15 @@
+# Core deployment dependencies for Streamlit Community Cloud (CPU-only, inference only)
+# Zero PyTorch dependency in the web serving path keeps memory usage ~150 MB (well within 1 GB limit)
+
+streamlit==1.51.0
+onnxruntime==1.29.0
+gymnasium==1.4.0
+gymnasium-robotics==1.4.2
+mujoco==4.0.0
+faster-whisper==1.2.1
+av==13.1.0
+scikit-learn==1.6.1
+numpy==2.1.3
+imageio==2.38.1
+imageio-ffmpeg>=0.4.9
+psutil==6.0.0

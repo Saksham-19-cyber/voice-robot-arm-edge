@@ -1,0 +1,23 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual environments
+venv/
+env/
+.env
+
+# Temporary artifacts and test files
+temp/
+*.tmp
+*.mp4
+*.gif
+!results/*.png
+!results/*.wav
+!results/*.json
+
+# IDE
+.vscode/
+.idea/

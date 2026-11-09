@@ -1,0 +1,27 @@
+{
+  "PyTorch_FP32": {
+    "success_rate": 1.0,
+    "mean_steps_to_goal": 2.65,
+    "std_steps_to_goal": 0.93,
+    "total_eval_time_sec": 56.45,
+    "fps": 88.6
+  },
+  "ONNX_FP32": {
+    "success_rate": 1.0,
+    "mean_steps_to_goal": 2.65,
+    "std_steps_to_goal": 0.93,
+    "total_eval_time_sec": 21.95,
+    "fps": 227.8
+  },
+  "ONNX_INT8": {
+    "success_rate": 1.0,
+    "mean_steps_to_goal": 2.65,
+    "std_steps_to_goal": 0.93,
+    "total_eval_time_sec": 21.67,
+    "fps": 230.8
+  },
+  "fp32_size_bytes": 287716,
+  "int8_size_bytes": 80341,
+  "max_abs_error_torch_fp32": 7.7858567237854e-07,
+  "max_abs_error_fp32_int8": 0.16404643654823303
+}

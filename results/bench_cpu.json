@@ -1,0 +1,70 @@
+{
+  "device_type": "cpu",
+  "hardware": {
+    "os": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 4, GenuineIntel",
+    "machine": "AMD64",
+    "python_version": "3.12.4",
+    "logical_cores": 12,
+    "physical_cores": 10,
+    "total_ram_gb": 7.69,
+    "onnxruntime_version": "1.29.0",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-1235U"
+  },
+  "policy_benchmarks": {
+    "fp32": {
+      "model_path": "models/fetch_reach_actor_fp32.onnx",
+      "file_size_bytes": 287716,
+      "file_size_kb": 280.97,
+      "n_runs": 1000,
+      "p50_us": 173.9,
+      "p95_us": 694.79,
+      "p99_us": 4019.45,
+      "mean_us": 371.07,
+      "std_us": 1385.95,
+      "min_us": 73.5,
+      "max_us": 21067.4,
+      "throughput_fps": 2694.9,
+      "memory_delta_mb": 0.0352
+    },
+    "int8": {
+      "model_path": "models/fetch_reach_actor_int8.onnx",
+      "file_size_bytes": 80341,
+      "file_size_kb": 78.46,
+      "n_runs": 1000,
+      "p50_us": 160.1,
+      "p95_us": 780.74,
+      "p99_us": 9991.83,
+      "mean_us": 715.06,
+      "std_us": 5653.94,
+      "min_us": 62.5,
+      "max_us": 115944.8,
+      "throughput_fps": 1398.5,
+      "memory_delta_mb": 0.0078
+    },
+    "speedup_ratio": 1.086,
+    "compression_ratio": 3.58,
+    "quantization_analysis": "INT8 provides 1.09x latency speedup and 3.58x size reduction."
+  },
+  "asr_benchmark": {
+    "model": "faster-whisper-tiny.en-int8",
+    "latency_ms": 4418.1,
+    "audio_duration_sec": 1.404,
+    "real_time_factor": 3.1461
+  },
+  "nlu_benchmark": {
+    "latency_ms": 10.59
+  },
+  "end_to_end_breakdown": {
+    "asr_stage_ms": 4418.1,
+    "asr_percentage": 98.4,
+    "nlu_stage_ms": 10.59,
+    "nlu_percentage": 0.2,
+    "policy_rollout_50steps_ms": 8.7,
+    "policy_percentage": 0.2,
+    "tts_stage_ms": 50.64,
+    "tts_percentage": 1.1,
+    "total_e2e_latency_ms": 4488.02,
+    "finding": "ASR dominates end-to-end latency (>90%), while the quantized ONNX policy executes a full 50-step trajectory in under 15ms."
+  }
+}

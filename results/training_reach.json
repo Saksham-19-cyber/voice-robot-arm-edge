@@ -1,0 +1,50 @@
+[
+  {
+    "step": 500,
+    "success_rate": 0.1,
+    "mean_ep_length": 50.0,
+    "timestamp": 1794213537.32
+  },
+  {
+    "step": 1000,
+    "success_rate": 0.5,
+    "mean_ep_length": 50.0,
+    "timestamp": 1794213570.58
+  },
+  {
+    "step": 1500,
+    "success_rate": 1.0,
+    "mean_ep_length": 50.0,
+    "timestamp": 1794213600.87
+  },
+  {
+    "step": 2000,
+    "success_rate": 1.0,
+    "mean_ep_length": 50.0,
+    "timestamp": 1794213634.73
+  },
+  {
+    "step": 2500,
+    "success_rate": 1.0,
+    "mean_ep_length": 50.0,
+    "timestamp": 1794213667.02
+  },
+  {
+    "step": 3000,
+    "success_rate": 1.0,
+    "mean_ep_length": 50.0,
+    "timestamp": 1794213701.49
+  },
+  {
+    "step": 3500,
+    "success_rate": 1.0,
+    "mean_ep_length": 50.0,
+    "timestamp": 1794213751.44
+  },
+  {
+    "step": 4000,
+    "success_rate": 1.0,
+    "mean_ep_length": 50.0,
+    "timestamp": 1794213854.82
+  }
+]

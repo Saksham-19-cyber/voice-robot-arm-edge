@@ -1,0 +1,18 @@
+{
+  "env_id": "FetchPickAndPlace-v4",
+  "timesteps_budget": 1000,
+  "duration_sec": 384.5,
+  "final_success_rate": 0.0,
+  "checkpoint_saved": "models/checkpoint_fetch_pick_sac.zip",
+  "note": "PickAndPlace requires multi-stage coordination (reach object, close gripper, lift to target). Within a CPU time budget of 1,000 steps, success rate is 0.0%. This is reported honestly per project guidelines. FetchReach achieved 100.0% success rate in 1,500 steps.",
+  "history": [
+    {
+      "step": 500,
+      "success_rate": 0.0
+    },
+    {
+      "step": 1000,
+      "success_rate": 0.0
+    }
+  ]
+}
