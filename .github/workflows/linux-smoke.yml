@@ -1,0 +1,176 @@
+name: Linux Smoke & MuJoCo Compatibility
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  diagnose-and-strategy-a:
+    name: Strategy A (Stock MuJoCo ${{ matrix.mujoco_ver }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mujoco_ver: ["4.0.0", "3.17.0", "3.12.0", "3.2.7", "3.1.6"]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $(cat packages.txt)
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install --force-reinstall "mujoco==${{ matrix.mujoco_ver }}"
+
+      - name: Inspect Package Versions & MuJoCo Utils
+        run: |
+          python -c "
+          import mujoco
+          import gymnasium
+          import gymnasium_robotics
+          import numpy as np
+          print('=== PACKAGE VERSIONS ===')
+          print('mujoco:', mujoco.__version__)
+          print('gymnasium:', gymnasium.__version__)
+          print('gymnasium_robotics:', gymnasium_robotics.__version__)
+          print('numpy:', np.__version__)
+          "
+
+      - name: Grep gymnasium_robotics mujoco_utils for joint_type and mjtJoint
+        run: |
+          python -c "
+          import gymnasium_robotics.utils.mujoco_utils as mu
+          import inspect
+          lines = inspect.getsource(mu).splitlines()
+          print('=== GREP RESULTS IN mujoco_utils.py ===')
+          for idx, line in enumerate(lines, 1):
+              if any(k in line for k in ['joint_type', 'mjtJoint', 'mjtEq', 'jnt_type', 'eq_type']):
+                  print(f'{idx}: {line}')
+          "
+
+      - name: Diagnose Linux pybind11 Enum Equality vs Windows
+        run: |
+          python -c "
+          import mujoco
+          import numpy as np
+
+          xml = '''<mujoco><worldbody><body name=\"b1\"><joint type=\"hinge\" name=\"j1\"/><geom size=\"0.1\" type=\"sphere\"/></body></worldbody></mujoco>'''
+          model = mujoco.MjModel.from_xml_string(xml)
+          joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, 'j1')
+          raw_type = model.jnt_type[joint_id]
+
+          print('=== LINUX ENUM DIAGNOSTICS ===')
+          print('model.jnt_type[i] type:', type(raw_type))
+          print('model.jnt_type[i] dtype:', model.jnt_type.dtype)
+          print('model.jnt_type[i] repr:', repr(raw_type))
+          print('mujoco.mjtJoint.mjJNT_HINGE type:', type(mujoco.mjtJoint.mjJNT_HINGE))
+          print('mujoco.mjtJoint.mjJNT_HINGE repr:', repr(mujoco.mjtJoint.mjJNT_HINGE))
+          print('Equality (==):', raw_type == mujoco.mjtJoint.mjJNT_HINGE)
+          print('Membership (in):', raw_type in (mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE))
+          print('Coerced int Membership:', int(raw_type) in (int(mujoco.mjtJoint.mjJNT_HINGE), int(mujoco.mjtJoint.mjJNT_SLIDE)))
+          "
+
+      - name: Test Strategy A - Stock Env Creation (NO Patch)
+        env:
+          MUJOCO_GL: osmesa
+          DISABLE_MUJOCO_UTILS_PATCH: "1"
+        run: |
+          python -c "
+          import os
+          import traceback
+          import gymnasium as gym
+          import gymnasium_robotics
+
+          gym.register_envs(gymnasium_robotics)
+          try:
+              env = gym.make('FetchReach-v4', render_mode='rgb_array')
+              obs, _ = env.reset()
+              print('Strategy A PASSED without patch on mujoco ${{ matrix.mujoco_ver }}!')
+              env.close()
+          except Exception as e:
+              print('Strategy A FAILED on mujoco ${{ matrix.mujoco_ver }}:')
+              traceback.print_exc()
+              raise e
+          "
+
+  linux-smoke-strategy-b:
+    name: Strategy B (Comprehensive Patch & E2E Rollout)
+    runs-on: ubuntu-latest
+    needs: [diagnose-and-strategy-a]
+    if: always()
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y $(cat packages.txt)
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Test Suite (test_env_smoke & test_enum_patch)
+        env:
+          MUJOCO_GL: osmesa
+        run: |
+          pytest tests/ -v
+
+      - name: Run Preset ONNX Rollout & Verify Video Encoding
+        env:
+          MUJOCO_GL: osmesa
+        run: |
+          python -c "
+          import os
+          import traceback
+          import numpy as np
+
+          try:
+              from src.rl.rollout import run_onnx_rollout
+              from src.rl.env_utils import WORKSPACE_CENTER
+
+              goal = WORKSPACE_CENTER + np.array([-0.1, 0.0, 0.0], dtype=np.float32)
+              res = run_onnx_rollout(
+                  goal_xyz=goal,
+                  onnx_path='models/fetch_reach_actor_int8.onnx',
+                  max_steps=25,
+                  early_termination=True,
+                  render_width=320,
+                  render_height=320,
+              )
+
+              frames = res.get('frames', [])
+              print(f'Rollout executed {len(frames)} frames.')
+              assert len(frames) > 0, 'No frames rendered'
+              assert frames[0].shape == (320, 320, 3), f'Unexpected frame shape: {frames[0].shape}'
+
+              video_bytes = res.get('video_bytes')
+              assert video_bytes is not None and len(video_bytes) > 0, 'MP4 video bytes missing'
+              print(f'MP4 video successfully encoded ({len(video_bytes)} bytes).')
+              print('Linux E2E smoke test PASSED successfully!')
+          except Exception as e:
+              traceback.print_exc()
+              raise e
+          "

@@ -1,11 +1,14 @@
 # Voice-Commanded Robot Arm with Quantized RL Policy on Edge
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app/)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zero PyTorch in Serving](https://img.shields.io/badge/Serving-Zero_PyTorch_(ONNX_Only)-orange.svg)](https://onnxruntime.ai/)
-[![Tests: 16 Passed](https://img.shields.io/badge/Tests-16%20Passed-brightgreen.svg)](tests/)
+[![Tests: 18 Passed](https://img.shields.io/badge/Tests-18%20Passed-brightgreen.svg)](tests/)
 
 An end-to-end, edge-ready robotics portfolio system that translates natural voice commands into 3D spatial goals and executes them with a goal-conditioned reinforcement learning (SAC) policy inside MuJoCo physics simulation.
+
+🔗 **Live Deployment:** [voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app](https://voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app/)
 
 ![Robot Arm Reach Demo](assets/demo_reach_left.gif)
 
@@ -174,6 +177,17 @@ Measured directly on the live Streamlit server process tree (`results/streamlit_
 
 - **Status:** Smoke test only, not a real attempt.
 - **Details:** A 1,000-step smoke test on CPU confirmed correct environment initialization, goal conditioning, and action piping under SAC, but yielded **0.0% success rate**. Achieving non-prehensile contact grasping and multi-stage pick-and-place subgoals requires substantial training beyond our CPU budget. FetchReach-v4 is retained as the verified production policy.
+
+---
+
+## ⚙️ Compatibility & Linux Runtime Diagnosis
+
+### MuJoCo PyBind11 Enum Comparison on Linux
+Under Linux GCC environments (such as Streamlit Community Cloud running Debian Trixie / Ubuntu), evaluating `np.int32(joint_type) in (mjtJoint.mjJNT_HINGE, mjtJoint.mjJNT_SLIDE)` inside `gymnasium_robotics/utils/mujoco_utils.py` causes an `AssertionError` because pybind11's enum equality comparison returns `False` when comparing pybind11 enums against `numpy.int32` scalars from model arrays under NumPy >= 2.0.
+
+- **Strategy A (Stock Testing):** Multi-version evaluation across `mujoco` 3.x candidates (`3.17.0`, `3.12.0`, `3.2.7`, `3.1.6`) is tracked via the Linux CI workflow (`.github/workflows/linux-smoke.yml`).
+- **Strategy B (Module Patch):** `src/rl/env_utils.py` applies a non-invasive import-time compatibility patch to `gymnasium_robotics.utils.mujoco_utils` (`get_joint_qpos`, `set_joint_qpos`, `get_joint_qvel`, `set_joint_qvel`, `reset_mocap_welds`, `reset_mocap2body_xpos`), coercing array values and enum variants to Python `int()`.
+- **Reproducibility:** A dedicated test suite (`tests/test_enum_patch.py`) validates that accessor operations execute cleanly without assertion failures.
 
 ---
 

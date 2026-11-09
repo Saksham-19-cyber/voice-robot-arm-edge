@@ -1,8 +1,9 @@
 {
+  "deployment_url": "https://voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app/",
   "deployed_at": null,
-  "cloud_python_version": null,
+  "cloud_python_version": "3.11",
   "commit_sha": null,
-  "status": null,
+  "status": "investigating_linux_mujoco_runtime",
   "first_request_latency_ms": null,
-  "notes": "To be populated post-deployment from Streamlit Community Cloud logs and live UI verification."
+  "notes": "Live app deployed at https://voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app/. Investigating and resolving Linux pybind11 enum compatibility in FetchReach-v4."
 }

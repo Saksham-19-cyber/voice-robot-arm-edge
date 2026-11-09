@@ -9,6 +9,7 @@ Streamlit Web Application for Inference, Rollout Visualization, and Benchmarking
 import sys
 import time
 import json
+import traceback
 import numpy as np
 import streamlit as st
 import matplotlib.pyplot as plt
@@ -285,6 +286,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                 target_goal = np.array(intent_res.goal_xyz, dtype=np.float32)
 
                 # Reuse session environment or initialize once
+                env_creation_failed = False
                 if st.session_state["sim_env"] is None:
                     try:
                         st.session_state["sim_env"] = make_fetch_env(
@@ -295,41 +297,54 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                             fixed_goal=target_goal,
                         )
                     except Exception as env_err:
-                        import traceback
-                        st.session_state["sim_env"] = None
-                        st.session_state["sim_env_error"] = traceback.format_exc()
-
-                with st.spinner("Simulating MuJoCo physics rollout..."):
-                    try:
-                        rollout_res = run_onnx_rollout(
-                            goal_xyz=target_goal,
-                            onnx_path=onnx_path,
-                            max_steps=50 if full_rollout else 25,
-                            early_termination=not full_rollout,
-                            render_width=render_w,
-                            render_height=render_h,
-                            env=st.session_state["sim_env"],
-                        )
-                        st.session_state["last_result"] = {
-                            "kind": "success",
-                            "intent_res": intent_res,
-                            "rollout": rollout_res,
-                            "nlu_latency_ms": nlu_latency_ms,
-                            "asr_latency_ms": asr_latency_ms,
-                        }
-                    except Exception as exc:
-                        import traceback
                         import mujoco
                         import gymnasium_robotics
+                        st.session_state["sim_env"] = None
+                        st.session_state["sim_env_error"] = traceback.format_exc()
+                        env_creation_failed = True
                         st.session_state["last_result"] = {
                             "kind": "error",
+                            "stage": "Environment Initialization (make_fetch_env)",
                             "intent_res": intent_res,
-                            "error_type": type(exc).__name__,
-                            "error_msg": str(exc),
+                            "error_type": type(env_err).__name__,
+                            "error_msg": str(env_err),
                             "traceback": traceback.format_exc(),
                             "mujoco_ver": getattr(mujoco, "__version__", "unknown"),
                             "robotics_ver": getattr(gymnasium_robotics, "__version__", "unknown"),
                         }
+
+                if not env_creation_failed:
+                    with st.spinner("Simulating MuJoCo physics rollout..."):
+                        try:
+                            rollout_res = run_onnx_rollout(
+                                goal_xyz=target_goal,
+                                onnx_path=onnx_path,
+                                max_steps=50 if full_rollout else 25,
+                                early_termination=not full_rollout,
+                                render_width=render_w,
+                                render_height=render_h,
+                                env=st.session_state["sim_env"],
+                            )
+                            st.session_state["last_result"] = {
+                                "kind": "success",
+                                "intent_res": intent_res,
+                                "rollout": rollout_res,
+                                "nlu_latency_ms": nlu_latency_ms,
+                                "asr_latency_ms": asr_latency_ms,
+                            }
+                        except Exception as exc:
+                            import mujoco
+                            import gymnasium_robotics
+                            st.session_state["last_result"] = {
+                                "kind": "error",
+                                "stage": "Rollout Execution (run_onnx_rollout)",
+                                "intent_res": intent_res,
+                                "error_type": type(exc).__name__,
+                                "error_msg": str(exc),
+                                "traceback": traceback.format_exc(),
+                                "mujoco_ver": getattr(mujoco, "__version__", "unknown"),
+                                "robotics_ver": getattr(gymnasium_robotics, "__version__", "unknown"),
+                            }
             else:
                 st.session_state["last_result"] = {
                     "kind": "clarification",
@@ -353,14 +368,17 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
         elif res["kind"] == "clarification":
             st.warning(f"⚠️ {res['message']}")
         elif res["kind"] == "error":
+            stage = res.get("stage", "Simulation Execution")
             st.error(
-                f"❌ Rollout Simulation Failed: `{res['error_type']}`: {res['error_msg']}\n\n"
-                f"Installed versions: `mujoco=={res['mujoco_ver']}`, `gymnasium-robotics=={res['robotics_ver']}`."
+                f"❌ {stage} Failed: `{res['error_type']}`: {res['error_msg']}\n\n"
+                f"Installed versions: `mujoco=={res.get('mujoco_ver', 'unknown')}`, `gymnasium-robotics=={res.get('robotics_ver', 'unknown')}`."
             )
-            st.code(res.get("traceback", "no traceback"), language="text")
+            if res.get("traceback"):
+                st.markdown("**Full Traceback:**")
+                st.code(res["traceback"], language="text")
             fallback_video = os.path.join(BASE_DIR, "results", "demo_prerendered.mp4")
             if os.path.exists(fallback_video):
-                st.markdown("##### 📺 Fallback Pre-Rendered Demo (Not Your Command)")
+                st.warning("📺 Fallback Demo Video (Pre-rendered FetchReach rollout shown due to simulation failure; this is NOT your live command)")
                 st.video(fallback_video)
         elif res["kind"] == "success":
             r_data = res["rollout"]
