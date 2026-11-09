@@ -66,7 +66,7 @@ class RuleBasedParser:
 
     def __init__(self):
         self.stop_words = {"stop", "halt", "pause", "freeze", "abort", "cancel", "stand by"}
-        self.pick_words = {"pick", "grasp", "grab", "lift", "take", "hold"}
+        self.pick_words = {"pick", "grasp", "grab", "lift", "take", "hold", "snatch", "release", "clasp"}
         self.reach_words = {"reach", "touch", "go", "move", "navigate", "extend", "point"}
 
     def parse(self, text: str, current_gripper_pos: Optional[np.ndarray] = None) -> IntentResult:
@@ -127,9 +127,20 @@ class RuleBasedParser:
             )
 
         # Determine Primary Intent
-        if is_pick:
-            intent = "pick"
-        elif is_reach or detected_directions or detected_anchor:
+        # Unsupported manipulation intents: Policy only supports Reach
+        if is_pick or any(re.search(rf"\b{w}\b", cleaned) for w in ["pick", "grab", "snatch", "release", "clasp", "grasp"]):
+            return IntentResult(
+                intent="pick",
+                target="unsupported",
+                confidence=0.95,
+                goal_xyz=None,
+                clarification_needed=True,
+                message="I can only move the arm to a position. Gripper manipulation (pick and place) is not supported by this policy.",
+                raw_text=raw_text,
+                metadata={"supported": False, "requires_gripper": True},
+            )
+
+        if is_reach or detected_directions or detected_anchor:
             intent = "reach"
         else:
             intent = "move"

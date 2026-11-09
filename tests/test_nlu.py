@@ -47,17 +47,22 @@ def test_distance_extraction(parser):
     assert res.goal_xyz[2] > WORKSPACE_CENTER[2]
 
 
-def test_pick_commands(parser):
-    commands = [
+def test_unsupported_manipulation_commands(parser):
+    unsupported_commands = [
         "pick up the red block",
         "grab the cube",
-        "lift the object from the table",
+        "snatch that plastic piece",
+        "release the object",
+        "grasp the cylinder",
     ]
-    for text in commands:
+    for text in unsupported_commands:
         res = parser.parse(text)
         assert res.intent == "pick"
-        assert res.goal_xyz is not None
-        assert not res.clarification_needed
+        # Must NOT generate a goal coordinate for arm movement
+        assert res.goal_xyz is None
+        # Must return explicit unsupported message
+        assert "I can only move the arm to a position" in res.message
+        assert res.clarification_needed is True
 
 
 def test_stop_commands(parser):

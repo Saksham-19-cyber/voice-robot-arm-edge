@@ -17,6 +17,7 @@ temp/
 !results/*.png
 !results/*.wav
 !results/*.json
+!results/demo_prerendered.mp4
 
 # IDE
 .vscode/

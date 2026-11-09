@@ -1,0 +1,7 @@
+[
+  {
+    "text": "example: reach left by 10 centimeters",
+    "expected_intent": "reach",
+    "expected_goal_region": "left"
+  }
+]

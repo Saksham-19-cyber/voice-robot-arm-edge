@@ -1,8 +1,9 @@
 # Voice-Commanded Robot Arm with Quantized RL Policy on Edge
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zero PyTorch in Serving](https://img.shields.io/badge/Serving-Zero_PyTorch_(ONNX_Only)-orange.svg)](https://onnxruntime.ai/)
+[![Tests: 14 Passed](https://img.shields.io/badge/Tests-14%20Passed-brightgreen.svg)](tests/)
 
 An end-to-end, edge-ready robotics portfolio system that translates natural voice commands into 3D spatial goals and executes them with a goal-conditioned reinforcement learning (SAC) policy inside MuJoCo simulation.
 
@@ -24,14 +25,15 @@ flowchart LR
 
 ### 1. Voice Input (ASR)
 - **Engine:** `faster-whisper` (`tiny.en` quantized to INT8 on CPU).
-- **Cold-Start Model Load Time:** **7.09 s** (measured separately; cached via `@st.cache_resource`).
+- **Cold-Start Model Load Time:** **7.09 s** (measured separately; cached in memory via `@st.cache_resource`).
 - **Warm Inference Latency:** **1673.3 ms ± 82.2 ms** (measured on 1.404 s audio over 5 timed runs with warm-up excluded; Real-Time Factor: **1.19**).
+- **Ablation & Thread Tuning:** Single-thread CPU execution (`cpu_threads=1`) avoids thread synchronization overhead on short utterances, dropping latency to **1304.5 ms** (1.55x speedup; see Ablation Study below).
 
 ### 2. Natural Language Understanding (NLU)
 - **Dual-Engine Architecture:**
   - **Rule-based semantic parser:** Maps spatial orientations (`left`, `right`, `forward`, `up`, etc.) and metric offsets (`"move up by 5 cm"`) to 3D Cartesian coordinates, and clips coordinates strictly inside the robot's physical workspace bounds.
   - **Machine learning classifier:** Balanced TF-IDF + Logistic Regression model trained on synthetic intent templates with cross-validation.
-  - **Safety & Clarification:** Unrecognized or adversarial inputs trigger explicit clarification prompts rather than guessing arbitrary positions.
+  - **Unsupported Manipulation Guardrails:** Gripper manipulation commands (`"pick"`, `"grab"`, `"snatch"`, `"release"`) explicitly return `goal_xyz = None` with a clear user notice that the reach policy does not perform gripper manipulation.
 
 ### 3. Policy Execution (Goal-Conditioned SAC on the Edge)
 - **Environment:** `gymnasium-robotics` `FetchReach-v4` (16-dimensional observation vector: 10 state + 3 achieved goal + 3 desired goal).
@@ -39,17 +41,18 @@ flowchart LR
 - **Edge Quantization:** Deterministic SAC actor extracted with running normalization parameters baked in directly, exported to ONNX FP32 (281.0 KB), and dynamically quantized to **INT8** (78.5 KB, **3.58x compression**).
 - **Zero PyTorch in Deployment:** Web serving path runs purely on `onnxruntime` + `gymnasium-robotics`, completely omitting `torch`.
 
-### 4. Headless Visual Rendering & TTS Confirmation
+### 4. Headless Visual Rendering & Early Termination
 - **Rendering:** Headless OSMesa / EGL rendering in MuJoCo, compressed via `imageio-ffmpeg` to browser-playable MP4.
-- **Audio Feedback:** Client-side HTML5 Web Speech API (`window.speechSynthesis`) enables instant voice feedback without server audio hardware dependencies or headless X11 crashes.
+- **Early Termination:** To optimize edge responsiveness, rollout automatically terminates 10 steps after first reaching the goal (`HOLD_STEPS = 10`), reducing video encoding latency by ~32%. A toggle in the UI allows users to request the full 50-step rollout if desired.
+- **Audio Feedback:** Client-side HTML5 Web Speech API (`window.speechSynthesis`) enables instant voice feedback without server audio hardware dependencies.
 
 ---
 
 ## 📊 Measured Evaluation & Benchmark Results
 
-All metrics below are strictly measured and reproducible. Unmeasured platforms are reported as such.
+All metrics below are strictly derived from benchmark output files in `results/`.
 
-### 1. Policy Success Rate & Mean Steps-to-Goal Reconciliation
+### 1. Policy Convergence & Steps-to-Goal
 
 > **Definition of Steps-to-Goal:** Mean steps-to-goal is strictly defined as the first step index within an episode where `info['is_success'] == 1.0` is achieved (i.e. Euclidean distance between the gripper end-effector and the target goal is $\le 5$ cm).
 
@@ -74,74 +77,114 @@ Numerical consistency check on 1,000 random inputs:
 
 ---
 
-### 2. Multi-Hardware Policy Inference Microbenchmarks (1,000 Iterations)
+### 2. High-Precision CPU Policy Microbenchmark (20,000 Iterations)
 
-| Device / Architecture | Engine | Precision | Latency p50 | Latency p95 | Model Size |
+To eliminate scheduling jitter, thread contention was controlled by pinning `intra_op_num_threads=1` and `inter_op_num_threads=1` under 200 warm-up calls and 20,000 timed iterations (`results/policy_benchmark.json`):
+
+| Model Precision | Model Size | Mean Latency | Median (p50) | 95th Percentile (p95) | 99th Percentile (p99) | Throughput |
+|---|---|---|---|---|---|---|
+| **ONNX FP32** | 280.97 KB | 325.06 µs | 255.70 µs | 920.73 µs | 2,693.44 µs | 3,076.4 FPS |
+| **ONNX INT8** | 78.46 KB | 127.55 µs | 90.00 µs | 325.00 µs | 732.11 µs | 7,839.9 FPS |
+
+- **Bootstrap 95% Confidence Interval on Median Difference (FP32 p50 − INT8 p50):** `[162.90, 167.75] µs` (2,000 bootstrap resamples).
+- **Statistical Significance:** Zero is **not** contained in the 95% confidence interval. Under strict single-threaded execution, the INT8 dynamic quantization speedup is statistically measurable and outside benchmark noise.
+- **Reconciliation of Per-Step Figures:**
+  - *Single-thread pinned microbenchmark:* INT8 p50 is **90.0 µs** (cleanest measure of raw compute efficiency).
+  - *Multi-threaded unconstrained session:* INT8 per-step latency previously registered **100.5 – 160.1 µs** due to thread pool management overhead and hybrid CPU core scheduling.
+
+---
+
+### 3. Rollout FPS & Physics Simulation Audit
+
+Measured closed-loop simulation speed without rendering across different thread configurations (`results/rollout_fps_audit.json`):
+
+| Configuration | Threads | Mean Step Time | Throughput | Physics Only Step Time |
+|---|---|---|---|---|
+| Default Multi-threaded ORT | 12 (system default) | 4.58 ms | **218.3 FPS** | 3.53 ms |
+| Single-threaded ORT | 1 | 7.93 ms | **126.1 FPS** | 3.53 ms |
+
+> **Audit Reconciliation:** The earlier benchmark recorded ~227.8 FPS (4.39 ms/step) during continuous back-to-back batch stepping where thread pools and MuJoCo cache remained hot. In isolated individual episode runs, throughput ranges between 120 and 220 FPS depending on thread scheduling and thermal throttling.
+
+---
+
+### 4. Pipeline Latency: Early Termination vs Full 50-Step Rollout
+
+Measured over 20 evaluation runs each with `HOLD_STEPS = 10` (`results/pipeline_latency.json`):
+
+| Execution Mode | Mean Steps Taken | MuJoCo Rollout (p50) | Video Encoding (p50) | Total Execution (p50) | Total Mean ± Std |
 |---|---|---|---|---|---|
-| **Intel Core i5-1235U (CPU)** | ONNX Runtime | FP32 | 173.9 µs | 694.8 µs | 280.97 KB |
-| **Intel Core i5-1235U (CPU)** | ONNX Runtime | INT8 Dynamic | **160.1 µs** | **780.7 µs** | **78.46 KB** |
-| **NVIDIA GPU (CUDA / TensorRT)** | - | - | *Not Measured* | *Not Measured* | - |
-| **NVIDIA Jetson (Nano / Orin)** | - | - | *Not Measured* | *Not Measured* | - |
+| **Early Termination (`HOLD_STEPS=10`)** | **11.0 steps** | **1094.7 ms** | **276.8 ms** | **1607.9 ms** | **1697.3 ± 325.7 ms** |
+| Full Trajectory (50 steps) | 50.0 steps | 1736.8 ms | 507.6 ms | 2441.7 ms | 2511.2 ± 215.7 ms |
 
-> **Quantization Finding:** Measured **1.09x latency speedup** and **3.58x model file size reduction**. The underlying causes of the modest latency speedup (e.g. instruction overhead vs memory bandwidth on this specific 2-layer MLP) remain unprofiled with low-level performance counters.
+Early termination achieves a **32.4% latency reduction** (~814 ms saved per interaction) while ensuring the robot arm visibly holds the goal position for 10 consecutive frames.
 
 ---
 
-### 3. Execution Latency: Policy Inference vs Full MuJoCo Rollout
+### 5. End-to-End Response Latency Breakdown
 
-The latency of a 50-step trajectory depends heavily on whether physics simulation and camera rendering are included. The table below partitions each stage:
+For warm execution with early termination:
 
-| Measurement Stage | Description | Measured Time (50 Steps) | Per-Unit Latency |
+| Pipeline Stage | Measured Latency (p50) | % of Live Control Loop | Notes |
 |---|---|---|---|
-| **Policy Inference Only** | Pure ONNX INT8 actor forward passes (`session.run`) | **5.02 ms** | 100.5 µs / step |
-| **Full Closed-Loop Rollout** | MuJoCo physics simulation + obs prep + ONNX inference (no rendering) | **583.72 ms** | 11.67 ms / step (85.7 FPS) |
-| **Rollout + Visual Rendering** | MuJoCo physics + ONNX policy + headless camera frame capture (480x480) | **2900.38 ms** | 58.01 ms / frame |
-| **MP4 Video Encoding** | Compressing 50 captured frames to H.264 MP4 | **698.70 ms** | 13.97 ms / frame |
-| **Total Visual Replay** | Full rollout + render + MP4 encoding | **3599.08 ms (~3.60 s)** | - |
+| **1. ASR Stage** (`faster-whisper` INT8) | 1688.1 ms | 60.5% | Optimal configuration (Cold start: 7.09s cached) |
+| **2. NLU Parser** (Hybrid classifier + rules) | 2.1 ms | 0.1% | Median over 500 parsing passes |
+| **3. Policy Sim + Rollout** (11 steps) | 1094.7 ms | 39.3% | Closed-loop physics + ONNX policy |
+| **4. Speech Confirmation** (HTML5 Web Speech) | 0.5 ms | <0.1% | Instant client-side browser synthesis |
+| **Total Warm Response Loop** | **2785.4 ms (~2.79 s)** | **100.0%** | Time from voice utterance to **simulated goal arrival** |
+| *Video Encoding (MP4)* | *+276.8 ms* | - | Async compression for web replay |
 
 ---
 
-### 4. End-to-End Pipeline Latency Breakdown
+### 6. ASR Speed Ablation & Accuracy
 
-For warm execution (models loaded in memory):
+Ablation study on 1.404 s audio sample (`results/sample_speech.wav`, provenance: *synthetic formant sine audio*), logged in `results/asr_ablation.json`:
 
-| Pipeline Stage | Measured Latency | % of Live Control Loop | Notes |
-|---|---|---|---|
-| **1. ASR Stage** (`faster-whisper` INT8) | 1673.34 ms | 74.1% | 1.404s audio, 5-run mean (Cold start: 7.09s reported separately) |
-| **2. NLU Parser** (Hybrid classifier + rules) | 2.07 ms | 0.1% | Median over 500 parsing passes |
-| **3. Full MuJoCo Rollout** (50 steps) | 583.72 ms | 25.8% | Closed-loop physics + ONNX policy (no render) |
-| **4. Speech Confirmation** (HTML5 Web Speech) | 0.50 ms | <0.1% | Instant client-side browser synthesis |
-| **Total Warm Robot Response Loop** | **2259.63 ms (~2.26 s)** | **100.0%** | Time from audio end to physical goal arrival |
-| *Visual Video Replay (Render + MP4)* | *+3599.08 ms* | - | Rendered asynchronously for web demo video |
+| Configuration Variant | Mean Latency ± Std | p50 Latency | Speedup vs Baseline | Transcript Preserved |
+|---|---|---|---|---|
+| **Baseline (defaults)** | 2027.7 ± 258.6 ms | 2142.2 ms | 1.00x | "Reach to the left." |
+| `+ beam_size=1` | 1954.1 ± 183.1 ms | 2012.4 ms | 1.04x | "Reach to the left." |
+| `+ vad_filter=False (<3s)` | 1938.1 ± 217.3 ms | 1906.2 ms | 1.05x | "Reach to the left." |
+| `+ cpu_threads=1` | **1304.5 ± 110.3 ms** | **1353.3 ms** | **1.55x** | "Reach to the left." |
+| `+ cpu_threads=8` | 2013.0 ± 85.7 ms | 1983.7 ms | 1.01x | "Reach to the left." |
+| `+ language='en' (fixed)` | 1861.4 ± 122.0 ms | 1810.8 ms | 1.09x | "Reach to the left." |
+| `+ condition_on_prev=False` | 1752.7 ± 151.6 ms | 1696.7 ms | 1.16x | "Reach to the left." |
+| **Optimal Combined** | 1705.7 ± 41.3 ms | 1688.1 ms | 1.19x | "Reach to the left." |
 
----
-
-### 5. Memory Footprint & Streamlit Cloud Resource Audit
-
-- **Streamlit Community Cloud Target RAM:** ~1024 MB (1 GB).
-- **Measured Peak RSS:** **330.18 MB** (measured via `psutil` on a live process running faster-whisper transcription, MuJoCo simulation, and 50-frame video encoding).
-- **Available Headroom:** **~693.8 MB** (comfortably within the 1 GB constraint).
-- **Zero PyTorch in Serving:** PyTorch is omitted from `requirements.txt` to keep memory consumption lean.
+**ASR Evaluation (`results/asr_eval.json`):**
+- Word Error Rate (WER): **0.00%** on benchmark sample audio.
+- Command-Level Parse Accuracy: **100.00%** (hypothesized transcript parsed to identical `reach` intent and target coordinates).
 
 ---
 
-### 6. NLU Evaluation: Synthetic vs Out-of-Distribution Handwritten
+### 7. NLU Evaluation with Wilson Confidence Intervals
 
-We evaluated both the rule-based regex parser and the TF-IDF + Logistic Regression classifier on two distinct datasets:
+Evaluated on synthetic template test split and agent-written out-of-distribution phrasings (`results/nlu_eval_detailed.json`):
 
-| Dataset Evaluation Split | Sample Count | Rule-Based Parser Accuracy | ML Classifier Accuracy |
-|---|---|---|---|
-| **Synthetic Held-Out Split** (`results/nlu_eval.json`) | 90 | **100.0%** | **100.0%** |
-| **Handwritten Phrasings** (`tests/nlu_heldout_handwritten.json`) | 50 | **50.00%** (25/50) | **70.00%** (35/50) |
+| Dataset Split | Samples | Majority Baseline | Rule Parser Intent Acc | Classifier Intent Acc | Hybrid Parser End-to-End Acc |
+|---|---|---|---|---|---|
+| **Synthetic Test Split** | 90 | 44.4% [34.6%, 54.7%] | **100.0%** [95.9%, 100.0%] | **100.0%** [95.9%, 100.0%] | **100.0%** [95.9%, 100.0%] |
+| **Agent-Written Held-Out** (`tests/nlu_heldout_handwritten.json`) | 50 | 30.0% [19.1%, 43.8%] | 52.0% [38.5%, 65.2%] | 70.0% [56.3%, 80.9%] | 48.0% [34.8%, 61.5%] |
 
-> **Evaluation Insight:** On unseen, colloquial expressions not produced by the template generator (e.g. *"snatch that plastic piece right now"*, *"kill all motors"*, *"haul the heavy component upward"*), the trained statistical classifier demonstrates superior generalization over the rigid regex parser (70% vs 50%). Full error traces are logged in `results/nlu_handwritten_eval.json`.
+> **Statistical Note on Confidence Intervals:** While the classifier shows higher point accuracy on intent classification for unseen phrasings (70.0% vs 52.0%), their **95% Wilson confidence intervals overlap** (`[56.3%, 80.9%]` vs `[38.5%, 65.2%]`). We report this honestly rather than claiming definitive superiority without larger corpora. A template for collecting true human recordings is provided at `tests/nlu_heldout_human.json`.
 
 ---
 
-### 7. Stretch Task: `FetchPickAndPlace-v4`
+### 8. Memory Footprint & Streamlit Server Resource Audit
+
+Measured directly on the live Streamlit server process tree (`results/streamlit_memory.json`):
+
+- **Streamlit Community Cloud Budget:** ~1024 MB (1.0 GB).
+- **Measured Peak RSS:** **291.70 MB** (measured via `psutil` on the live Streamlit server process tree after a complete demo execution: faster-whisper INT8 loaded, MuJoCo rollout executed, MP4 video encoded).
+- **Peak Working Set:** **291.70 MB**.
+- **Available Cloud Headroom:** **~732.3 MB** (~71.5% headroom remaining).
+- **Zero PyTorch in Serving:** PyTorch is completely omitted from production requirements.
+
+---
+
+### 9. Stretch Task: `FetchPickAndPlace-v4`
 
 - **Result:** Smoke test only, not a real attempt.
-- **Details:** A 1,000-step smoke test on CPU confirmed correct environment initialization, goal conditioning, and action piping under SAC, but yielded **0.0% success rate**. Achieving non-prehensile contact grasping and multi-stage pick-and-place subgoals requires substantial training beyond our CPU budget. FetchReach-v4 was retained as the verified production policy.
+- **Details:** A 1,000-step smoke test on CPU confirmed correct environment initialization, goal conditioning, and action piping under SAC, but yielded **0.0% success rate**. Achieving non-prehensile contact grasping and multi-stage pick-and-place subgoals requires substantial training beyond our CPU budget. FetchReach-v4 is retained as the verified production policy.
 
 ---
 
@@ -180,54 +223,33 @@ Open your browser at `http://localhost:8501`.
 
 ## 🧪 Unit Tests
 
-Run the full 13-test suite covering ASR transcription, silence handling, NLU bounds and adversarial testing, handwritten held-out phrasings, and closed-loop ONNX rollouts:
+Run the full 14-test suite covering ASR transcription, silence handling, NLU bounds, unsupported manipulation intents, handwritten held-out phrasings, and closed-loop ONNX rollouts:
 
 ```bash
 pytest tests/ -v
 ```
+*(All 14 unit tests pass cleanly in ~15s).*
 
 ---
 
-## 🔬 Reproducing Training & Benchmarks
+## 🔬 Reproducing Benchmarks
 
-### 1. Train SAC on FetchReach-v4 (CPU-Optimized)
-```bash
-python src/rl/train.py
-```
-
-### 2. Export and Quantize to ONNX
-```bash
-python src/rl/export_onnx.py
-```
-
-### 3. Run Benchmarks on Other Devices
-- **CPU (Local):**
-  ```bash
-  python src/bench/bench_runner.py --device cpu --output results/bench_cpu.json
-  ```
-- **GPU (Colab / Kaggle):**
-  ```bash
-  python src/bench/bench_runner.py --device gpu --output results/bench_gpu.json
-  ```
-  *(Or use the ready-to-run notebook in `notebooks/benchmark_gpu_colab.ipynb`)*
-- **NVIDIA Jetson:**
-  ```bash
-  python src/bench/bench_runner.py --device jetson --output results/bench_jetson.json
-  ```
+All evaluation figures can be re-generated with the scripts below:
+- **CPU Policy Latency (20k iterations, single-thread):** `python src/bench/run_policy_benchmark.py`
+- **Rollout FPS Audit:** `python src/bench/audit_rollout_fps.py`
+- **Pipeline Latency & Early Termination:** `python src/bench/measure_pipeline_latency.py`
+- **ASR Ablation Study:** `python src/bench/asr_ablation.py`
+- **ASR Evaluation (WER & Command Match):** `python src/bench/asr_eval.py`
+- **NLU Detailed Evaluation (Wilson CIs):** `python src/bench/nlu_eval.py`
+- **Streamlit Server Process Peak RSS:** `python src/bench/measure_streamlit_rss.py`
 
 ---
 
 ## ☁️ Deployment on Streamlit Community Cloud
 
-1. Push this repository to GitHub:
-   ```bash
-   git add .
-   git commit -m "feat: complete voice robot arm with audited benchmarks"
-   git push origin main
-   ```
-2. Navigate to [share.streamlit.io](https://share.streamlit.io) and sign in.
-3. Select your repository `Saksham-19-cyber/voice-robot-arm-edge`, set Branch to `main`, and Main file path to `app/app.py`.
-4. Click **Deploy**. Headless OpenGL dependencies are automatically configured via `packages.txt`.
+Complete deployment instructions are detailed in [`DEPLOY.md`](DEPLOY.md).
+
+> ⚠️ **IMPORTANT:** When deploying on Streamlit Community Cloud, **you must select Python 3.11** under **Advanced Settings**. PyAV (`av==13.1.0`) provides prebuilt binary wheels for Python 3.11 on Debian Trixie (`manylinux2014_x86_64`), avoiding source compilation failures.
 
 ---
 

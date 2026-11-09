@@ -32,13 +32,16 @@ from src.rl.env_utils import WORKSPACE_BOUNDS, WORKSPACE_CENTER
 
 
 # Cache heavy models to avoid reloading on each interaction
-@st.cache_resource(show_spinner="Loading ASR engine (faster-whisper int8)...")
+@st.cache_resource(show_spinner="Downloading/loading faster-whisper int8 model...")
 def get_asr_model():
     try:
         from src.asr.transcriber import WhisperASR
         return WhisperASR(model_size="tiny.en", device="cpu", compute_type="int8")
     except Exception as e:
-        st.warning(f"ASR initialization notice: {e}")
+        st.warning(
+            f"⚠️ ASR engine failed to initialize: {e}. "
+            "Microphone voice transcription will be unavailable; text commands and presets remain fully functional."
+        )
         return None
 
 
@@ -71,6 +74,20 @@ def main():
         """
     )
     st.sidebar.markdown("---")
+    with st.sidebar.expander("ℹ️ System Info", expanded=False):
+        import platform
+        import psutil
+        import onnxruntime as ort
+        proc = psutil.Process()
+        rss_mb = proc.memory_info().rss / (1024 * 1024)
+        peak_mb = getattr(proc.memory_info(), "peak_wset", proc.memory_info().rss) / (1024 * 1024)
+        st.markdown(f"- **Python:** `{platform.python_version()}`")
+        st.markdown(f"- **Current RSS:** `{rss_mb:.1f} MB`")
+        st.markdown(f"- **Peak Working Set:** `{peak_mb:.1f} MB`")
+        st.markdown(f"- **ONNX Runtime:** `{ort.__version__}`")
+        st.markdown(f"- **Platform:** `{platform.system()} {platform.machine()}`")
+        st.markdown(f"- **CPU Threads:** `{os.cpu_count()}`")
+
     page = st.sidebar.radio(
         "Navigation",
         ["🎮 Interactive Demo", "📊 Benchmarks & Results", "📐 Architecture & Notes"],
@@ -88,6 +105,12 @@ def main():
 def render_demo_page():
     st.title("🎙️ Voice-Commanded Robot Arm")
     st.caption("Goal-conditioned Reinforcement Learning policy executed in MuJoCo physics via ONNX Runtime.")
+
+    prerendered_path = os.path.join(BASE_DIR, "results", "demo_prerendered.mp4")
+    if os.path.exists(prerendered_path):
+        with st.expander("📺 Quick Preview (Pre-rendered FetchReach Rollout)", expanded=False):
+            st.video(prerendered_path)
+            st.caption("Pre-rendered closed-loop FetchReach rollout with INT8 quantized policy.")
 
     col_ctrl, col_view = st.columns([1, 1], gap="large")
 
@@ -162,12 +185,27 @@ def render_demo_page():
         )
         onnx_path = os.path.join(BASE_DIR, onnx_model_file)
 
+        full_rollout = st.checkbox(
+            "Full 50-step rollout (disable early termination)",
+            value=False,
+            help="By default, rollout terminates 10 steps after first reaching the goal to reduce latency and video encoding overhead.",
+        )
+
+        autorun = os.environ.get("STREAMLIT_AUTORUN_BENCHMARK") == "1"
+        if autorun:
+            asr_engine = get_asr_model()
+            sample_wav = os.path.join(BASE_DIR, "results", "sample_speech.wav")
+            if asr_engine and os.path.exists(sample_wav):
+                asr_res = asr_engine.transcribe(sample_wav)
+                command_text = asr_res.get("text", "reach to the left")
+                asr_latency_ms = asr_res.get("latency_sec", 0.0) * 1000
+
         run_btn = st.button("🚀 Execute Command", type="primary", use_container_width=True)
 
     with col_view:
         st.subheader("3. Execution & Visualization")
 
-        if run_btn and command_text:
+        if (run_btn or autorun) and command_text:
             nlu = get_nlu_parser()
 
             # Stage 1: NLU Parsing
@@ -191,7 +229,8 @@ def render_demo_page():
                         rollout_res = run_onnx_rollout(
                             goal_xyz=target_goal,
                             onnx_path=onnx_path,
-                            max_steps=25,
+                            max_steps=50 if full_rollout else 25,
+                            early_termination=not full_rollout,
                         )
 
                     # Display Video Rollout

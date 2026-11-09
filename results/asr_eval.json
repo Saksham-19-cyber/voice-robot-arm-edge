@@ -1,0 +1,22 @@
+{
+  "num_samples": 1,
+  "mean_wer": 0.0,
+  "command_level_parse_accuracy": 1.0,
+  "samples": [
+    {
+      "file": "results/sample_speech.wav",
+      "provenance": "synthetic formant sine audio",
+      "reference_text": "reach to the left",
+      "hypothesis_text": "Reach to the left.",
+      "wer": 0.0,
+      "ref_intent": "reach",
+      "hyp_intent": "reach",
+      "command_parse_matched": true,
+      "hyp_goal_xyz": [
+        1.34,
+        0.87,
+        0.53
+      ]
+    }
+  ]
+}

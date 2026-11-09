@@ -1,0 +1,44 @@
+{
+  "early_termination": {
+    "n_runs": 20,
+    "hold_steps_constant": 10,
+    "mean_steps_taken": 11.0,
+    "mean_first_success_step": 1.0,
+    "rollout_ms": {
+      "mean": 1186.5,
+      "p50": 1094.7,
+      "std": 252.1
+    },
+    "encode_ms": {
+      "mean": 289.7,
+      "p50": 276.8,
+      "std": 45.0
+    },
+    "total_ms": {
+      "mean": 1697.3,
+      "p50": 1607.9,
+      "std": 325.7
+    }
+  },
+  "full_50_steps": {
+    "n_runs": 20,
+    "hold_steps_constant": 10,
+    "mean_steps_taken": 50.0,
+    "mean_first_success_step": 1.0,
+    "rollout_ms": {
+      "mean": 1810.0,
+      "p50": 1736.8,
+      "std": 185.0
+    },
+    "encode_ms": {
+      "mean": 517.7,
+      "p50": 507.6,
+      "std": 35.7
+    },
+    "total_ms": {
+      "mean": 2511.2,
+      "p50": 2441.7,
+      "std": 215.7
+    }
+  }
+}

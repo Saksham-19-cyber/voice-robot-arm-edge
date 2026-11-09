@@ -1,0 +1,41 @@
+{
+  "benchmark_config": {
+    "intra_op_num_threads": 1,
+    "inter_op_num_threads": 1,
+    "execution_mode": "ORT_SEQUENTIAL",
+    "n_warmup": 200,
+    "n_iterations": 20000,
+    "input_dim": 16,
+    "output_dim": 4
+  },
+  "fp32": {
+    "p50_us": 255.7,
+    "p95_us": 920.73,
+    "p99_us": 2693.44,
+    "mean_us": 325.06,
+    "std_us": 706.12,
+    "min_us": 36.0,
+    "max_us": 39928.4,
+    "file_size_bytes": 287716,
+    "file_size_kb": 280.97
+  },
+  "int8": {
+    "p50_us": 90.0,
+    "p95_us": 325.0,
+    "p99_us": 732.11,
+    "mean_us": 127.55,
+    "std_us": 187.74,
+    "min_us": 45.5,
+    "max_us": 5860.5,
+    "file_size_bytes": 80341,
+    "file_size_kb": 78.46
+  },
+  "bootstrap_p50_difference": {
+    "mean_p50_diff_us (fp32 - int8)": 165.602,
+    "ci_95_low_us": 162.9,
+    "ci_95_high_us": 167.75,
+    "n_boot": 2000
+  },
+  "zero_in_95_ci": false,
+  "conclusion": "Measurable difference of 165.70 us (95% CI: [162.9, 167.75] us)."
+}

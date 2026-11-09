@@ -1,0 +1,12 @@
+{
+  "deployment_url": null,
+  "deployment_timestamp": null,
+  "deployed_commit": null,
+  "python_version_selected": null,
+  "cloud_status": null,
+  "cloud_rss_mb": null,
+  "cloud_rollout_render_verified": null,
+  "cloud_whisper_download_verified": null,
+  "cloud_tts_audio_verified": null,
+  "notes": "To be populated post-deployment from Streamlit Community Cloud logs and live UI."
+}

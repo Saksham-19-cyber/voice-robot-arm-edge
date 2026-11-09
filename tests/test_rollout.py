@@ -51,7 +51,8 @@ def test_closed_loop_rollout_reaches_goal_fp32():
         output_format="mp4",
     )
     assert res["succeeded"] is True
-    assert res["steps_taken"] <= 10
+    assert res["first_success_step"] is not None and res["first_success_step"] <= 10
+    assert res["steps_taken"] <= 25
     assert res["final_distance_m"] <= 0.05
     assert os.path.exists(res["video_path"])
     # Clean up generated video
@@ -70,7 +71,8 @@ def test_closed_loop_rollout_reaches_goal_int8():
         output_format="mp4",
     )
     assert res["succeeded"] is True
-    assert res["steps_taken"] <= 10
+    assert res["first_success_step"] is not None and res["first_success_step"] <= 10
+    assert res["steps_taken"] <= 25
     assert res["final_distance_m"] <= 0.05
     assert os.path.exists(res["video_path"])
     if os.path.exists(res["video_path"]):

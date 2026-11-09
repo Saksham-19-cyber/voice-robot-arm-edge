@@ -18,10 +18,15 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 from src.rl.env_utils import make_fetch_env, clip_to_workspace, setup_headless_rendering
 
 
+HOLD_STEPS = 10  # Constant: number of steps to hold position after first is_success
+
+
 def run_onnx_rollout(
     goal_xyz: np.ndarray,
     onnx_path: str = "models/fetch_reach_actor_int8.onnx",
-    max_steps: int = 25,
+    max_steps: int = 50,
+    hold_steps: int = HOLD_STEPS,
+    early_termination: bool = True,
     render_width: int = 320,
     render_height: int = 240,
     seed: int = 42,
@@ -29,7 +34,8 @@ def run_onnx_rollout(
 ) -> dict:
     """
     Executes closed-loop rollout using ONNX policy in MuJoCo.
-    Renders frames and encodes to video (MP4) or GIF.
+    If early_termination is True, stops at first_success_step + hold_steps.
+    Renders and encodes only those frames to video (MP4) or GIF.
     Returns rollout stats and filepath to rendered video.
     """
     setup_headless_rendering()
@@ -51,7 +57,6 @@ def run_onnx_rollout(
     # Capture initial frame
     frame = env.render()
     if frame is not None:
-        # Resize or crop if needed, or take native
         frames.append(frame)
 
     while step < max_steps:
@@ -79,8 +84,8 @@ def run_onnx_rollout(
         if frame is not None:
             frames.append(frame)
 
-        # If achieved goal and held for 3 frames, terminate early to keep video snappy
-        if succeeded and (step - first_success_step) >= 3:
+        # Early termination: first is_success plus constant hold_steps
+        if early_termination and succeeded and (step - first_success_step) >= hold_steps:
             break
 
     rollout_time_ms = (time.perf_counter() - t0) * 1000

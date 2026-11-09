@@ -1,0 +1,99 @@
+{
+  "agent_written_heldout": {
+    "dataset_label": "agent_written_heldout",
+    "sample_count": 50,
+    "class_distribution": {
+      "reach": 15,
+      "pick": 15,
+      "stop": 10,
+      "unknown": 10
+    },
+    "majority_class_baseline": {
+      "majority_class": "reach",
+      "wilson_ci": {
+        "accuracy": 0.3,
+        "ci_low": 0.191,
+        "ci_high": 0.4375
+      }
+    },
+    "rule_parser": {
+      "intent_accuracy": {
+        "accuracy": 0.52,
+        "ci_low": 0.3851,
+        "ci_high": 0.652
+      },
+      "end_to_end_accuracy": {
+        "accuracy": 0.46,
+        "ci_low": 0.3297,
+        "ci_high": 0.596
+      }
+    },
+    "classifier_alone": {
+      "intent_accuracy": {
+        "accuracy": 0.7,
+        "ci_low": 0.5625,
+        "ci_high": 0.809
+      },
+      "note": "Classifier predicts intent class only; goal coordinates are produced by rule parser."
+    },
+    "hybrid_parser": {
+      "intent_accuracy": {
+        "accuracy": 0.54,
+        "ci_low": 0.404,
+        "ci_high": 0.6703
+      },
+      "end_to_end_accuracy": {
+        "accuracy": 0.48,
+        "ci_low": 0.348,
+        "ci_high": 0.6149
+      }
+    }
+  },
+  "human_written_heldout": {
+    "dataset_label": "human_written_heldout",
+    "sample_count": 1,
+    "class_distribution": {
+      "reach": 1
+    },
+    "majority_class_baseline": {
+      "majority_class": "reach",
+      "wilson_ci": {
+        "accuracy": 1.0,
+        "ci_low": 0.2065,
+        "ci_high": 1.0
+      }
+    },
+    "rule_parser": {
+      "intent_accuracy": {
+        "accuracy": 1.0,
+        "ci_low": 0.2065,
+        "ci_high": 1.0
+      },
+      "end_to_end_accuracy": {
+        "accuracy": 1.0,
+        "ci_low": 0.2065,
+        "ci_high": 1.0
+      }
+    },
+    "classifier_alone": {
+      "intent_accuracy": {
+        "accuracy": 1.0,
+        "ci_low": 0.2065,
+        "ci_high": 1.0
+      },
+      "note": "Classifier predicts intent class only; goal coordinates are produced by rule parser."
+    },
+    "hybrid_parser": {
+      "intent_accuracy": {
+        "accuracy": 1.0,
+        "ci_low": 0.2065,
+        "ci_high": 1.0
+      },
+      "end_to_end_accuracy": {
+        "accuracy": 1.0,
+        "ci_low": 0.2065,
+        "ci_high": 1.0
+      }
+    }
+  }
+}

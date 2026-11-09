@@ -41,7 +41,7 @@ class VoiceCommandParser:
                 rule_result.metadata["classifier_confidence"] = clf_prob
                 rule_result.metadata["all_probabilities"] = all_probs
 
-                # If rule parser was uncertain (unknown) or classifier is highly confident on stop/unknown
+                # If rule parser was uncertain (unknown) or classifier is highly confident on stop/unknown/pick
                 if rule_result.intent == "unknown" and clf_intent != "unknown" and clf_prob > 0.70:
                     rule_result.intent = clf_intent
                     rule_result.confidence = clf_prob
@@ -50,6 +50,14 @@ class VoiceCommandParser:
                     rule_result.intent = "unknown"
                     rule_result.clarification_needed = True
                     rule_result.message = f"I'm not sure what you mean by '{text.strip()}'. Please specify a command like 'reach left' or 'stop'."
+
+                # If identified as pick/manipulation, enforce unsupported policy boundary
+                if rule_result.intent == "pick" or (clf_intent == "pick" and clf_prob > 0.75):
+                    rule_result.intent = "pick"
+                    rule_result.goal_xyz = None
+                    rule_result.clarification_needed = True
+                    rule_result.message = "I can only move the arm to a position. Gripper manipulation (pick and place) is not supported by this policy."
+                    rule_result.metadata["supported"] = False
             except Exception as e:
                 rule_result.metadata["classifier_error"] = str(e)
 
