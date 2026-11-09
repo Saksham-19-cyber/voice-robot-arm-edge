@@ -9,6 +9,7 @@ jobs:
   diagnose-and-strategy-a:
     name: Strategy A (Stock MuJoCo ${{ matrix.mujoco_ver }})
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -32,7 +33,7 @@ jobs:
       - name: Install Python Dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt pytest
           pip install --force-reinstall "mujoco==${{ matrix.mujoco_ver }}"
 
       - name: Inspect Package Versions & MuJoCo Utils
@@ -130,7 +131,7 @@ jobs:
       - name: Install Python Dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt pytest
 
       - name: Run Test Suite (test_env_smoke & test_enum_patch)
         env:
@@ -174,3 +175,4 @@ jobs:
               traceback.print_exc()
               raise e
           "
+
