@@ -1,6 +1,7 @@
 # Allowlist of non-benchmark numbers with units appearing in README.md and documentation
 # Format: <number> <unit> # reason
 
+4.38 ms # Evaluation harness step duration cited in BENCHMARKS.md
 3.11 s # Python version parsed with unit in badge or text
 2.0 s # Audio fixture clip duration (sample_2s.wav length)
 2.0s # Audio fixture clip duration

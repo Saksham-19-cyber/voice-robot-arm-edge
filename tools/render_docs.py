@@ -135,6 +135,12 @@ This document records the exact, unrounded measurements produced by benchmark sc
 - **Observation Array Formatting & Flattening:** {step_bd.get('stages', {}).get('obs_flattening_and_conversion_ms', {}).get('median', 0.009):.3f} ms ({step_bd.get('stages', {}).get('obs_flattening_and_conversion_ms', {}).get('pct_of_total', 0.5):.1f}%)
 - **Closure:** Sum of component medians is {step_bd.get('closure', {}).get('sum_of_medians_ms', 1.690):.3f} ms (closure difference: {step_bd.get('closure', {}).get('diff_from_closed_loop_pct', 2.0):.1f}% from closed-loop step, well within 5%).
 
+### Measurement Definitions
+
+To reconcile throughput and step-time figures across benchmark tables:
+- **Closed-Loop Rollout Step (~580 FPS / 1.72 ms/step):** Measured in `results/rollout_fps_audit.json` and `results/step_breakdown.json`. Benchmarks the continuous real-time closed-loop execution loop (environment physics step, observation formatting, and ONNX policy forward pass without episode reset overhead). This reflects the true real-time throughput of the policy loop during execution.
+- **Evaluation Harness Step (~230 FPS / 4.38 ms/step):** Derived from `results/quantization_eval.json` ({quant_eval.get('ONNX_FP32', {}).get('fps', 227.8):.1f} FPS FP32, {quant_eval.get('ONNX_INT8', {}).get('fps', 230.8):.1f} FPS INT8). Benchmarks the full batch test harness across 100 evaluation episodes, which includes per-episode environment resets, deepcopy observation storage, multi-threshold distance evaluations (<=5cm, <=2cm, <=1cm), and per-step metric aggregation overhead.
+
 ---
 
 ## 4. End-to-End Request Latency & Pipeline Stages
@@ -147,9 +153,9 @@ This document records the exact, unrounded measurements produced by benchmark sc
 | **NLU Intent Parsing** | Dual-engine hybrid (Regex + Classifier fallback) | {early_term.get('nlu_parse_ms', {}).get('p50', 3.27):.2f} ms | {early_term.get('nlu_parse_ms', {}).get('mean', 4.19):.2f} ms | {early_term.get('nlu_parse_ms', {}).get('p95', 9.25):.2f} ms |
 | **Rollout + Visual Render** | Early termination ({early_term.get('mean_steps_taken', 13.0):.1f} steps) @ 320x320 | {early_term.get('rollout_and_render_ms', {}).get('p50', 34.9):.1f} ms | {early_term.get('rollout_and_render_ms', {}).get('mean', 37.0):.1f} ms | {early_term.get('rollout_and_render_ms', {}).get('p95', 53.7):.1f} ms |
 | **MP4 Video Encoding** | `imageio-ffmpeg` H.264 (`-movflags +faststart`) | {early_term.get('video_encode_ms', {}).get('p50', 329.3):.1f} ms | {early_term.get('video_encode_ms', {}).get('mean', 330.2):.1f} ms | {early_term.get('video_encode_ms', {}).get('p95', 457.9):.1f} ms |
-| **Total User Wait Time** | End-to-end request latency | **{early_term.get('total_user_wait_ms', {}).get('p50', 2008.5):.1f} ms** | {early_term.get('total_user_wait_ms', {}).get('mean', 2017.8):.1f} ms | {early_term.get('total_user_wait_ms', {}).get('p95', 2687.8):.1f} ms |
+| **Total User Wait Time** | End-to-end request latency (Single Run 5) | **{early_term.get('total_user_wait_ms', {}).get('p50', 2008.5):.1f} ms** | {early_term.get('total_user_wait_ms', {}).get('mean', 2017.8):.1f} ms | {early_term.get('total_user_wait_ms', {}).get('p95', 2687.8):.1f} ms |
 
-- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **{rep_pipe.get('early_termination_wait_p50_ms', {}).get('median', 1597.6):.1f} ms** (range: {rep_pipe.get('early_termination_wait_p50_ms', {}).get('range', '[1220.7, 2008.5]')} ms).
+- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **{rep_pipe.get('early_termination_wait_p50_ms', {}).get('median', 1597.6):.1f} ms** (range: {rep_pipe.get('early_termination_wait_p50_ms', {}).get('range', '[1220.7, 2008.5]')} ms; single-run table above reports Run 5 at 2008.5 ms p50).
 - **Environment State Reuse:** Reusing the environment in `st.session_state` yields **{rep_pipe.get('env_warm_reset_mean_ms', {}).get('median', 1.2):.1f} ms** warm reset (range: {rep_pipe.get('env_warm_reset_mean_ms', {}).get('range', '[0.5, 1.2]')} ms) vs **{rep_pipe.get('env_recreate_mean_ms', {}).get('median', 394.7):.1f} ms** cold recreation (range: {rep_pipe.get('env_recreate_mean_ms', {}).get('range', '[342.6, 817.6]')} ms), yielding a **{rep_pipe.get('speedup_factor', {}).get('median', 672.1):.0f}x speedup** (range: {rep_pipe.get('speedup_factor', {}).get('range', '[289.1, 794.1]')}x).
 
 ---
