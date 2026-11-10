@@ -447,7 +447,7 @@ def plot_success_threshold_sweep():
     ]
 
     fig, ax = plt.subplots(figsize=(7.2, 4.3), dpi=150)
-    rects1 = ax.bar(x - width, base_vals, width, label="Proportional Baseline (k=10)", color="#4C72B0", edgecolor="black", linewidth=0.8)
+    rects1 = ax.bar(x - width, base_vals, width, label="Proportional Baseline (k=3.0)", color="#4C72B0", edgecolor="black", linewidth=0.8)
     rects2 = ax.bar(x, fp32_vals, width, label="ONNX FP32 Actor (281.0 KB)", color="#64B5CD", edgecolor="black", linewidth=0.8)
     rects3 = ax.bar(x + width, int8_vals, width, label="ONNX INT8 Actor (78.5 KB)", color="#55A868", edgecolor="black", linewidth=0.8)
 

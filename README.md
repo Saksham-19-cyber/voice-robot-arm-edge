@@ -11,6 +11,9 @@
 
 A voice-directed robotics system translating spoken English commands into 3D Cartesian coordinates and executing closed-loop kinematic reaching with a goal-conditioned Soft Actor-Critic (SAC) reinforcement learning policy inside MuJoCo physics. The production serving stack runs without PyTorch (`Zero-PyTorch`), serving 8-bit dynamically quantized ONNX models alongside INT8 `faster-whisper` speech recognition under single-threaded CPU execution.
 
+![Streamlit Application Interface](assets/screenshots/after_fix_reach_left.png)
+*(Live Streamlit Community Cloud browser capture instructions are provided in `assets/screenshots/ADD_CLOUD_SCREENSHOT.txt`)*
+
 ---
 
 ## 1. Results at a Glance
@@ -20,9 +23,9 @@ A voice-directed robotics system translating spoken English commands into 3D Car
 | **Actor Model Size** | 281.0 KB (FP32 ONNX) | **78.5 KB** (INT8 ONNX) | **3.58x compression** via post-training dynamic quantization |
 | **Reach Success (<= 5 cm)** | 100.0% (Proportional Baseline) | **100.0%** (SAC Actor) | Zero degradation at default FetchReach-v4 tolerance ($N=100$) |
 | **Reach Success (<= 2 cm)** | 98.0% (Proportional Baseline) | **96.0%** (SAC Actor) | Exact parity with FP32 ONNX (96.0%); mean final distance 1.08 cm |
-| **Reach Success (<= 1 cm)** | 91.0% (Proportional Baseline) | **56.0%** (SAC Actor) | Matches FP32 ONNX (54.0%); baseline error is 0.18 cm |
-| **Policy Latency p50** | 44.4 µs (FP32 ONNX) | **42.6 µs** (INT8 ONNX) | 5-run median diff -6.0 µs (range [-17.2, 16.5] µs spans zero; cause not profiled) |
-| **User Wait Time (Warm)** | 2008.5 ms (Single Run 5) | **1597.6 ms** (5-run median) | Full pipeline on CPU: ASR + NLU + Rollout + H.264 encode |
+| **Reach Success (<= 1 cm)** | 91.0% (Proportional Baseline) | **56.0%** (SAC Actor) | Within 2 percentage points of FP32 ONNX (54.0%); baseline error is 0.18 cm |
+| **Policy Latency p50** | 34.7 µs (FP32 ONNX) | **42.6 µs** (INT8 ONNX) | 5-run median diff -6.0 µs (range [-17.2, 16.5] µs spans zero; cause not profiled) |
+| **User Wait Time (Warm)** | 2008.5 ms (Single Run 5) | **1597.6 ms** (5-run median) | Full pipeline on CPU: ASR (1639.9 ms on Run 5) + NLU + Rollout + H.264 encode |
 | **NLU Accuracy (Dev Set)** | 30.0% (Majority Baseline) | **76.0%** intent / **68.0%** e2e | Dev set ($N=50$, agent-written; parser tuned while inspecting it) |
 
 ---
@@ -33,15 +36,15 @@ A voice-directed robotics system translating spoken English commands into 3D Car
 flowchart TD
     A["🎙️ Spoken Audio (16 kHz WAV)"] --> B["⚡ faster-whisper tiny.en INT8"]
     B -->|"Transcribed Text"| C{"Dual-Engine NLU"}
-    C -->|"Rule Regex"| D["Deterministic Match"]
-    C -->|"Fallback"| E["TF-IDF + Logistic Reg"]
-    D --> F["Workspace Bounds Clipping"]
-    E --> F
-    F -->|"Target Goal g ∈ ℝ³"| G["MuJoCo Sim (FetchReach-v4)"]
-    G <-->|"Observation ot ∈ ℝ¹⁶"| H["ONNX INT8 Actor Policy"]
-    H -->|"Action at ∈ [-1, 1]⁴"| G
-    G -->|"Render Frames"| I["imageio-ffmpeg (H.264 MP4)"]
-    I --> J["🎬 User Interface & Replay"]
+    C -->|"Safety Check"| D["Explicit Stop Priority"]
+    C -->|"Statistical Prediction"| E["Intent Classifier: P >= 0.50"]
+    C -->|"Goal Extraction"| F["Rule Parser: 3D Coordinate Extraction"]
+    F --> G["Workspace Bounds Clipping"]
+    G -->|"Target Goal g ∈ ℝ³"| H["MuJoCo Sim (FetchReach-v4)"]
+    H <-->|"Observation ot ∈ ℝ¹⁶"| I["ONNX INT8 Actor Policy"]
+    I -->|"Action at ∈ [-1, 1]⁴"| H
+    H -->|"Render Frames"| J["imageio-ffmpeg (H.264 MP4)"]
+    J --> K["🎬 User Interface & Replay"]
 ```
 
 ---
@@ -56,7 +59,7 @@ The policy receives a 16-dimensional concatenated vector comprising observation 
 2. **Linear Gripper Velocity (3-d):** End-effector translation rates $(\dot{x}, \dot{y}, \dot{z})$.
 3. **Gripper Finger Positions (2-d):** Lateral position of left and right fingers $(d_1, d_2)$.
 4. **Gripper Finger Velocities (2-d):** Linear velocities of fingers $(\dot{d}_1, \dot{d}_2)$.
-- *Implementation:* `gymnasium_robotics/envs/fetch/reach.py:_get_obs`
+- *Implementation:* `gymnasium_robotics/envs/fetch/fetch_env.py:_get_obs`
 
 The continuous action space is 4-dimensional: $\mathbf{a} \in [-1, 1]^4 = [dx, dy, dz, a_\text{dummy}]$. In `FetchReach-v4`, the parallel jaw fingers are rigidly locked, making the 4th action dimension an unactuated dummy dimension. In multi-stage environments (`FetchPickAndPlace-v4`), this 4th dimension controls gripper open and close.
 - *Implementation:* `src/rl/baseline_controller.py:solve_reach` (parameter `action[3] = 0.0`)
@@ -64,7 +67,7 @@ The continuous action space is 4-dimensional: $\mathbf{a} \in [-1, 1]^4 = [dx, d
 ### Sparse Reward Structure
 The agent receives a binary sparse distance reward at each timestep:
 $$r_t = \begin{cases} 0.0 & \text{if } \|g - s_\text{achieved}\|_2 \le 0.05 \\ -1.0 & \text{if } \|g - s_\text{achieved}\|_2 > 0.05 \end{cases}$$
-- *Implementation:* `gymnasium_robotics/envs/fetch/reach.py:compute_reward` (threshold `0.05` m)
+- *Implementation:* `gymnasium_robotics/envs/fetch/fetch_env.py:compute_reward` (threshold `0.05` m)
 
 ### Soft Actor-Critic (SAC) Objectives
 The policy is trained with the maximum entropy SAC algorithm. The actor maximizes expected return and Shannon entropy $\mathcal{H}$:
@@ -86,15 +89,16 @@ $$\hat{o} = \text{clip}\left(\frac{o - \mu}{\sqrt{\sigma^2 + \epsilon}}, -10.0, 
 <details>
 <summary>🔍 Click to view full SAC training hyperparameters</summary>
 
-| Parameter | Value | Description |
-| :--- | :--- | :--- |
-| **Architecture** | MLP [256, 256] | Two hidden layers, ReLU activations |
-| **Learning Rate** | $1 \times 10^{-3}$ | Adam optimizer across actor and critic |
-| **Discount ($\gamma$)** | 0.95 | FetchReach horizon discount factor |
-| **Target Smoothing ($\tau$)** | 0.005 | Polyak update rate for target networks |
-| **Replay Buffer Size** | $1 \times 10^6$ | Uniform transition capacity |
-| **Batch Size** | 256 | Transitions per gradient step |
-| **HER Goal Strategy** | `future` ($k=4$) | 4 virtual hindsight goals per real transition |
+| Parameter | Value |
+| :--- | :--- |
+| **Architecture** | MLP [256, 256], ReLU |
+| **Learning Rate** | $1 \times 10^{-3}$ |
+| **Discount ($\gamma$)** | 0.95 |
+| **Target Smoothing ($\tau$)** | 0.05 |
+| **Replay Buffer Size** | 50,000 |
+| **Batch Size** | 256 |
+| **HER Goal Strategy** | `future` ($k=4$) |
+| **Target Entropy ($\bar{\mathcal{H}}$)** | -4.0 |
 
 </details>
 
@@ -102,60 +106,60 @@ $$\hat{o} = \text{clip}\left(\frac{o - \mu}{\sqrt{\sigma^2 + \epsilon}}, -10.0, 
 
 ## 4. Quantization & Model Compression
 
-The trained FP32 PyTorch actor is exported to ONNX and compressed via post-training dynamic quantization. Weights are mapped to unsigned 8-bit integers while activations remain in 32-bit floating point during single-threaded INT8 ONNX Runtime inference:
-$$W_q = \text{round}\left(\frac{W}{S}\right) + Z$$
-where $S = \frac{\max(W) - \min(W)}{255}$ is the quantization scale and $Z = \text{round}\left(-\frac{\min(W)}{S}\right)$ is the zero-point offset.
-- *Implementation:* `src/rl/export_onnx.py:quantize_policy_onnx` (calls `onnxruntime.quantization.quantize_dynamic`)
+The trained FP32 PyTorch actor is exported to ONNX and compressed via post-training dynamic quantization using signed 8-bit integers (`QuantType.QInt8`):
+$$W_q = \text{clip}\left(\text{round}\left(\frac{W}{S}\right), -128, 127\right)$$
+where $S = \frac{\max(|W|)}{127}$ represents the symmetric scale factor with zero-point $Z = 0$.
+- *Implementation:* `src/rl/export_onnx.py:quantize_policy_onnx` (parameter `weight_type=QuantType.QInt8`)
 
-The actor model compresses by 3.58x from 281.0 KB (FP32) to 78.5 KB (INT8). Parity evaluation confirms identical 100.0% success at 5 cm and 96.0% at 2 cm across 100 test episodes, with a maximum absolute action difference of 0.042 across 1,000 rollout states (0.114 across random states).
+The actor model compresses by 3.58x from 281.0 KB (FP32) to 78.5 KB (INT8). Parity evaluation confirms identical 100.0% success at 5 cm and 96.0% at 2 cm across 100 test episodes, and 56.0% at 1 cm (within 2 percentage points of FP32 at 54.0%), with a maximum absolute action difference of 0.042 across 1,000 rollout states (0.114 across random states).
 
 ---
 
 ## 5. Control Baseline & Honest Comparison
 
 To establish an analytical control benchmark, a proportional velocity controller was implemented without learning:
-$$a = \text{clip}(k \cdot (g - p_\text{ee}), -1.0, 1.0), \quad a_4 = 0.0$$
-where $k = 10.0 \text{ s}^{-1}$ represents the proportional gain and $p_\text{ee}$ is the Cartesian position of the end-effector.
-- *Implementation:* `src/rl/baseline_controller.py:solve_reach` (gain `k=10.0`)
+$$a = \text{clip}\left(\frac{k \cdot (g - p_\text{ee})}{d_\text{max}}, -1.0, 1.0\right), \quad a_4 = 0.0$$
+where $k = 3.0$ represents the dimensionless proportional gain, $d_\text{max} = 0.05\text{ m}$ is the per-step displacement normalizer, and $p_\text{ee}$ is the Cartesian position of the end-effector.
+- *Implementation:* `src/rl/baseline_controller.py:solve_reach` (parameters `k=3.0`, `max_step=0.05`)
 
 ### Performance Comparison
 - **Proportional Controller:** Achieves 100.0% success at <= 5 cm, 98.0% at <= 2 cm, and **91.0% at <= 1 cm** with mean final distance **0.18 cm**.
-- **SAC INT8 Policy:** Achieves 100.0% success at <= 5 cm, 96.0% at <= 2 cm, and **56.0% at <= 1 cm** with mean final distance **1.08 cm**.
+- **SAC INT8 Policy:** Achieves 100.0% success at <= 5 cm, 96.0% at <= 2 cm, and **56.0% at <= 1 cm** (within 2 percentage points of FP32 ONNX at 54.0%) with mean final distance **1.08 cm**.
 
-The proportional controller attains higher sub-centimeter accuracy because it continuously drives an unconstrained velocity vector toward zero Cartesian error. The SAC policy was trained against a sparse reward where any distance $\le 5\text{ cm}$ yields maximum return ($0.0$), leaving the neural network with zero gradient pressure to correct residual millimeter offsets.
+The proportional controller attains higher sub-centimeter accuracy because it continuously drives an unconstrained velocity vector toward zero Cartesian error. The SAC policy was trained against a sparse reward where any distance $\le 5\text{ cm}$ yields maximum return ($0.0$), leaving the neural network with zero gradient pressure to correct residual millimeter offsets (hypothesized explanation).
 
 ---
 
 ## 6. Speech Recognition & Natural Language Understanding
 
-Voice command processing combines an acoustic frontend, energy silence gating, deterministic regex extraction, and statistical intent classification.
+Voice command processing combines an acoustic frontend, energy silence gating, deterministic coordinate extraction, and statistical intent classification.
 
 ### Audio RMS Silence Guard
 Incoming audio is inspected to avoid running inference on ambient silence:
 $$\text{RMS} = \sqrt{\frac{1}{N} \sum_{i=1}^N x_i^2}$$
-If $\text{RMS} \le 0.005$, the audio is classified as silent and transcription is skipped.
-- *Implementation:* `src/asr/transcriber.py:is_silence` (threshold `0.005`)
+If $\text{RMS} < 0.003$, the audio is classified as silent and transcription is skipped.
+- *Implementation:* `src/asr/transcriber.py:analyze_audio_source` and `src/asr/transcriber.py:WhisperASR:transcribe` (parameter `min_rms=0.003`)
 
 ### Transcribe vs Pipeline Latency
-In microbenchmarks, isolated `transcribe()` of a 2.0s audio clip on 1 thread takes **992.8 ms p50** (1730.4 ms on 4 threads; `results/asr_ablation.json`). Inside the live application, the full ASR stage takes **1639.9 ms p50** (mean 1645.2 ms, p95 2169.6 ms; `results/pipeline_latency.json`), which includes audio decoding, RMS check, VAD segmentation, and segment text collation.
+In microbenchmarks, isolated `transcribe()` of a 2.0s audio clip on 1 thread takes **992.8 ms p50** (1730.4 ms on 4 threads; `results/asr_ablation.json`). Inside the live application, the full ASR stage takes **1639.9 ms p50** (mean 1645.2 ms, p95 2169.6 ms; `results/pipeline_latency.json`; difference not profiled), with total warm user wait time of **2008.5 ms p50** on that run (5-run median total wait time is 1597.6 ms).
 
 ### Workspace Coordinate Bounds
 Extracted coordinates are clamped to ensure reachable target goals:
 $$g_\text{clamped} = \text{clip}(g, [1.15, 0.60, 0.40], [1.50, 0.90, 0.70])$$
 - *Implementation:* `src/rl/env_utils.py:clip_to_workspace` (bounds `WORKSPACE_BOUNDS`)
 
-### NLU Dual-Engine Accuracy
-Deterministic regex rules are evaluated first. If no rule matches, a TF-IDF vectorizer and Multinomial Logistic Regression model classify intent. On the development set ($N=50$, agent-written; parser tuned while inspecting it), intent accuracy is 76.0% (Wilson CI [62.6, 85.7]%) and end-to-end accuracy is 68.0% (Wilson CI [54.2, 79.2]%). On the synthetic template set ($N=80$), both metrics reach 100.0%. The human held-out set (`tests/nlu_heldout_human.json`) is unmeasured ($N=0$) and frozen for evaluation on git tag `nlu-frozen-v2`.
+### NLU Dual-Engine Architecture & Accuracy
+Production uses the TF-IDF and Logistic Regression classifier for intent prediction (confidence $\ge 0.50$), the rule engine for 3D goal coordinate extraction, and an explicit rule-based stop command always wins unconditionally for safety. On the development set ($N=50$, agent-written; parser tuned while inspecting it), intent accuracy is 76.0% (Wilson CI [62.6, 85.7]%) and end-to-end accuracy is 68.0% (Wilson CI [54.2, 79.2]%). On the synthetic template set ($N=80$), both metrics reach 100.0%. The human held-out set (`tests/nlu_heldout_human.json`) is unmeasured ($N=0$) and frozen for evaluation on git tag `nlu-frozen-v2`.
 
 ---
 
 ## 7. Results with Graphs
 
 ![Task Success Across Convergence Thresholds](assets/figures/success_threshold_sweep.png)
-*Figure 1: Task success rate across convergence thresholds (<=5cm, <=2cm, <=1cm) across $N=100$ random episodes. Proportional baseline maintains 91.0% at 1 cm; INT8 and FP32 policies match closely at 56.0% and 54.0%.*
+*Figure 1: Task success rate across convergence thresholds (<=5cm, <=2cm, <=1cm) across $N=100$ random episodes. Proportional baseline maintains 91.0% at 1 cm; INT8 is 56.0%, within 2 percentage points of FP32 at 54.0%.*
 
 ![Policy Latency Distribution](assets/figures/policy_latency.png)
-*Figure 2: Single-thread pinned actor latency across 5 repeated benchmark runs (20,000 iterations per run). FP32 median is 44.4 µs versus INT8 median 42.6 µs (difference range [-17.2, 16.5] µs spans zero; 3.58x smaller; no measurable latency difference on this CPU; cause not profiled).*
+*Figure 2: Single-thread pinned actor latency across 5 repeated benchmark runs (20,000 iterations per run). FP32 median is 34.7 µs versus INT8 median 42.6 µs (difference range [-17.2, 16.5] µs spans zero; -6.0 µs median difference; 3.58x smaller; no measurable latency difference on this CPU; cause not profiled).*
 
 ![NLU Intent Confusion Matrix](assets/figures/nlu_confusion_matrix.png)
 *Figure 3: Confusion matrix for NLU intent parsing on the development set ($N=50$, agent-written). Hybrid parser achieves 76.0% intent accuracy with strict emergency stop precedence.*
@@ -165,9 +169,9 @@ Deterministic regex rules are evaluated first. If no rule matches, a TF-IDF vect
 
 ### Measurement Equations
 Empirical metrics throughout this repository are computed using standard statistical definitions:
-- **Percentiles:** The $k$-th percentile of sorted sample $X_{(1)} \le X_{(2)} \le \dots \le X_{(N)}$ is computed via rank nearest index:
-$$p_k = X_{\lceil (k/100) \cdot N \rceil}$$
-- **Bootstrap 95% Confidence Interval:** Computed using the non-parametric percentile bootstrap method with $B = 10000$ resamples:
+- **Percentiles:** Linearly interpolated percentiles (matching NumPy's default `method='linear'`):
+$$p_q = X_{(\lfloor i \rfloor)} + (i - \lfloor i \rfloor) \cdot \left(X_{(\lfloor i \rfloor + 1)} - X_{(\lfloor i \rfloor)}\right), \quad i = \frac{q}{100} \cdot (N - 1)$$
+- **Bootstrap 95% Confidence Interval:** Computed using the non-parametric percentile bootstrap method with $B = 2000$ resamples:
 $$\text{CI}_{95\%} = [\theta^*_{0.025}, \theta^*_{0.975}]$$
 - **Wilson Score Interval:** Confidence intervals for binomial success proportions $\hat{p} = \frac{x}{n}$ are evaluated at confidence $z = 1.96$:
 $$w = \frac{\hat{p} + \frac{z^2}{2n} \pm z \sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1 + \frac{z^2}{n}}$$
@@ -198,7 +202,7 @@ $$T_\text{step} = T_\text{obs} + T_\text{policy} + T_\text{physics} + T_\text{wr
 | Run 3 | 34.7 µs | 38.6 µs | -3.9 µs |
 | Run 4 | 25.4 µs | 42.6 µs | -17.2 µs |
 | Run 5 | 26.6 µs | 38.4 µs | -11.8 µs |
-| **5-Run Median** | **44.4 µs** | **42.6 µs** | **-6.0 µs (range [-17.2, 16.5] µs spans zero)** |
+| **5-Run Median** | **34.7 µs** | **42.6 µs** | **-6.0 µs (range [-17.2, 16.5] µs spans zero)** |
 
 ### Table C: Closed-Loop Simulation Step Duration Breakdown
 *Measured on Windows laptop, Intel Core i5-1235U (5 runs of 500 iterations). Source: `results/step_breakdown.json`*
@@ -232,25 +236,24 @@ $$T_\text{step} = T_\text{obs} + T_\text{policy} + T_\text{physics} + T_\text{wr
 | **Development Set** | Tuned on dev set | $N=50$ | 60.0% | 70.0% | **76.0%** | **68.0%** |
 | **Human Held-Out Set** | Unbenchmarked | $N=0$ | not measured | not measured | not measured | not measured |
 
-*Stop-list ablation on dev set ($N=50$): base 5 stop phrases gave 66.0% intent / 58.0% e2e; expanded 25 phrases contributed a +10.0 pp absolute gain to 76.0% intent / 68.0% e2e.*
+*Stop-list ablation on dev set ($N=50$, effect on the development set, which was written after inspecting those failures): base 5 stop phrases gave 66.0% intent / 58.0% e2e; expanded 25 phrases reached 76.0% intent / 68.0% e2e.*
 
 ---
 
 ## 9. Serving & Deployment Architecture
 
 ### Zero-PyTorch Edge Serving
-Production serving completely excludes PyTorch from dependencies. Neural execution is handled exclusively by ONNX Runtime (`onnxruntime==1.20.1`) and acoustic transcription by `faster-whisper` (`faster-whisper==1.1.1` backed by CTranslate2), reducing serving memory footprint.
+Production serving completely excludes PyTorch from dependencies. Neural execution is handled exclusively by ONNX Runtime (`onnxruntime==1.29.0`) and acoustic transcription by `faster-whisper` (`faster-whisper==1.2.1` backed by CTranslate2).
 
-### Fresh Environment Allocation on Cloud (OSMesa)
-On Streamlit Community Cloud, offscreen graphics rendering runs via OSMesa (`MUJOCO_GL=osmesa`). Reusing a single simulation environment across Streamlit reruns causes OpenGL context leakage across worker threads, resulting in blank black video frames. To guarantee visual integrity, the application creates a fresh environment per user request and strictly destroys it (`env.close()`) in a `try/finally` block.
+### Fresh Environment Allocation per Request
+On Streamlit Community Cloud, offscreen graphics rendering runs via OSMesa (`MUJOCO_GL=osmesa`). Reusing a single simulation environment across Streamlit reruns causes OpenGL context leakage across worker threads, resulting in blank black video frames. To guarantee visual integrity, the application creates a fresh environment per user request via `run_onnx_rollout(..., env=None)` and closes both renderer and environment in a `try/finally` block.
 
 ### Linux pybind11 Enum Compatibility Fix
-In `gymnasium-robotics`, joint type checks evaluate equality against MuJoCo enums:
+In MuJoCo's Linux wheels, `model.jnt_type` returns NumPy scalar integers (`numpy.int32`). Pybind11 exposes C++ enums (`mujoco.mjtJoint.mjJNT_HINGE`, `mjJNT_SLIDE`) with custom equality operators where `numpy.int32(3) == HINGE` evaluates to `True`, but `HINGE == numpy.int32(3)` evaluates to `False`. When evaluating tuple membership:
 ```python
-# Fails silently under Linux pybind11 when comparing enum to np.int32:
-if model.jnt_type[joint_id] == mujoco.mjtJoint.mjJNT_FREE: ...
+raw_type in (HINGE, SLIDE)
 ```
-Because pybind11 Linux builds expose PyCapsule enum objects that fail equality against NumPy scalar int32 types, `src/rl/env_utils.py` monkey-patches `_safe_get_joint_qpos` and `_safe_set_joint_qpos` by coercing types to native Python integers (`int(model.jnt_type[joint_id]) == int(mujoco.mjtJoint.mjJNT_FREE)`).
+Python iterates through the tuple and checks `item == raw_type` (e.g. `HINGE == raw_type`), which dispatches to pybind11's enum `__eq__` and fails with `ValueError: 'np.int32(3)' is not a valid joint type`. To fix this asymmetry, `src/rl/env_utils.py` monkey-patches `_safe_get_joint_qpos` and `_safe_set_joint_qpos` by coercing NumPy scalar integers to standard Python integers (`int(model.jnt_type[joint_id]) == int(mujoco.mjtJoint.mjJNT_FREE)`).
 
 ---
 
