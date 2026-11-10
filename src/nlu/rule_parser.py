@@ -41,22 +41,26 @@ DIRECTION_VECTORS = {
 
 
 def extract_distance(text: str) -> Optional[float]:
-
-
-
-
-
+    """Extract distance from command text. Supports mm, cm, m, inches, feet."""
     cm_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:cm|centimeters?)\b', text, re.IGNORECASE)
     if cm_match:
         return float(cm_match.group(1)) / 100.0
 
-    m_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:m|meters?)\b', text, re.IGNORECASE)
-    if m_match:
-        return float(m_match.group(1))
-
     mm_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:mm|millimeters?)\b', text, re.IGNORECASE)
     if mm_match:
         return float(mm_match.group(1)) / 1000.0
+
+    inch_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:inches|inch|in)\b', text, re.IGNORECASE)
+    if inch_match:
+        return float(inch_match.group(1)) * 0.0254
+
+    ft_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:feet|foot|ft)\b', text, re.IGNORECASE)
+    if ft_match:
+        return float(ft_match.group(1)) * 0.3048
+
+    m_match = re.search(r'(\d+(?:\.\d+)?)\s*(?:m|meters?)\b', text, re.IGNORECASE)
+    if m_match:
+        return float(m_match.group(1))
 
     return None
 
@@ -70,7 +74,12 @@ STOP_PHRASES = [
     "power off",
     "don't move",
     "dont move",
+    "do not move",
     "stay put",
+    "stay where you are",
+    "stay right there",
+    "stay still",
+    "hold still",
     "hold your position",
     "hold position",
     "stand by",
@@ -85,15 +94,15 @@ STOP_PHRASES = [
     "freeze",
     "abort",
     "cease",
-    "stay",
     "pause",
     "cancel",
 ]
 
-GRASP_CUES = ["grab", "grasp", "pick up", "pick", "release", "drop", "snatch", "clasp"]
+GRASP_CUES = ["grab", "grasp", "pick up", "pick", "release", "snatch", "clasp"]
 OBJECT_CUES = [
     "block", "cube", "object", "item", "piece", "cylinder", "toy", "box",
-    "nut", "can", "bottle", "tool", "pencil", "cardboard"
+    "nut", "soda can", "tin can", "bottle", "tool", "pencil", "cardboard",
+    "ball", "part"
 ]
 
 class RuleBasedParser:
@@ -105,7 +114,7 @@ class RuleBasedParser:
         self.object_cues = OBJECT_CUES
         self.reach_words = {
             "reach", "touch", "go", "move", "navigate", "extend", "point",
-            "lift", "raise", "shift", "nudge", "slide"
+            "lift", "raise", "shift", "nudge", "slide", "drop", "lower"
         }
 
     def parse(self, text: str, current_gripper_pos: Optional[np.ndarray] = None) -> IntentResult:
@@ -122,7 +131,25 @@ class RuleBasedParser:
                 raw_text=raw_text,
             )
 
-        # 1. Check for Stop Commands first
+        # 1. Check for Conflicting / Ambiguous Commands (e.g. "cancel that and move left")
+        is_conflicting = (
+            bool(re.search(r'\b(cancel|abort|stop|halt|freeze)\b.*?\b(and|then|but|instead|or)\b.*?\b(move|reach|go|lift|raise|shift|slide|drop|left|right|up|down|forward|back)\b', cleaned))
+            or bool(re.search(r'\b(move|reach|go|lift|raise|shift|slide)\b.*?\b(and|then|but|instead|or)\b.*?\b(stop|halt|freeze|cancel|abort)\b', cleaned))
+            or (bool(re.search(r'\bcancel\s+that\b', cleaned)) and bool(re.search(r'\b(move|reach|go|left|right|up|down|forward|back)\b', cleaned)))
+        )
+        if is_conflicting:
+            return IntentResult(
+                intent="unknown",
+                target="ambiguous",
+                confidence=0.0,
+                goal_xyz=None,
+                clarification_needed=True,
+                message=f"Conflicting commands detected in '{raw_text}'. Please provide a single clear instruction.",
+                raw_text=raw_text,
+                metadata={"conflicting": True},
+            )
+
+        # 2. Check for Stop Commands first
         for sp in self.stop_phrases:
             pattern = rf"\b{re.escape(sp)}\b" if " " in sp else rf"\b{sp}\b"
             if re.search(pattern, cleaned):
@@ -137,10 +164,10 @@ class RuleBasedParser:
                     raw_text=raw_text,
                 )
 
-        # 2. Check for Manipulation (Pick and Place) Refusal
+        # 3. Check for Manipulation (Pick and Place) Refusal
         has_grasp_cue = any(re.search(rf"\b{re.escape(gc)}\b", cleaned) for gc in self.grasp_cues)
         has_object_cue = any(re.search(rf"\b{re.escape(oc)}\b", cleaned) for oc in self.object_cues)
-        has_ambiguous_manip = any(re.search(rf"\b{w}\b", cleaned) for w in ["lift", "take", "hold"])
+        has_ambiguous_manip = any(re.search(rf"\b{w}\b", cleaned) for w in ["lift", "take", "hold", "drop", "retrieve", "fetch", "collect"])
 
         is_manipulation = has_grasp_cue or (has_ambiguous_manip and has_object_cue)
 
@@ -156,7 +183,7 @@ class RuleBasedParser:
                 metadata={"supported": False, "requires_gripper": True},
             )
 
-        # 3. Check for Reach / Navigation Commands
+        # 4. Check for Reach / Navigation Commands
         is_reach = any(re.search(rf"\b{rw}\b", cleaned) for rw in self.reach_words)
 
         detected_directions = []
@@ -167,6 +194,10 @@ class RuleBasedParser:
         # If lift or raise is used without a specific direction, infer upward
         if not detected_directions and any(re.search(rf"\b{w}\b", cleaned) for w in ["lift", "raise"]):
             detected_directions.append(("up", DIRECTION_VECTORS["up"]))
+
+        # If drop or lower is used without a specific direction, infer downward
+        if not detected_directions and any(re.search(rf"\b{w}\b", cleaned) for w in ["drop", "lower"]):
+            detected_directions.append(("down", DIRECTION_VECTORS["down"]))
 
         detected_anchor = None
         for anchor_name in ANCHORS:
@@ -186,7 +217,6 @@ class RuleBasedParser:
 
         intent = "reach"
 
-
         base_origin = current_gripper_pos.copy() if current_gripper_pos is not None else WORKSPACE_CENTER.copy()
         explicit_dist = extract_distance(cleaned)
 
@@ -198,15 +228,21 @@ class RuleBasedParser:
             offset = np.zeros(3, dtype=np.float32)
             for word, vec in detected_directions:
                 if explicit_dist is not None:
-
                     unit_v = vec / (np.linalg.norm(vec) + 1e-8)
                     offset += unit_v * explicit_dist
                 else:
                     offset += vec
             goal_pos = base_origin + offset
         else:
-            target_name = "center"
-            goal_pos = WORKSPACE_CENTER.copy()
+            return IntentResult(
+                intent="reach",
+                target="unspecified",
+                goal_xyz=None,
+                confidence=0.5,
+                clarification_needed=True,
+                message=f"I understood you want to move, but no destination or direction was recognized in '{raw_text}'. Please specify where to move.",
+                raw_text=raw_text,
+            )
 
 
         clipped_goal = clip_to_workspace(goal_pos)

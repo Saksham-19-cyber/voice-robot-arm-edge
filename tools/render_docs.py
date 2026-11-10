@@ -178,7 +178,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
 - **Without Stop-List Expansion:** Hybrid Intent: 66.0% (Wilson CI: [52.2%, 77.6%]), End-to-End: 58.0% (Wilson CI: [44.2%, 70.6%])
 - **With Stop-List Expansion (25 phrases):** Hybrid Intent: 76.0% (Wilson CI: [62.6%, 85.7%]), End-to-End: 68.0% (Wilson CI: [54.2%, 79.2%])
 - **Effect:** Effect of stop list on development set: contributed +10.0 pp absolute accuracy gain to both intent and end-to-end metrics on the development set.
-- **Frozen Protocol:** The parser was frozen at git commit `{nlu_det.get('nlu_frozen_v1_commit', 'aa35fd4')[:7]}` (tag `nlu-frozen-v1`). Future human evaluation (`tests/nlu_heldout_human.json`) must be evaluated exactly once on this tag without further tuning.
+- **Frozen Protocol:** Initial parser baseline frozen at tag `nlu-frozen-v1`. Following audit pass 3 fixes (resolving regression probes, unit conversions, stop priority, and goal invention avoidance), the updated parser is tagged as `nlu-frozen-v2`. The human held-out set (`tests/nlu_heldout_human.json`) must be evaluated once on tag `nlu-frozen-v2` with no tuning afterwards.
 
 ---
 

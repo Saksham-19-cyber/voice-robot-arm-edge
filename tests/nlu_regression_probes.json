@@ -1,0 +1,215 @@
+[
+  {
+    "text": "drop the arm down 5 cm",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, 0.0, -0.05],
+    "description": "Probe 1: drop + direction down + distance 5 cm -> reach downward"
+  },
+  {
+    "text": "can you lift your arm up 10 cm",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, 0.0, 0.10],
+    "description": "Probe 2: modal polite 'can you' + lift up 10 cm -> reach upward, not refused as pick"
+  },
+  {
+    "text": "move 5 inches to the left",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, 0.127, 0.0],
+    "description": "Probe 3: unit 'inches' parsed as 0.0254 m (5 in = 0.127 m)"
+  },
+  {
+    "text": "move left and stay there",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_direction": "left",
+    "description": "Probe 4: 'stay there' is an adverbial qualifier; intent is reach left"
+  },
+  {
+    "text": "don't move left",
+    "expected_intent": "stop",
+    "expected_clarification": false,
+    "description": "Probe 5: negative motion command -> stop; classifier cannot override explicit stop"
+  },
+  {
+    "text": "cancel that and move left",
+    "expected_intent": "unknown",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Probe 6: conflicting cancel and motion commands -> clarification required, no rollout"
+  },
+  {
+    "text": "drop the gripper 10 cm",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, 0.0, -0.10],
+    "description": "Drop without object cue infers downward motion"
+  },
+  {
+    "text": "lower the arm by 8 cm",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, 0.0, -0.08],
+    "description": "Lower with distance moves downward"
+  },
+  {
+    "text": "lift the arm 2 inches",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, 0.0, 0.0508],
+    "description": "Lift with inches moves upward"
+  },
+  {
+    "text": "move 4 inches forward",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.1016, 0.0, 0.0],
+    "description": "Unit 'inches' forward within workspace bounds (4 in = 0.1016 m)"
+  },
+  {
+    "text": "move 1 foot forward",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_was_clipped": true,
+    "expected_goal_xyz": [1.50, 0.75, 0.53],
+    "description": "Unit 'foot' parsed as 0.3048 m, clipped to workspace maximum x (1.50)"
+  },
+  {
+    "text": "can you move forward 3 cm",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.03, 0.0, 0.0],
+    "description": "Polite request with forward motion and cm"
+  },
+  {
+    "text": "can you please reach right",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_direction": "right",
+    "description": "Polite modal request with rightward reach"
+  },
+  {
+    "text": "shift arm 6 inches up",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, 0.0, 0.1524],
+    "description": "Shift arm up by 6 inches"
+  },
+  {
+    "text": "reach right and stay there",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_direction": "right",
+    "description": "Reach right with 'stay there' phrasing"
+  },
+  {
+    "text": "go up and hold there",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_direction": "up",
+    "description": "Go up with 'hold there' phrasing"
+  },
+  {
+    "text": "do not move forward",
+    "expected_intent": "stop",
+    "expected_clarification": false,
+    "description": "Negative command: do not move forward"
+  },
+  {
+    "text": "dont move right",
+    "expected_intent": "stop",
+    "expected_clarification": false,
+    "description": "Negative command: dont move right"
+  },
+  {
+    "text": "abort that and reach up",
+    "expected_intent": "unknown",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Conflicting abort and motion command"
+  },
+  {
+    "text": "stop the arm and go down",
+    "expected_intent": "unknown",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Conflicting stop and motion command"
+  },
+  {
+    "text": "cancel command and move right",
+    "expected_intent": "unknown",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Conflicting cancel and motion command"
+  },
+  {
+    "text": "just move",
+    "expected_intent": "reach",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Unrecognized/unspecified reach target requires clarification, does not invent center"
+  },
+  {
+    "text": "go somewhere",
+    "expected_intent": "reach",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Unspecified destination requires clarification"
+  },
+  {
+    "text": "drop the red block",
+    "expected_intent": "pick",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Manipulation refusal when drop is used with object cue"
+  },
+  {
+    "text": "drop the cube on the table",
+    "expected_intent": "pick",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Drop cube refused as pick/place manipulation"
+  },
+  {
+    "text": "can you grab the cylinder",
+    "expected_intent": "pick",
+    "expected_clarification": true,
+    "expected_goal_null": true,
+    "description": "Polite modal grasp refused as manipulation"
+  },
+  {
+    "text": "stay put",
+    "expected_intent": "stop",
+    "expected_clarification": false,
+    "description": "Stop command: stay put"
+  },
+  {
+    "text": "stay right there",
+    "expected_intent": "stop",
+    "expected_clarification": false,
+    "description": "Stop command: stay right there"
+  },
+  {
+    "text": "emergency stop now",
+    "expected_intent": "stop",
+    "expected_clarification": false,
+    "description": "Stop command: emergency stop now"
+  },
+  {
+    "text": "move 25 millimeters to the left",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, 0.025, 0.0],
+    "description": "Unit 'millimeters' parsed as 0.001 m (25 mm = 0.025 m)"
+  },
+  {
+    "text": "slide 4 cm to the right",
+    "expected_intent": "reach",
+    "expected_clarification": false,
+    "expected_goal_delta": [0.0, -0.04, 0.0],
+    "description": "Slide action verb with 4 cm right"
+  }
+]
+

@@ -187,3 +187,44 @@ def test_nlu_regression_known_failures(parser):
     res = parser.parse("cut power")
     assert res.intent == "stop", f"Expected stop but got {res.intent}"
     assert not res.clarification_needed
+
+
+def test_nlu_regression_probes(parser):
+    """Test the regression probes suite (tests/nlu_regression_probes.json)."""
+    import json
+    probes_path = "tests/nlu_regression_probes.json"
+    assert os.path.exists(probes_path)
+    with open(probes_path, "r", encoding="utf-8") as f:
+        probes = json.load(f)
+
+    assert len(probes) >= 26  # 6 original probes + at least 20 similar ones
+
+    for p in probes:
+        text = p["text"]
+        res = parser.parse(text)
+        assert res.intent == p["expected_intent"], (
+            f"Probe '{text}' failed: expected intent {p['expected_intent']}, got {res.intent} ({p.get('description')})"
+        )
+        assert res.clarification_needed == p["expected_clarification"], (
+            f"Probe '{text}' failed: expected clarification {p['expected_clarification']}, got {res.clarification_needed}"
+        )
+        if p.get("expected_goal_null"):
+            assert res.goal_xyz is None, f"Probe '{text}' expected goal_xyz=None, got {res.goal_xyz}"
+        if "expected_goal_xyz" in p:
+            assert np.allclose(res.goal_xyz, p["expected_goal_xyz"], atol=0.01), (
+                f"Probe '{text}' expected goal_xyz {p['expected_goal_xyz']}, got {res.goal_xyz}"
+            )
+        if "expected_was_clipped" in p:
+            assert res.metadata.get("was_clipped") == p["expected_was_clipped"], (
+                f"Probe '{text}' expected was_clipped={p['expected_was_clipped']}, got {res.metadata.get('was_clipped')}"
+            )
+        if "expected_goal_delta" in p:
+            expected_delta = np.array(p["expected_goal_delta"])
+            actual_delta = np.array(res.goal_xyz) - WORKSPACE_CENTER
+            assert np.allclose(actual_delta, expected_delta, atol=0.01), (
+                f"Probe '{text}' expected delta {expected_delta}, got {actual_delta}"
+            )
+        if "expected_direction" in p:
+            assert p["expected_direction"] in res.target, (
+                f"Probe '{text}' expected direction {p['expected_direction']} in target {res.target}"
+            )
