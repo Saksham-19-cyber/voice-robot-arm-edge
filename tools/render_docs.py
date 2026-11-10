@@ -191,7 +191,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
   - y: `[{goal_range.get('training_range', {}).get('bounds', {}).get('y', [0.5991, 0.8991])[0]:.4f}, {goal_range.get('training_range', {}).get('bounds', {}).get('y', [0.5991, 0.8991])[1]:.4f}]`
   - z: `[{goal_range.get('training_range', {}).get('bounds', {}).get('z', [0.3847, 0.6847])[0]:.4f}, {goal_range.get('training_range', {}).get('bounds', {}).get('z', [0.3847, 0.6847])[1]:.4f}]`
 - **Out-of-Range NLU Goals Found:** {goal_range.get('out_of_range_count', 12)} commands produce coordinates beyond the environment training bounds prior to clipping.
-- **NLU Goal Closed-Loop Success Rate:** **{nlu_goal.get('success_rate_summary', {}).get('int8_first_reached_within_5cm', 1.0) * 100:.1f}%** across all 30 goal categories (mean steps to goal: {nlu_goal.get('overall_metrics', {}).get('int8', {}).get('mean_steps_to_goal', 2.97):.2f}, mean final distance: {nlu_goal.get('overall_metrics', {}).get('int8', {}).get('mean_final_distance_cm', 1.08):.2f} cm).
+- **NLU Goal Closed-Loop Success Rate:** **{nlu_goal.get('success_rate_summary', {}).get('int8_first_reached_within_5cm', 1.0) * 100:.1f}%** across all {len(nlu_goal.get('goals', {})) or 33} goal categories (mean steps to goal: {nlu_goal.get('overall_metrics', {}).get('int8', {}).get('mean_steps_to_goal', 2.97):.2f}, mean final distance: {nlu_goal.get('overall_metrics', {}).get('int8', {}).get('mean_final_distance_cm', 1.08):.2f} cm).
 
 ---
 

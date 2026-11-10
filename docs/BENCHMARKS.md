@@ -122,7 +122,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
   - y: `[0.5991, 0.8991]`
   - z: `[0.3847, 0.6847]`
 - **Out-of-Range NLU Goals Found:** 12 commands produce coordinates beyond the environment training bounds prior to clipping.
-- **NLU Goal Closed-Loop Success Rate:** **100.0%** across all 30 goal categories (mean steps to goal: 2.97, mean final distance: 1.08 cm).
+- **NLU Goal Closed-Loop Success Rate:** **100.0%** across all 33 goal categories (mean steps to goal: 2.97, mean final distance: 1.08 cm).
 
 ---
 

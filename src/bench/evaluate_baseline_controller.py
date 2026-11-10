@@ -141,17 +141,22 @@ def evaluate_baseline():
             "n_episodes": 100,
             "success_rate_first_reached_within_5cm": round(random_first_reached / 100.0, 4),
             "success_rate_final_step": round(random_final_success / 100.0, 4),
+            "success_rate_final_within_5cm": round(sum(1 for d in random_final_dists if d <= 0.05) / 100.0, 4),
+            "success_rate_final_within_2cm": round(sum(1 for d in random_final_dists if d <= 0.02) / 100.0, 4),
+            "success_rate_final_within_1cm": round(sum(1 for d in random_final_dists if d <= 0.01) / 100.0, 4),
             "mean_steps_to_goal": round(float(np.mean(random_steps_to_goal)), 2),
             "mean_final_distance_m": round(float(np.mean(random_final_dists)), 4),
+            "mean_final_distance_cm": round(float(np.mean(random_final_dists)) * 100.0, 2),
             "max_final_distance_m": round(float(np.max(random_final_dists)), 4),
         },
-        "nlu_goals_eval_600_episodes": {
+        f"nlu_goals_eval_{total_nlu_episodes}_episodes": {
             "n_episodes": total_nlu_episodes,
             "n_goal_categories": len(nlu_goals_data),
             "success_rate_first_reached_within_5cm": round(nlu_first_reached / total_nlu_episodes, 4),
             "success_rate_final_step": round(nlu_final_success / total_nlu_episodes, 4),
             "mean_steps_to_goal": round(float(np.mean(nlu_steps_to_goal)), 2),
             "mean_final_distance_m": round(float(np.mean(nlu_final_dists)), 4),
+            "mean_final_distance_cm": round(float(np.mean(nlu_final_dists)) * 100.0, 2),
             "max_final_distance_m": round(float(np.max(nlu_final_dists)), 4),
         },
         "comparison_with_learned_policy": {
@@ -161,10 +166,15 @@ def evaluate_baseline():
             "learned_policy_final_distance_m": 0.0101,
             "baseline_final_distance_m": round(float(np.mean(random_final_dists)), 4),
             "finding": (
-                "Because FetchReach-v4 is a kinematic positioning task without obstacles, a simple proportional "
-                "controller achieves 100% success rate. The learned SAC policy matches this 100% success rate while "
-                "reaching the goal in fewer steps (mean ~3.0 steps with early termination vs ~4.2 steps for baseline) "
-                "and with lower steady-state error (1.01 cm vs 1.25 cm)."
+                f"Because FetchReach-v4 is a kinematic positioning task without obstacles, a simple proportional "
+                f"controller achieves {round(random_first_reached / 100.0 * 100, 1)}% success (mean steps "
+                f"{round(float(np.mean(random_steps_to_goal)), 2)}, mean final distance "
+                f"{round(float(np.mean(random_final_dists)) * 100, 2)} cm) across 100 episodes on random goals, and "
+                f"{round(nlu_first_reached / total_nlu_episodes * 100, 1)}% success (mean steps "
+                f"{round(float(np.mean(nlu_steps_to_goal)), 2)}, mean final distance "
+                f"{round(float(np.mean(nlu_final_dists)) * 100, 2)} cm) across {total_nlu_episodes} episodes on NLU goals. "
+                f"The learned SAC policy matches this 100% success rate while reaching the goal in comparable steps "
+                f"(mean ~3.0 steps) without manual gain tuning."
             )
         }
     }
