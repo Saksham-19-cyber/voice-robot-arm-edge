@@ -234,12 +234,12 @@ def main():
             "gl_backend": "osmesa",
             "server_baseline_rss_mb": base_mem["rss_mb"],
             "single_session": {
-                "condition": "1 session running 3 presets sequentially (Reach Left, Right, Up) with faster-whisper int8 loaded",
+                "condition": "1 session running 3 presets sequentially + 1 real transcription with faster-whisper int8 loaded",
                 "peak_rss_mb": mem1["peak_rss_mb"],
                 "peak_working_set_mb": mem1["peak_wset_mb"],
             },
             "three_concurrent_sessions": {
-                "condition": "3 concurrent sessions simultaneously running 3 presets with faster-whisper int8 loaded",
+                "condition": "3 concurrent sessions simultaneously running 3 presets + real transcription with faster-whisper int8 loaded",
                 "peak_rss_mb": mem3["peak_rss_mb"],
                 "peak_working_set_mb": mem3["peak_wset_mb"],
             },
@@ -247,11 +247,11 @@ def main():
         }
 
         os.makedirs("results", exist_ok=True)
-        out_path = "results/streamlit_memory_v3.json"
+        out_path = "results/streamlit_memory_v4.json"
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(res, f, indent=2)
 
-        print("\n=== FINAL MEMORY RESULTS (results/streamlit_memory_v3.json) ===")
+        print("\n=== FINAL MEMORY RESULTS (results/streamlit_memory_v4.json) ===")
         print(json.dumps(res, indent=2), flush=True)
         return res
 

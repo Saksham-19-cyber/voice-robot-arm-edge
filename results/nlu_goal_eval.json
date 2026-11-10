@@ -1,6 +1,14 @@
 {
   "n_episodes_per_goal": 20,
   "gl_backend": "glfw",
+  "success_rate_summary": {
+    "total_episodes": 600,
+    "fp32_first_reached_within_5cm": 1.0,
+    "fp32_is_success_final_step": 1.0,
+    "int8_first_reached_within_5cm": 1.0,
+    "int8_is_success_final_step": 1.0,
+    "metric_difference_note": "Both success metrics are 100.0% (first-reached and final-step): policy reaches within 5 cm and holds position."
+  },
   "goals": {
     "preset_reach_left": {
       "command": "reach to the left",

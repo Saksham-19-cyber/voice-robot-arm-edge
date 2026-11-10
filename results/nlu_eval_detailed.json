@@ -1,4 +1,7 @@
 {
+  "nlu_frozen_v1_commit": "aa35fd42dc4d90d2e2663f5c0a9314ab649a0cdd",
+  "nlu_frozen_v1_tag": "nlu-frozen-v1",
+  "evaluator_fix_note": "Evaluator fixed 2026-11-10 truth-pass-2: (1) stop intent no longer requires goal_xyz=None (stop returns current position, which is correct); (2) synonym keywords higher/top->up and bottom/lower->down added to expected_region extraction.",
   "synthetic_test_split": {
     "dataset_label": "synthetic_test_split",
     "sample_count": 80,
@@ -16,18 +19,6 @@
         "ci_high": 0.4077
       }
     },
-    "rule_parser": {
-      "intent_accuracy": {
-        "accuracy": 0.975,
-        "ci_low": 0.9134,
-        "ci_high": 0.9931
-      },
-      "end_to_end_accuracy": {
-        "accuracy": 0.7,
-        "ci_low": 0.5923,
-        "ci_high": 0.7894
-      }
-    },
     "classifier_alone": {
       "intent_accuracy": {
         "accuracy": 1.0,
@@ -36,6 +27,18 @@
       },
       "note": "Classifier predicts intent class only; goal coordinates are produced by rule parser."
     },
+    "rule_parser": {
+      "intent_accuracy": {
+        "accuracy": 0.975,
+        "ci_low": 0.9134,
+        "ci_high": 0.9931
+      },
+      "end_to_end_accuracy": {
+        "accuracy": 0.975,
+        "ci_low": 0.9134,
+        "ci_high": 0.9931
+      }
+    },
     "hybrid_parser": {
       "intent_accuracy": {
         "accuracy": 1.0,
@@ -43,14 +46,60 @@
         "ci_high": 1.0
       },
       "end_to_end_accuracy": {
-        "accuracy": 0.725,
-        "ci_low": 0.6186,
-        "ci_high": 0.8108
+        "accuracy": 1.0,
+        "ci_low": 0.9542,
+        "ci_high": 1.0
+      }
+    },
+    "stop_list_expansion_ablation": {
+      "without_stop_expansion": {
+        "rule_parser_intent": {
+          "accuracy": 0.9,
+          "ci_low": 0.8149,
+          "ci_high": 0.9485
+        },
+        "rule_parser_e2e": {
+          "accuracy": 0.9,
+          "ci_low": 0.8149,
+          "ci_high": 0.9485
+        },
+        "hybrid_parser_intent": {
+          "accuracy": 1.0,
+          "ci_low": 0.9542,
+          "ci_high": 1.0
+        },
+        "hybrid_parser_e2e": {
+          "accuracy": 1.0,
+          "ci_low": 0.9542,
+          "ci_high": 1.0
+        }
+      },
+      "with_stop_expansion": {
+        "rule_parser_intent": {
+          "accuracy": 0.975,
+          "ci_low": 0.9134,
+          "ci_high": 0.9931
+        },
+        "rule_parser_e2e": {
+          "accuracy": 0.975,
+          "ci_low": 0.9134,
+          "ci_high": 0.9931
+        },
+        "hybrid_parser_intent": {
+          "accuracy": 1.0,
+          "ci_low": 0.9542,
+          "ci_high": 1.0
+        },
+        "hybrid_parser_e2e": {
+          "accuracy": 1.0,
+          "ci_low": 0.9542,
+          "ci_high": 1.0
+        }
       }
     }
   },
-  "agent_written_heldout": {
-    "dataset_label": "agent_written_heldout",
+  "dev_agent_written": {
+    "dataset_label": "dev_agent_written",
     "sample_count": 50,
     "class_distribution": {
       "reach": 15,
@@ -66,18 +115,6 @@
         "ci_high": 0.4375
       }
     },
-    "rule_parser": {
-      "intent_accuracy": {
-        "accuracy": 0.6,
-        "ci_low": 0.4618,
-        "ci_high": 0.7239
-      },
-      "end_to_end_accuracy": {
-        "accuracy": 0.42,
-        "ci_low": 0.2937,
-        "ci_high": 0.5577
-      }
-    },
     "classifier_alone": {
       "intent_accuracy": {
         "accuracy": 0.7,
@@ -86,6 +123,18 @@
       },
       "note": "Classifier predicts intent class only; goal coordinates are produced by rule parser."
     },
+    "rule_parser": {
+      "intent_accuracy": {
+        "accuracy": 0.6,
+        "ci_low": 0.4618,
+        "ci_high": 0.7239
+      },
+      "end_to_end_accuracy": {
+        "accuracy": 0.52,
+        "ci_low": 0.3851,
+        "ci_high": 0.652
+      }
+    },
     "hybrid_parser": {
       "intent_accuracy": {
         "accuracy": 0.76,
@@ -93,21 +142,69 @@
         "ci_high": 0.857
       },
       "end_to_end_accuracy": {
-        "accuracy": 0.58,
-        "ci_low": 0.4423,
-        "ci_high": 0.7063
+        "accuracy": 0.68,
+        "ci_low": 0.5419,
+        "ci_high": 0.7924
       },
       "previous_architecture_comparison": {
         "previous_hybrid_intent_accuracy": 0.54,
         "previous_hybrid_end_to_end_accuracy": 0.48,
         "note": "Old hybrid prioritized rules first; new hybrid uses classifier intent with rule spatial extraction and rule fallback."
       }
-    }
+    },
+    "stop_list_expansion_ablation": {
+      "without_stop_expansion": {
+        "rule_parser_intent": {
+          "accuracy": 0.5,
+          "ci_low": 0.3664,
+          "ci_high": 0.6336
+        },
+        "rule_parser_e2e": {
+          "accuracy": 0.42,
+          "ci_low": 0.2937,
+          "ci_high": 0.5577
+        },
+        "hybrid_parser_intent": {
+          "accuracy": 0.66,
+          "ci_low": 0.5215,
+          "ci_high": 0.7756
+        },
+        "hybrid_parser_e2e": {
+          "accuracy": 0.58,
+          "ci_low": 0.4423,
+          "ci_high": 0.7063
+        }
+      },
+      "with_stop_expansion": {
+        "rule_parser_intent": {
+          "accuracy": 0.6,
+          "ci_low": 0.4618,
+          "ci_high": 0.7239
+        },
+        "rule_parser_e2e": {
+          "accuracy": 0.52,
+          "ci_low": 0.3851,
+          "ci_high": 0.652
+        },
+        "hybrid_parser_intent": {
+          "accuracy": 0.76,
+          "ci_low": 0.6259,
+          "ci_high": 0.857
+        },
+        "hybrid_parser_e2e": {
+          "accuracy": 0.68,
+          "ci_low": 0.5419,
+          "ci_high": 0.7924
+        }
+      }
+    },
+    "label_warning": "DEVELOPMENT SET: parser was tuned while looking at these examples. Not independent. Do not report as generalization accuracy."
   },
   "human_written_heldout": {
     "dataset_label": "human_written_heldout",
     "sample_count": 0,
     "status": "not measured (N=0; awaiting human-collected heldout sentences in tests/nlu_heldout_human.json)",
-    "accuracy": null
+    "accuracy": null,
+    "note": "Human eval must be run once on tag nlu-frozen-v1 with no parser tuning afterwards. N=0 currently."
   }
 }

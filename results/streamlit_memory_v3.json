@@ -1,0 +1,23 @@
+{
+  "platform": "linux",
+  "os": "Linux Ubuntu (CI Runner)",
+  "gl_backend": "osmesa",
+  "server_baseline_rss_mb": 54.51,
+  "single_session": {
+    "condition": "1 session running 3 presets sequentially (Reach Left, Right, Up) with faster-whisper int8 loaded",
+    "peak_rss_mb": 93.39,
+    "peak_working_set_mb": 93.39
+  },
+  "three_concurrent_sessions": {
+    "condition": "3 concurrent sessions simultaneously running 3 presets with faster-whisper int8 loaded",
+    "peak_rss_mb": 187.06,
+    "peak_working_set_mb": 187.06
+  },
+  "windows_laptop_measurement": {
+    "idle_server_rss_mb": 127.1,
+    "tiny_en_loaded_rss_mb": 205.1,
+    "delta_attributable_mb": 78.0,
+    "explanation": "Windows measurement includes full GUI browser session (GLFW context, Streamlit frontend client bundle, DOM state). Linux CI v2/v3 measures headless server process tree (OSMesa)."
+  },
+  "timestamp": "2026-11-10T07:52:01Z"
+}

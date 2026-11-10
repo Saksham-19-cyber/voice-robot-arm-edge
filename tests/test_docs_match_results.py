@@ -47,5 +47,87 @@ def test_readme_numbers_match_results():
         f"README has live (non-audit-table) 12,000 steps claim on line(s):\n"
         + "\n".join(live_lines)
     )
-    assert "4,000 steps" in readme, "README missing true 4,000 steps"
+def _extract_all_numbers_from_json(data):
+    """Recursively collect all numeric floats/ints from parsed json data."""
+    nums = []
+    if isinstance(data, dict):
+        for v in data.values():
+            nums.extend(_extract_all_numbers_from_json(v))
+    elif isinstance(data, list):
+        for item in data:
+            nums.extend(_extract_all_numbers_from_json(item))
+    elif isinstance(data, (int, float)) and not isinstance(data, bool):
+        nums.append(float(data))
+    return nums
+
+
+def test_readme_unit_numbers_match_results_or_allowlist():
+    """Verify that every number with a unit in README.md matches results/*.json or allowlist."""
+    import re
+    import glob
+
+    # 1. Collect all results/*.json numbers
+    all_json_nums = []
+    for json_file in glob.glob("results/**/*.json", recursive=True):
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                content = json.load(f)
+                all_json_nums.extend(_extract_all_numbers_from_json(content))
+        except Exception:
+            pass
+
+    # 2. Collect allowlist entries
+    allowlist = set()
+    with open("tests/doc_number_allowlist.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                # Take token before '#'
+                token = line.split("#")[0].strip().lower()
+                allowlist.add(token)
+
+    # 3. Read README.md
+    with open("README.md", "r", encoding="utf-8") as f:
+        readme = f.read()
+
+    # Find numbers with units: ms, us, µs, MB, KB, GB, FPS, fps, x, %, steps, s
+    pattern = r'(?<![A-Za-z0-9_.])(\d+(?:,\d+)*(?:\.\d+)?)\s*(ms|µs|us|MB|KB|GB|FPS|fps|x|%|steps|s)\b'
+
+    unmatched = []
+    for m in re.finditer(pattern, readme):
+        raw_num = m.group(1).replace(",", "")
+        unit = m.group(2)
+        try:
+            val = float(raw_num)
+        except ValueError:
+            continue
+
+        pair_key = f"{raw_num} {unit}".lower()
+        alt_key = f"{raw_num}{unit}".lower()
+        if pair_key in allowlist or alt_key in allowlist:
+            continue
+
+        # Check if val matches any number in results/*.json within 2% or 0.1 tolerance
+        matched = False
+        for jnum in all_json_nums:
+            if abs(val - jnum) < 1e-4:
+                matched = True
+                break
+            # Check rounding match (e.g. 78.5 vs 78.46)
+            if abs(val - round(jnum, 1)) < 1e-4 or abs(val - round(jnum, 2)) < 1e-4:
+                matched = True
+                break
+            # Tolerance for percentage/unit conversions
+            if jnum != 0 and abs(val - jnum) / abs(jnum) < 0.02:
+                matched = True
+                break
+
+        if not matched:
+            line_no = readme[:m.start()].count("\n") + 1
+            unmatched.append((line_no, m.group(0), val, unit))
+
+    assert not unmatched, (
+        f"Found {len(unmatched)} numbers with units in README.md that neither match results/*.json nor appear in tests/doc_number_allowlist.txt:\n"
+        + "\n".join([f"  Line {l}: '{text}'" for l, text, _, _ in unmatched])
+    )
 

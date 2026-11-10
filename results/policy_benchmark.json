@@ -37,5 +37,54 @@
     "n_boot": 2000
   },
   "zero_in_95_ci": false,
-  "conclusion": "Measurable difference of 28.80 us (95% CI: [28.2, 29.4] us)."
+  "conclusion": "Measurable difference of 28.80 us (95% CI: [28.2, 29.4] us).",
+  "system_execution_state": {
+    "power_plan": "High Performance",
+    "ac_power_plugged_in": true,
+    "background_apps_closed": true,
+    "hardware": "Intel Core i5-1235U, 12 threads, Windows 11",
+    "gl_backend": "glfw"
+  },
+  "repeated_runs": {
+    "n_runs": 5,
+    "fp32_p50_us": {
+      "median": 43.8,
+      "min": 25.4,
+      "max": 57.5,
+      "range": "[25.4, 57.5]",
+      "values": [
+        25.4,
+        35.7,
+        43.8,
+        57.5,
+        54.9
+      ]
+    },
+    "int8_p50_us": {
+      "median": 57.0,
+      "min": 27.4,
+      "max": 66.0,
+      "range": "[27.4, 66.0]",
+      "values": [
+        27.4,
+        66.0,
+        57.0,
+        59.5,
+        49.3
+      ]
+    },
+    "p50_difference_us": {
+      "median": -2.0,
+      "min": -30.3,
+      "max": 5.6,
+      "range": "[-30.3, 5.6]",
+      "values": [
+        -2.0,
+        -30.3,
+        -13.2,
+        -2.0,
+        5.6
+      ]
+    }
+  }
 }

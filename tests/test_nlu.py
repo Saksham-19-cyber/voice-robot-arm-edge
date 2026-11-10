@@ -109,7 +109,7 @@ def test_empty_input(parser):
 
 def test_handwritten_heldout_dataset_evaluation(parser):
     import json
-    heldout_path = "tests/nlu_heldout_handwritten.json"
+    heldout_path = "tests/nlu_dev_agent_written.json"
     assert os.path.exists(heldout_path)
     with open(heldout_path, "r") as f:
         samples = json.load(f)
@@ -122,6 +122,45 @@ def test_handwritten_heldout_dataset_evaluation(parser):
     accuracy = correct / len(samples)
 
     assert accuracy >= 0.50
+
+
+def test_preset_commands_accuracy(parser):
+    """Verify each of the six app presets produces the expected goal within 1 cm."""
+    # 1. reach to the left
+    res = parser.parse("reach to the left")
+    assert res.intent == "reach"
+    expected_left = np.array([1.34, 0.87, 0.53])
+    assert np.allclose(res.goal_xyz, expected_left, atol=0.01), f"Left goal {res.goal_xyz} != {expected_left}"
+
+    # 2. move up by 10 cm
+    res = parser.parse("move up by 10 cm")
+    assert res.intent == "reach"
+    expected_up = np.array([1.34, 0.75, 0.63])
+    assert np.allclose(res.goal_xyz, expected_up, atol=0.01), f"Up goal {res.goal_xyz} != {expected_up}"
+
+    # 3. reach to the right
+    res = parser.parse("reach to the right")
+    assert res.intent == "reach"
+    expected_right = np.array([1.34, 0.63, 0.53])
+    assert np.allclose(res.goal_xyz, expected_right, atol=0.01), f"Right goal {res.goal_xyz} != {expected_right}"
+
+    # 4. move down towards table
+    res = parser.parse("move down towards table")
+    assert res.intent == "reach"
+    expected_table = np.array([1.34, 0.75, 0.42])
+    assert np.allclose(res.goal_xyz, expected_table, atol=0.01), f"Table goal {res.goal_xyz} != {expected_table}"
+
+    # 5. pick up the red block (unsupported manipulation)
+    res = parser.parse("pick up the red block")
+    assert res.intent == "pick"
+    assert res.goal_xyz is None
+    assert res.clarification_needed
+
+    # 6. emergency stop
+    res = parser.parse("emergency stop")
+    assert res.intent == "stop"
+    expected_stop = WORKSPACE_CENTER
+    assert np.allclose(res.goal_xyz, expected_stop, atol=0.01), f"Stop goal {res.goal_xyz} != {expected_stop}"
 
 
 def test_nlu_regression_known_failures(parser):

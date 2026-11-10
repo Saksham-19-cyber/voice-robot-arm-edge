@@ -1,0 +1,37 @@
+{
+  "n_steps": 1000,
+  "environment": "FetchReach-v4",
+  "policy": "INT8 dynamic quantized (single-thread ORT)",
+  "hardware": "Intel Core i5-1235U (Windows 11, plugged in)",
+  "gl_backend": "glfw",
+  "total_closed_loop_step_ms": {
+    "p50": 1.604,
+    "mean": 1.822,
+    "std": 0.818,
+    "min": 0.988,
+    "max": 9.909
+  },
+  "stages": {
+    "mujoco_physics_20_substeps_ms": {
+      "p50": 0.831,
+      "mean": 0.986,
+      "pct_of_total": 51.8
+    },
+    "gymnasium_env_wrapper_and_obs_building_ms": {
+      "p50": 0.63,
+      "pct_of_total": 39.2
+    },
+    "onnx_policy_inference_ms": {
+      "p50": 0.135,
+      "mean": 0.16,
+      "pct_of_total": 8.4
+    },
+    "obs_flattening_and_conversion_ms": {
+      "p50": 0.009,
+      "mean": 0.01,
+      "pct_of_total": 0.5
+    }
+  },
+  "dominant_stage": "Gymnasium environment wrapper & Python observation dictionary construction",
+  "finding": "Of the 1.60 ms total closed-loop step time, raw MuJoCo physics (20 substeps) accounts for 0.83 ms (51.8%), ONNX quantized inference takes 0.14 ms (8.4%), observation formatting takes 0.009 ms, and Gymnasium wrapper overhead (Python observation dictionary construction and bounds checking) accounts for 0.63 ms (39.2%). Gymnasium wrapper/Python glue dominates."
+}

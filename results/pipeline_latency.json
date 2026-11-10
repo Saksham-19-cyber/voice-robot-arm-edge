@@ -1,79 +1,141 @@
 {
   "cold_start": {
-    "asr_model_load_ms": 5304.6,
-    "asr_inference_ms": 1527.0,
-    "nlu_parse_ms": 24.62,
-    "env_construction_ms": 322.9,
-    "ort_session_init_ms": 19.9,
-    "rollout_and_render_ms": 2245.0,
-    "video_encode_ms": 8235.5,
-    "total_cold_start_ms": 17680.7
+    "asr_model_load_ms": 1699.5,
+    "asr_inference_ms": 1959.2,
+    "nlu_parse_ms": 4.12,
+    "env_construction_ms": 74.1,
+    "ort_session_init_ms": 16.0,
+    "rollout_and_render_ms": 1531.7,
+    "video_encode_ms": 871.4,
+    "total_cold_start_ms": 6156.8
   },
   "env_reuse_comparison": {
-    "env_recreate_with_first_render_mean_ms": 488.6,
-    "env_warm_reset_with_render_mean_ms": 0.9,
-    "speedup_factor": 515.0
+    "env_recreate_with_first_render_mean_ms": 562.8,
+    "env_warm_reset_with_render_mean_ms": 0.8,
+    "speedup_factor": 711.6
   },
   "early_termination": {
-    "n_runs": 20,
+    "n_runs": 10,
     "hold_steps_constant": 10,
     "mean_steps_taken": 13.0,
     "mean_first_success_step": 3.0,
     "asr_inference_ms": {
-      "mean": 1392.8,
-      "p50": 1337.4,
-      "p95": 1915.5
+      "mean": 1561.1,
+      "p50": 1620.7,
+      "p95": 1946.5
     },
     "nlu_parse_ms": {
-      "mean": 2.66,
-      "p50": 2.76,
-      "p95": 4.45
+      "mean": 3.33,
+      "p50": 3.41,
+      "p95": 4.82
     },
     "rollout_and_render_ms": {
-      "mean": 33.9,
-      "p50": 30.9,
-      "p95": 56.8
+      "mean": 36.5,
+      "p50": 34.2,
+      "p95": 53.9
     },
     "video_encode_ms": {
-      "mean": 208.4,
-      "p50": 203.1,
-      "p95": 274.9
+      "mean": 265.9,
+      "p50": 263.4,
+      "p95": 390.1
     },
     "total_user_wait_ms": {
-      "mean": 1639.4,
-      "p50": 1562.7,
-      "p95": 2175.4
+      "mean": 1867.4,
+      "p50": 1929.7,
+      "p95": 2332.1
     }
   },
   "full_50_steps": {
-    "n_runs": 20,
+    "n_runs": 10,
     "hold_steps_constant": 10,
     "mean_steps_taken": 50.0,
     "mean_first_success_step": 3.0,
     "asr_inference_ms": {
-      "mean": 1545.1,
-      "p50": 1536.0,
-      "p95": 1895.9
+      "mean": 1699.7,
+      "p50": 1630.5,
+      "p95": 2450.6
     },
     "nlu_parse_ms": {
-      "mean": 3.0,
-      "p50": 3.01,
-      "p95": 4.79
+      "mean": 2.72,
+      "p50": 3.11,
+      "p95": 3.4
     },
     "rollout_and_render_ms": {
-      "mean": 97.2,
-      "p50": 93.2,
-      "p95": 169.3
+      "mean": 124.2,
+      "p50": 125.7,
+      "p95": 192.1
     },
     "video_encode_ms": {
-      "mean": 531.8,
-      "p50": 453.2,
-      "p95": 849.0
+      "mean": 730.6,
+      "p50": 548.8,
+      "p95": 1310.1
     },
     "total_user_wait_ms": {
-      "mean": 2180.7,
-      "p50": 2078.5,
-      "p95": 2885.6
+      "mean": 2559.5,
+      "p50": 2246.3,
+      "p95": 3722.4
+    }
+  },
+  "system_execution_state": {
+    "power_plan": "High Performance",
+    "ac_power_plugged_in": true,
+    "background_apps_closed": true,
+    "hardware": "Intel Core i5-1235U, 12 threads, Windows 11",
+    "gl_backend": "glfw"
+  },
+  "repeated_runs": {
+    "n_runs": 5,
+    "env_recreate_mean_ms": {
+      "median": 488.5,
+      "min": 477.1,
+      "max": 956.5,
+      "range": "[477.1, 956.5]",
+      "values": [
+        488.5,
+        956.5,
+        478.8,
+        477.1,
+        562.8
+      ]
+    },
+    "env_warm_reset_mean_ms": {
+      "median": 1.0,
+      "min": 0.8,
+      "max": 1.4,
+      "range": "[0.8, 1.4]",
+      "values": [
+        1.0,
+        1.1,
+        0.8,
+        1.4,
+        0.8
+      ]
+    },
+    "speedup_factor": {
+      "median": 584.2,
+      "min": 333.8,
+      "max": 874.0,
+      "range": "[333.8, 874.0]",
+      "values": [
+        498.1,
+        874.0,
+        584.2,
+        333.8,
+        711.6
+      ]
+    },
+    "early_termination_wait_p50_ms": {
+      "median": 1958.5,
+      "min": 1784.0,
+      "max": 2484.1,
+      "range": "[1784.0, 2484.1]",
+      "values": [
+        2372.2,
+        2484.1,
+        1958.5,
+        1784.0,
+        1929.7
+      ]
     }
   }
 }

@@ -1,0 +1,8 @@
+{
+  "run_index": 3,
+  "env_recreate_mean_ms": 478.8,
+  "env_warm_reset_mean_ms": 0.8,
+  "speedup_factor": 584.2,
+  "early_termination_p50_ms": 1958.5,
+  "full_50_steps_p50_ms": 2184.9
+}

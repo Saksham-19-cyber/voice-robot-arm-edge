@@ -1,0 +1,8 @@
+{
+  "run_index": 3,
+  "pure_mujoco_step_alone_ms": 2.416,
+  "closed_loop_single_thread_ort_fps": 438.9,
+  "closed_loop_single_thread_ort_ms": 2.279,
+  "closed_loop_default_thread_ort_fps": 339.7,
+  "closed_loop_default_thread_ort_ms": 2.944
+}

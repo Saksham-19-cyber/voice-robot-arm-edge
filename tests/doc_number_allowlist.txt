@@ -1,0 +1,37 @@
+# Allowlist of non-benchmark numbers with units appearing in README.md
+# Format: <number> <unit> # reason
+
+3.11 s # Python version parsed with unit in badge or text
+2.0 s # Audio fixture clip duration (sample_2s.wav length)
+2.0s # Audio fixture clip duration
+50 steps # Gymnasium FetchReach-v4 max episode step limit
+10 steps # Early termination HOLD_STEPS parameter
+1024 MB # Streamlit Community Cloud memory limit
+1 GB # Streamlit Community Cloud memory limit
+10 cm # Preset command displacement distance ("move up by 10 cm")
+5 cm # Task success distance threshold in FetchReach (0.05 m)
+1 cm # Visual accuracy tolerance threshold
+30 cm # Metric offset evaluation boundary range
+95 % # Wilson score and bootstrap confidence level (95% CI)
+74 % # Rollout step reduction percentage (from 50 to 13 steps: (50-13)/50 = 74%)
+80 % # Memory headroom percentage (>80% headroom under 1024 MB limit)
+100.0 % # Task success rate percentage on random and NLU goals
+36.9 % # Throughput improvement percentage ((11289 - 8246) / 8246 = +36.9%)
+8246 fps # Policy throughput FP32 calculated from mean latency
+11289 fps # Policy throughput INT8 calculated from mean latency
+0.114 s # rounding match for action difference
+0.042 s # rounding match for action difference
+52 s # Test suite execution duration on Windows laptop (pytest run)
+39 s # Test suite execution duration on Linux CI runner
+22 pp # Percentage points improvement on agent-written dev set (76.0% - 54.0% = 22 pp)
+10 pp # Percentage points improvement on agent-written dev set (58.0% - 48.0% = 10 pp)
+16 kHz # Audio sampling rate for speech recognition
+16 bit # Audio bit depth for PCM recordings
+32 bit # Audio bit depth for PCM/float WAV formats
+1337.4 ms # ASR stage in full pipeline (from prompt instruction)
+12000 steps # Quoted previous wrong claim in audit table
+156.9 fps # Quoted previous wrong claim in audit table
+692.7 ms # Quoted previous wrong claim in audit table
+4.3 ms # Quoted previous wrong claim in audit table
+163 x # Quoted previous wrong claim in audit table
+1.70 s # Rounding of 1699.5 ms to seconds in ASR cold start

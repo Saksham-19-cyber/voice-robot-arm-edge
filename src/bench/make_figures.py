@@ -245,13 +245,13 @@ def plot_nlu_accuracy():
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    agent_data = data.get("agent_written_heldout")
+    agent_data = data.get("dev_agent_written") or data.get("agent_written_heldout")
     human_data = data.get("human_written_heldout", {})
     if human_data.get("accuracy") is None:
-        print("Note: human_written_heldout has no measured data (N=0); plotting agent_written_heldout only.")
+        print("Note: human_written_heldout has no measured data (N=0); plotting dev_agent_written only.")
 
     if not agent_data:
-        print("Skipping nlu_accuracy.png: agent_written_heldout missing")
+        print("Skipping nlu_accuracy.png: dev_agent_written missing")
         return
 
     rule = agent_data.get("rule_parser", {})
@@ -314,7 +314,7 @@ def plot_nlu_accuracy():
                 label="End-to-End Accuracy (%)", capsize=4, color="#55A868", edgecolor="black", linewidth=0.8)
 
     ax.set_ylabel("Accuracy (%)")
-    ax.set_title("NLU Accuracy with Wilson 95% CIs (Agent-Written Held-Out, N=50)", fontsize=11, fontweight="bold", pad=12)
+    ax.set_title("NLU Accuracy with Wilson 95% CIs (Development Set, Agent-Written, N=50)", fontsize=10, fontweight="bold", pad=12)
     ax.set_xticks(x)
     ax.set_xticklabels(models, fontsize=8.5)
     ax.set_ylim(0, 100)
@@ -330,7 +330,7 @@ def plot_nlu_accuracy():
             ax.text(bar.get_x() + bar.get_width()/2.0, 3, "N/A", ha="center", va="bottom", fontsize=7.5, color="#777777")
 
     footnote = (
-        "Footnote: Evaluated on agent-written held-out split (N=50, not independent).\n"
+        "Footnote: Evaluated on development set (agent-written; parser tuned against it; not independent; N=50).\n"
         "Human held-out test split is unmeasured (N=0). Error bars denote Wilson 95% confidence intervals."
     )
     plt.figtext(0.5, 0.01, footnote, ha="center", fontsize=7.5, color="#444444", style="italic")

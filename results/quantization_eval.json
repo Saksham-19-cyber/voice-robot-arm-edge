@@ -1,6 +1,8 @@
 {
   "PyTorch_FP32": {
     "success_rate": 1.0,
+    "success_rate_first_reached_within_5cm": 1.0,
+    "success_rate_final_step": 1.0,
     "mean_steps_to_goal": 2.65,
     "std_steps_to_goal": 0.93,
     "total_eval_time_sec": 56.45,
@@ -8,6 +10,8 @@
   },
   "ONNX_FP32": {
     "success_rate": 1.0,
+    "success_rate_first_reached_within_5cm": 1.0,
+    "success_rate_final_step": 1.0,
     "mean_steps_to_goal": 2.65,
     "std_steps_to_goal": 0.93,
     "total_eval_time_sec": 21.95,
@@ -15,6 +19,8 @@
   },
   "ONNX_INT8": {
     "success_rate": 1.0,
+    "success_rate_first_reached_within_5cm": 1.0,
+    "success_rate_final_step": 1.0,
     "mean_steps_to_goal": 2.65,
     "std_steps_to_goal": 0.93,
     "total_eval_time_sec": 21.67,

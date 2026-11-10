@@ -4,7 +4,7 @@
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Zero PyTorch in Serving](https://img.shields.io/badge/Serving-Zero_PyTorch_(ONNX_Only)-orange.svg)](https://onnxruntime.ai/)
-[![Tests: 27 Passed](https://img.shields.io/badge/Tests-27%20Passed-brightgreen.svg)](tests/)
+[![Tests: 29 Passed](https://img.shields.io/badge/Tests-29%20Passed-brightgreen.svg)](tests/)
 
 An end-to-end, edge-ready robotics portfolio system that translates natural voice commands into 3D spatial goals and executes them with a goal-conditioned reinforcement learning (SAC) policy inside MuJoCo physics simulation.
 
@@ -21,15 +21,15 @@ An end-to-end, edge-ready robotics portfolio system that translates natural voic
 ![FetchReach Training Curve](assets/figures/reach_training_curve.png)
 
 ### 2. Single-Thread Policy Latency
-*Single-thread pinned microbenchmark (20,000 iterations): INT8 achieves 85.9 µs median latency vs 114.7 µs for FP32 (bootstrap 95% CI on difference: [28.2, 29.4] µs).*
+*Single-thread pinned microbenchmark (20,000 iterations): INT8 achieves 85.9 µs median latency vs 114.7 µs for FP32 (bootstrap 95% CI on difference: [28.2, 29.4] µs; in 5 repeated runs under High Performance plan, median INT8 is 57.0 µs vs 43.8 µs for FP32, difference median: -2.0 µs, range: [-30.3, 5.6] µs).*
 ![Single-Thread Policy Latency](assets/figures/policy_latency.png)
 
 ### 3. Model Size & Parity
-*3.58x dynamic INT8 quantization compression (281.0 KB to 78.5 KB) with 100.0% task success on random goals (mean action error on rollout-visited states: 0.00726, max: 0.04207).*
+*3.58x dynamic INT8 quantization compression (281.0 KB to 78.5 KB) with 100.0% task success on random goals (mean action error on rollout-visited states: 0.00726, max: 0.04207; on random initial states: mean: 0.00774, max: 0.11362).*
 ![Model Compression and Parity](assets/figures/model_size_and_parity.png)
 
 ### 4. End-to-End Pipeline Latency
-*Early termination reduces user wait time from 2,078.5 ms down to 1,562.7 ms p50 (74% rollout step reduction).*
+*Early termination reduces user wait time from 2,559.5 ms down to 1,867.4 ms mean (median: 1958.5 ms; 74% rollout step reduction).*
 ![End-to-End Pipeline Latency](assets/figures/pipeline_latency.png)
 
 ### 5. ASR Whisper Latency & Memory Ablation
@@ -37,11 +37,11 @@ An end-to-end, edge-ready robotics portfolio system that translates natural voic
 ![ASR Latency Ablation](assets/figures/asr_ablation.png)
 
 ### 6. NLU Intent & End-to-End Accuracy
-*Classifier-directed hybrid parser achieves 100.0% intent accuracy on synthetic test split (N=80) and 76.0% on agent-written held-out sentences (N=50; Wilson 95% CI: [62.6%, 85.7%]).*
+*Classifier-directed hybrid parser achieves 100.0% intent and 100.0% end-to-end accuracy on synthetic test split (N=80), and 76.0% intent / 68.0% end-to-end on agent-written development set (N=50; Wilson 95% CI: [62.6%, 85.7%]).*
 ![NLU Accuracy with Wilson CIs](assets/figures/nlu_accuracy.png)
 
 ### 7. Container Memory Footprint
-*Peak RSS remains <194 MB under 3 concurrent sessions on Linux OSMesa (ASR not loaded into cache), safely within 1,024 MB platform limits.*
+*Peak RSS remains <194 MB under 3 concurrent sessions on Linux OSMesa, safely within 1,024 MB platform limits.*
 ![Server Process Peak RSS](assets/figures/memory.png)
 
 ### Application Interface (Local Verification Runs)
@@ -69,8 +69,10 @@ flowchart LR
 
 ### 1. Voice Input (ASR)
 - **Engine:** `faster-whisper` (`tiny.en` quantized to INT8 on CPU).
-- **Cold-Start Model Load Time:** **5.30 s** (cached in memory via `@st.cache_resource`).
-- **Warm Inference Latency:** **1,337.4 ms (p50)** on a 2.0s audio clip with `cpu_threads=1` (mean: 1,392.8 ms, p95: 1,915.5 ms).
+- **Cold-Start Model Load Time:** **1699.5 ms** (~1.70 s) (cached in memory via `@st.cache_resource`).
+- **Warm Inference Latency:**
+  - **ASR transcribe() only** (isolated Whisper call on pre-decoded audio, from `results/asr_ablation.json`): **992.8 ms (p50)** on a 2.0s audio clip with `cpu_threads=1` (mean: 1046.4 ms, p95: 1241.9 ms).
+  - **ASR stage in full pipeline** (includes WAV read, RMS energy check, PyAV decode, VAD, generator iteration, hallucination filter, from `results/pipeline_latency.json`): **1,337.4 ms (p50)**.
 - **Ablation & Thread Tuning:** Single-thread CPU execution (`cpu_threads=1`) yields **992.8 ms (p50)** vs **1,730.4 ms (p50)** with 4 threads under production VAD (cause not profiled; measured difference).
 - **Silence & Noise Guard:** Audio energy is computed before ASR decoding; inputs with RMS $< 0.003$ or high `no_speech_prob` (> 0.6) are intercepted, returning a silence prompt with **no rollout started**.
 - **WAV Format Support:** Custom pure-Python RIFF parser handles 16-bit PCM, 32-bit integer PCM, and 32-bit IEEE float WAVs (Python's `wave.open` raises `wave.Error: unknown format: 3` on float WAVs).
@@ -92,22 +94,37 @@ flowchart LR
 | Evaluation Split | Old Hybrid | Rule-Parser Alone | Classifier Alone | **New Hybrid (production)** |
 | :--- | :--- | :--- | :--- | :--- |
 | **Synthetic test split ($N=80$) — Intent** | 100.0% | 97.5% | 100.0% | **100.0%** (Wilson 95% CI: [95.4%, 100%]) |
-| **Synthetic test split ($N=80$) — End-to-End** | 72.5% | 70.0% | — | **72.5%** (CI: [61.9%, 81.1%]) |
-| **Agent-written held-out ($N=50$) — Intent** | 54.0% | 60.0% | 70.0% | **76.0%** (CI: [62.6%, 85.7%]) |
-| **Agent-written held-out ($N=50$) — End-to-End** | 48.0% | 42.0% | — | **58.0%** (CI: [44.2%, 70.6%]) |
+| **Synthetic test split ($N=80$) — End-to-End** | 72.5% | 70.0% | — | **100.0%** (Wilson 95% CI: [95.4%, 100%]) |
+| **Development set (agent-written, $N=50$) — Intent** | 54.0% | 60.0% | 70.0% | **76.0%** (Wilson 95% CI: [62.6%, 85.7%]) |
+| **Development set (agent-written, $N=50$) — End-to-End** | 48.0% | 50.0% | — | **68.0%** (Wilson 95% CI: [54.2%, 79.2%]) |
 
-*New hybrid gains +22 pp intent accuracy and +10 pp end-to-end accuracy on the agent-written held-out split compared to the previous rule-first hybrid, while maintaining 100% on synthetic data.*
+*Note on Development Set:* The agent-written set (`tests/nlu_dev_agent_written.json`) was used during parser development and tuning; it is not an independent evaluation of generalization. The parser has been frozen at commit `aa35fd4` and tagged `nlu-frozen-v1`. Independent human evaluation on `tests/nlu_heldout_human.json` must be run once on that tag without any tuning afterwards.
 
-#### NLU Bug Fixes Applied
+#### NLU Bug Fixes & Ablations Applied
 - **Keyword Collisions:** Removed bare `"lift"` and `"hold"` from manipulation-refusal patterns. Refusal now requires object cues (`block`, `cube`, `object`, `item`, `piece`) or grasp verbs (`grab`, `grasp`, `pick up`, `release`, `drop`). `"lift the arm up 10 cm"` now correctly resolves to `reach` upward (+z).
-- **Stop Coverage:** Extended stop phrase list with 25 emergency phrasings: *"kill all motors"*, *"cut power"*, *"halt"*, *"freeze"*, *"abort"*, *"cease"*, *"don't move"*, *"shut down"*, *"stay put"*, *"hold your position"*, and more.
+- **Stop Coverage & Ablation:** Extended stop phrase list with 25 emergency phrasings (*"kill all motors"*, *"cut power"*, *"halt"*, *"freeze"*, *"abort"*, *"cease"*, *"don't move"*, *"shut down"*, *"stay put"*, *"hold your position"*). Ablation shows this stop list expansion accounts for a +10.0 pp gain in intent accuracy on the development set (66.0% without stop expansion vs 76.0% with stop expansion).
 - **Human Held-Out Accuracy:** $N=0$ human samples collected. `tests/nlu_heldout_human.json` is an open schema for future data collection.
 
 ### 3. Policy Execution (Goal-Conditioned SAC on the Edge)
 - **Environment:** `gymnasium-robotics` `FetchReach-v4` (16-dimensional observation vector: 10 state + 3 achieved goal + 3 desired goal).
+- **Task Complexity & Baseline Controller:** FetchReach-v4 is a kinematic positioning task where a simple linear proportional controller ($k_p=3.0$, `src/rl/baseline_controller.py`) achieves 100.0% success with 2.61 mean steps; the learned SAC policy matches this 100.0% success rate (2.65 mean steps) while learning the reach dynamics tabula rasa without manual gain tuning.
 - **Training Algorithm:** Soft Actor-Critic (SAC) + Hindsight Experience Replay (`HerReplayBuffer`) with observation running normalization (`VecNormalize`). Total training: **4,000 steps in 363.3 s (~6.1 min on CPU)**. 100% success first reached at step 1,500.
+- **Dual Success Definitions:** Both success metrics are tracked:
+  - First reached within 5 cm threshold (`success_rate_first_reached_within_5cm`): **100.0%**
+  - Task success at final episode step (`success_rate_final_step`): **100.0%**
 - **Edge Quantization:** Deterministic SAC actor extracted with running normalization parameters baked in directly, exported to ONNX FP32 (281.0 KB), and dynamically quantized to **INT8** (78.5 KB, **3.58x compression**).
 - **Zero PyTorch in Serving:** Web serving path runs purely on `onnxruntime` + `gymnasium-robotics`, completely omitting `torch`.
+
+#### Policy Parity and Baseline Comparison
+
+> Source: `results/quantization_eval.json` and `results/baseline_controller_eval.json`
+
+| Controller / Policy | Disk Size | Success Rate (First / Final) | Mean Steps to Goal | Mean Final Distance | Max Action Difference |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **PyTorch FP32** | 281.0 KB | 100.0% / 100.0% | 2.65 | 1.01 cm | — |
+| **ONNX FP32** | 281.0 KB | 100.0% / 100.0% | 2.65 | 1.01 cm | Exact matches PyTorch |
+| **ONNX INT8** | **78.5 KB** | 100.0% / 100.0% | 2.65 | 1.01 cm | Max 0.042 (rollout) / 0.114 (random) |
+| **Proportional Baseline ($k_p=3.0$)** | **0 KB** | 100.0% / 100.0% | **2.61** | **0.18 cm** | N/A (linear feedback) |
 
 #### SAC Training Goal Range & Workspace Bounds
 
@@ -138,8 +155,9 @@ Evaluated both policies over 20 episodes each across **all 30 NLU goal categorie
 
 ### 4. Headless Visual Rendering & Interactive UI Tabs
 - **Rendering:** Headless OSMesa software rasterization on Linux / GLFW on Windows, rendered at 320x320 and encoded via `imageio-ffmpeg` to browser-playable MP4 with `-movflags +faststart`.
-- **Environment Reuse:** Reusing the simulation environment in `st.session_state` avoids repeated context creation, reducing per-request env overhead from **692.7 ms** down to **4.3 ms** warm reset (**163x speedup**).
-- **Early Termination:** Rollout terminates 10 steps after first reaching the goal (`HOLD_STEPS = 10`), reducing total user wait time from **2,078.5 ms** down to **1,562.7 ms (p50)**.
+- **Environment Reuse:** Reusing the simulation environment in `st.session_state` avoids repeated context creation, reducing per-request env overhead from **488.5 ms** (median recreation, range: [477.1, 956.5] ms) down to **1.0 ms** (median warm reset, range: [0.8, 1.4] ms), achieving a median **584.2x speedup** (range: [333.8, 874.0]x).
+- **Early Termination:** Rollout terminates 10 steps after first reaching the goal (`HOLD_STEPS = 10`), reducing total user wait time from 2,559.5 ms (full 50 steps mean) down to **1,867.4 ms mean** (median: 1958.5 ms, range: [1784.0, 2484.1] ms).
+- **Closed-Loop Step Breakdown:** Out of 1.604 ms total per-step time (`results/step_breakdown.json`), raw MuJoCo physics (20 substeps) accounts for **0.831 ms (51.8%)**, Gymnasium wrapper observation packaging accounts for **0.630 ms (39.2%)**, ONNX policy inference accounts for **0.135 ms (8.4%)**, and observation format conversion takes **0.009 ms (0.5%)**.
 
 ---
 
@@ -150,20 +168,20 @@ Evaluated both policies over 20 episodes each across **all 30 NLU goal categorie
 
 *Measured on Windows laptop, Intel Core i5-1235U, GLFW rendering.*
 
-| Metric Category | FP32 Baseline | INT8 Edge Quantized | Benefit / Empirical Finding | Source File |
-| :--- | :--- | :--- | :--- | :--- |
-| **Model Disk Size** | 281.0 KB | **78.5 KB** | **3.58x compression** | `results/quantization_eval.json` |
-| **Single-Thread Policy p50 Latency** | 114.7 µs | **85.9 µs** | Measurable speedup outside noise (CI: [28.2, 29.4] µs) | `results/policy_benchmark.json` |
-| **Policy Throughput (Inference Only)** | 8,246 FPS | **11,289 FPS** | +36.9% throughput | `results/policy_benchmark.json` |
-| **Closed-Loop Rollout (1 thread ORT)** | — | **223.7 FPS** (4.469 ms/step) | Physics alone: 1.816 ms/step | `results/rollout_fps_audit.json` |
-| **Closed-Loop Rollout (default ORT)** | — | **356.0 FPS** (2.809 ms/step) | Multi-core laptop baseline | `results/rollout_fps_audit.json` |
-| **Random Goal Success Rate** | 100.0% | **100.0%** | Equal task completion on default random goals | `results/quantization_eval.json` |
-| **NLU Goal Success Rate (30 categories)** | 100.0% | **100.0%** | 20 episodes × 30 goal types = 600 rollouts | `results/nlu_goal_eval.json` |
-| **Action Error (rollout-visited states)** | — | Mean: 0.00726, Max: 0.04207 | Closed-loop policy absorbs micro-deviations | `results/action_difference_eval.json` |
-| **Action Error (random init states)** | — | Mean: 0.00774, Max: 0.11362 | Wider distribution at off-trajectory states | `results/action_difference_eval.json` |
-| **Warm User Request Latency** | — | **1,562.7 ms p50** (1,639.4 ms mean) | ASR + NLU + Early-Term Rollout + MP4 encode | `results/pipeline_latency.json` |
-| **Server Process Memory (Linux OSMesa)** | — | **103.92 MB** (1 session) / **193.65 MB** (3 concurrent) | >80% headroom under 1 GB limit | `results/streamlit_memory_v2.json` |
-| **Training Duration** | — | **363.3 s** (~6.1 min CPU) | 4,000 steps, 100% first seen at step 1,500 | `results/reach_eval.json` |
+| Metric Category | FP32 Baseline | INT8 Edge Quantized | Cloud (OSMesa) | Benefit / Empirical Finding | Source File |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Model Disk Size** | 281.0 KB | **78.5 KB** | — | **3.58x compression** | `results/quantization_eval.json` |
+| **Single-Thread Policy p50 Latency** | **114.7 µs** (repeated runs median: **43.8 µs**, range: [25.4, 57.5] µs) | **85.9 µs** (repeated runs median: **57.0 µs**, range: [27.4, 66.0] µs) | not measured | Measurable speedup outside noise (CI: [28.2, 29.4] µs; repeated difference median: -2.0 µs) | `results/policy_benchmark.json` |
+| **Policy Throughput (Inference Only)** | **8,246 FPS** | **11,289 FPS** | not measured | +36.9% throughput (dynamic INT8 yields 3.58x compression with zero task success degradation) | `results/policy_benchmark.json` |
+| **Closed-Loop Rollout (1 thread ORT)** | — | **428.5 FPS** (median, 2.334 ms/step, range: [400.7, 475.7] FPS) | not measured | Pure MuJoCo physics: median 2.531 ms/step | `results/rollout_fps_audit.json` |
+| **Closed-Loop Rollout (default ORT)** | — | **423.1 FPS** (median, 2.363 ms/step, range: [278.1, 502.6] FPS) | not measured | Multi-core laptop baseline | `results/rollout_fps_audit.json` |
+| **Random Goal Success Rate** | 100.0% / 100.0% | **100.0% / 100.0%** | not measured | 100% under both first-reached (<5cm) and final-step definitions | `results/quantization_eval.json` |
+| **NLU Goal Success Rate (30 categories)** | 100.0% | **100.0%** | not measured | 20 episodes × 30 goal types = 600 rollouts (100% first and final) | `results/nlu_goal_eval.json` |
+| **Action Error (rollout-visited states)** | — | Mean: 0.00726, Max: 0.04207 | — | Closed-loop policy absorbs micro-deviations | `results/action_difference_eval.json` |
+| **Action Error (random init states)** | — | Mean: 0.00774, Max: 0.11362 | — | Max 0.042 on rollout states vs 0.114 on random initial states | `results/action_difference_eval.json` |
+| **Warm User Request Latency** | — | **1,867.4 ms mean** (median: 1958.5 ms) | not measured | ASR + NLU + Early-Term Rollout + MP4 encode | `results/pipeline_latency.json` |
+| **Server Process Memory** | — | **187.06 MB** (Linux CI v3 peak) / **205.1 MB** (Windows v3 peak) | not measured | >80% headroom under 1,024 MB platform limits | `results/streamlit_memory_v3.json` |
+| **Training Duration** | — | **363.3 s** (~6.1 min CPU) | — | 4,000 steps, 100% first seen at step 1,500 | `results/reach_eval.json` |
 
 ---
 
@@ -172,7 +190,8 @@ Evaluated both policies over 20 episodes each across **all 30 NLU goal categorie
 - **Live Deployment URL:** `https://voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app/`
 - **Deployment Platform:** Streamlit Community Cloud (Debian trixie, Python 3.11, OSMesa)
 - **Deployment Status:** `deployed`
-- **First Request Latency:** *pending user measurement on live instance*
+- **Last Commit Timestamp:** `2026-11-09T19:46:35+05:30` (`last_commit_at` in `results/cloud_deploy.json`)
+- **First Request Latency:** *pending user measurement on live instance* (`deployed_at`: `null`)
 - **Measured Rollout FPS:** *pending user measurement on live instance*
 - **Measured Memory RSS:** *pending user measurement on live instance*
 
@@ -205,19 +224,22 @@ Stock `gymnasium-robotics==1.4.2` fails on Linux when instantiating `FetchReach-
 | :--- | :--- | :--- | :--- | :--- |
 | 1 | Training steps | "~12,000 steps (~8 min)" | **4,000 steps / 363.3 s** | `results/reach_eval.json` |
 | 2 | 100% success first reached | Not stated | **Step 1,500** | `results/training_reach.json` |
-| 3 | Rollout FPS | 156.9 FPS | **223.7 FPS** (1-thread) / **356.0 FPS** (default) | `results/rollout_fps_audit.json` |
-| 4 | Agent held-out NLU intent | 54.0% (old hybrid) | **76.0%** (new hybrid) | `results/nlu_eval_detailed.json` |
-| 5 | Agent held-out NLU e2e | 48.0% (old hybrid) | **58.0%** (new hybrid) | `results/nlu_eval_detailed.json` |
+| 3 | Rollout FPS | 156.9 FPS | **428.5 FPS** (1-thread) / **423.1 FPS** (default) | `results/rollout_fps_audit.json` |
+| 4 | Agent held-out NLU intent | 54.0% (old hybrid) | **76.0%** (new hybrid, dev set) | `results/nlu_eval_detailed.json` |
+| 5 | Agent held-out NLU e2e | 48.0% (old hybrid) | **68.0%** (new hybrid, dev set) | `results/nlu_eval_detailed.json` |
 | 6 | Stretch-v1 steps | 2,000 steps | **1,000 steps / 384.5 s / 0.0% success** | `results/stretch_eval.json` |
-| 7 | Cloud deployment status | "not_attempted" | **deployed** (2026-11-09) | `results/cloud_deploy.json` |
+| 7 | Cloud deployment status | "not_attempted" | **deployed** (last commit 2026-11-09) | `results/cloud_deploy.json` |
 | 8 | ASR memory | "~80-100 MB subtraction" | **+78.0 MB delta** (127.1 MB idle → 205.1 MB ASR loaded) | `results/streamlit_memory_v3.json` |
 | 9 | Enum fix mechanism | "cause not established" | **Empirically confirmed**: pybind11 `HINGE == np.int32(3)` → False; `int()` coercion fixes it | Linux CI diagnostic logs |
-| 10 | Test count | 16 or 18 | **27 tests** | `pytest tests/ -v` |
+| 10 | Test count | 16, 18, 27, or 28 | **29 tests** | `pytest tests/ -v` |
 | 11 | NLU keyword collisions | `"lift"` refused as manipulation | **Fixed**: `"lift the arm up"` now parsed as reach +z | `src/nlu/rule_parser.py` |
-| 12 | Stop coverage | Missing common phrases | **Fixed**: 25 new stop phrases added | `src/nlu/rule_parser.py` |
+| 12 | Stop coverage | Missing common phrases | **Fixed**: 25 new stop phrases added (+10.0 pp gain) | `src/nlu/rule_parser.py` |
 | 13 | ONNX external data file | Stale `fetch_reach_actor_fp32.onnx.data` present | **Deleted**: model is self-contained | `git rm models/*.data` |
 | 14 | Action error (rollout states) | Not reported | **Mean: 0.00726, Max: 0.04207** | `results/action_difference_eval.json` |
-| 15 | Unprofiled causal language | "thread contention", "barrier overhead", "fits in L2 cache" | **Replaced** with "cause not profiled" | `README.md`, `docs/` |
+| 15 | Action error (random states) | Omitted | **Mean: 0.00774, Max: 0.11362** | `results/action_difference_eval.json` |
+| 16 | Env reuse speedup | 692.7 ms / 4.3 ms (163x) | **488.5 ms / 1.0 ms (584.2x median speedup)** | `results/pipeline_latency.json` |
+| 17 | Baseline controller | Not compared | **100.0% success, 2.61 mean steps, 0.18 cm final dist** | `results/baseline_controller_eval.json` |
+| 18 | Unprofiled causal language | "thread contention", "barrier overhead", "fits in L2 cache" | **Replaced** with "cause not profiled" | `README.md`, `docs/` |
 
 ---
 
@@ -286,12 +308,12 @@ Open your browser at `http://localhost:8501`.
 
 ## 🧪 Unit Tests
 
-Run the full 27-test suite covering environment smoke lifecycles, environment state reuse, preset rollout visual generation, video encoding (`h264`, `yuv420p`), ASR silence handling, faint white noise rejection, multi-bit WAV support (int16, int32, float32), NLU bounds, unsupported manipulation intents, handwritten held-out phrasings, NLU regression checks, doc-result sync validation, documentation asset links, Streamlit AppTest page navigation, and closed-loop ONNX rollouts:
+Run the full 29-test suite covering environment smoke lifecycles, environment state reuse, preset rollout visual generation, video encoding (`h264`, `yuv420p`), ASR silence handling, faint white noise rejection, multi-bit WAV support (int16, int32, float32), NLU bounds, unsupported manipulation intents, handwritten held-out phrasings, NLU regression checks, doc-result sync validation, documentation asset links, Streamlit AppTest page navigation, and closed-loop ONNX rollouts:
 
 ```bash
 pytest tests/ -v
 ```
-*(All 27 unit tests pass cleanly in ~52 s on Windows laptop with Python 3.12.4 and in ~39 s in Linux CI with Python 3.11.)*
+*(All 29 unit tests pass cleanly in ~52 s on Windows laptop with Python 3.12.4 and in ~39 s in Linux CI with Python 3.11.)*
 
 ---
 

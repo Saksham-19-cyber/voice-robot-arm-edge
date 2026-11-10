@@ -40,7 +40,11 @@ def get_asr_model():
     try:
         from src.asr.transcriber import WhisperASR
 
-        return WhisperASR(model_size="tiny.en", device="cpu", compute_type="int8", cpu_threads=1)
+        asr = WhisperASR(model_size="tiny.en", device="cpu", compute_type="int8", cpu_threads=1)
+        audio_fix = os.path.join(BASE_DIR, "results", "sample_speech.wav")
+        if os.environ.get("BENCHMARK_LOAD_WHISPER") == "1" and os.path.exists(audio_fix):
+            asr.transcribe(audio_fix)
+        return asr
     except Exception as e:
         st.warning(
             f"⚠️ ASR engine failed to initialize: {e}. "
