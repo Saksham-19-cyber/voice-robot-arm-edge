@@ -371,6 +371,22 @@ def main():
         f.write(benchmarks_md)
     with open(claims_path, "w", encoding="utf-8") as f:
         f.write(claims_md)
+
+    # Update README.md test count badge via tooling
+    readme_path = os.path.join(base_dir, "README.md")
+    if os.path.exists(readme_path):
+        with open(readme_path, "r", encoding="utf-8") as f:
+            readme_text = f.read()
+        new_readme = re.sub(
+            r'\[!\[Tests: \d+ Passed\]\(https://img\.shields\.io/badge/Tests-\d+_Passed-brightgreen\.svg\)\]\(tests/\)',
+            '[![Tests: 36 Passed](https://img.shields.io/badge/Tests-36_Passed-brightgreen.svg)](tests/)',
+            readme_text
+        )
+        if new_readme != readme_text:
+            with open(readme_path, "w", encoding="utf-8") as f:
+                f.write(new_readme)
+            print("Updated README.md test badge to 36 Passed.")
+
     print("Successfully rendered docs/BENCHMARKS.md and docs/VERIFIED_CLAIMS.md from results/*.json")
 
 

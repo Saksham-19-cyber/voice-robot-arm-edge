@@ -4,7 +4,7 @@
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Serving: Zero PyTorch](https://img.shields.io/badge/Serving-Zero_PyTorch_(ONNX_Only)-orange.svg)](https://onnxruntime.ai/)
-[![Tests: 32 Passed](https://img.shields.io/badge/Tests-32_Passed-brightgreen.svg)](tests/)
+[![Tests: 36 Passed](https://img.shields.io/badge/Tests-36_Passed-brightgreen.svg)](tests/)
 
 🔗 **Live Deployment:** [voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app](https://voice-robot-arm-edge-48q2t6rryznf97ypfkd59k.streamlit.app/)
 

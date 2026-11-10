@@ -15,3 +15,5 @@
 692.7 ms # Quoted previous wrong claim in AUDIT_LOG.md
 4.3 ms # Quoted previous wrong claim in AUDIT_LOG.md
 163 x # Quoted previous wrong claim in AUDIT_LOG.md
+5.86 steps # Quoted previous wrong claim in AUDIT_LOG.md
+1337.4 ms # Quoted previous unverified claim in AUDIT_LOG.md
