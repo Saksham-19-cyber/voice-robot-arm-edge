@@ -67,74 +67,88 @@ def run_onnx_rollout(
         if hasattr(env, "set_goal"):
             env.set_goal(clipped_goal)
 
-    t0 = time.perf_counter()
-    obs_dict, _ = env.reset(seed=seed)
+    try:
+        t0 = time.perf_counter()
+        obs_dict, _ = env.reset(seed=seed)
 
-    # Defensively ensure unwrapped.goal and obs_dict["desired_goal"] match clipped_goal exactly
-    if not np.allclose(env.unwrapped.goal, clipped_goal, atol=1e-4):
-        env.unwrapped.goal = clipped_goal.copy()
-        obs_dict["desired_goal"] = clipped_goal.copy()
-        if hasattr(env.unwrapped, "_render_callback"):
-            env.unwrapped._render_callback()
+        # Defensively ensure unwrapped.goal and obs_dict["desired_goal"] match clipped_goal exactly
+        if not np.allclose(env.unwrapped.goal, clipped_goal, atol=1e-4):
+            env.unwrapped.goal = clipped_goal.copy()
+            obs_dict["desired_goal"] = clipped_goal.copy()
+            if hasattr(env.unwrapped, "_render_callback"):
+                env.unwrapped._render_callback()
 
-    start_pos = [round(float(x), 4) for x in obs_dict["achieved_goal"]]
-    frames: List[np.ndarray] = []
-    render_times_ms: List[float] = []
+        start_pos = [round(float(x), 4) for x in obs_dict["achieved_goal"]]
+        frames: List[np.ndarray] = []
+        render_times_ms: List[float] = []
 
+        t_r0 = time.perf_counter()
+        f0 = env.render()
+        render_times_ms.append((time.perf_counter() - t_r0) * 1000)
+        if f0 is not None:
+            frames.append(f0)
 
-    t_r0 = time.perf_counter()
-    f0 = env.render()
-    render_times_ms.append((time.perf_counter() - t_r0) * 1000)
-    if f0 is not None:
-        frames.append(f0)
+        step = 0
+        succeeded = False
+        first_success_step = None
+        distances: List[float] = []
+        ee_positions: List[List[float]] = [start_pos]
+        actions_taken: List[List[float]] = []
 
-    step = 0
-    succeeded = False
-    first_success_step = None
-    distances: List[float] = []
-    ee_positions: List[List[float]] = [start_pos]
-    actions_taken: List[List[float]] = []
+        while step < max_steps:
+            ob = obs_dict["observation"]
+            ag = obs_dict["achieved_goal"]
+            dg = obs_dict["desired_goal"]
+            obs_flat = np.concatenate([ob, ag, dg], axis=0).astype(np.float32).reshape(1, 16)
 
-    while step < max_steps:
+            action = session.run(None, {"observation_flat": obs_flat})[0][0]
+            actions_taken.append([round(float(a), 4) for a in action])
 
-        ob = obs_dict["observation"]
-        ag = obs_dict["achieved_goal"]
-        dg = obs_dict["desired_goal"]
-        obs_flat = np.concatenate([ob, ag, dg], axis=0).astype(np.float32).reshape(1, 16)
+            obs_dict, reward, terminated, truncated, info = env.step(action)
+            step += 1
 
+            curr_ag = [round(float(x), 4) for x in obs_dict["achieved_goal"]]
+            ee_positions.append(curr_ag)
 
-        action = session.run(None, {"observation_flat": obs_flat})[0][0]
-        actions_taken.append([round(float(a), 4) for a in action])
+            dist = float(np.linalg.norm(obs_dict["achieved_goal"] - obs_dict["desired_goal"]))
+            distances.append(round(dist, 4))
 
+            if info.get("is_success", 0.0) == 1.0 and not succeeded:
+                succeeded = True
+                first_success_step = step
 
-        obs_dict, reward, terminated, truncated, info = env.step(action)
-        step += 1
+            t_r = time.perf_counter()
+            frame = env.render()
+            render_times_ms.append((time.perf_counter() - t_r) * 1000)
+            if frame is not None:
+                frames.append(frame)
 
-        curr_ag = [round(float(x), 4) for x in obs_dict["achieved_goal"]]
-        ee_positions.append(curr_ag)
+            if early_termination and succeeded and (step - first_success_step) >= hold_steps:
+                break
 
-        dist = float(np.linalg.norm(obs_dict["achieved_goal"] - obs_dict["desired_goal"]))
-        distances.append(round(dist, 4))
+        rollout_time_ms = (time.perf_counter() - t0) * 1000
 
-        if info.get("is_success", 0.0) == 1.0 and not succeeded:
-            succeeded = True
-            first_success_step = step
-
-
-        t_r = time.perf_counter()
-        frame = env.render()
-        render_times_ms.append((time.perf_counter() - t_r) * 1000)
-        if frame is not None:
-            frames.append(frame)
-
-
-        if early_termination and succeeded and (step - first_success_step) >= hold_steps:
-            break
-
-    rollout_time_ms = (time.perf_counter() - t0) * 1000
-
-    if owns_env:
-        env.close()
+        # Validate that frames were captured and are not black
+        if len(frames) == 0:
+            raise RuntimeError("Simulation failed to produce any render frames.")
+        mean_first = float(np.mean(frames[0]))
+        mean_last = float(np.mean(frames[-1]))
+        if mean_first < 5.0 or mean_last < 5.0:
+            raise RuntimeError(
+                f"Rendered frames are black (first frame mean: {mean_first:.2f}, "
+                f"last frame mean: {mean_last:.2f}, threshold: 5.0). Simulation render context failure."
+            )
+    finally:
+        if owns_env and env is not None:
+            try:
+                if hasattr(env.unwrapped, "mujoco_renderer") and env.unwrapped.mujoco_renderer is not None:
+                    env.unwrapped.mujoco_renderer.close()
+            except Exception:
+                pass
+            try:
+                env.close()
+            except Exception:
+                pass
 
 
     temp_dir = tempfile.gettempdir()

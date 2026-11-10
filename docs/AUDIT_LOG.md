@@ -44,3 +44,10 @@ This document records the 18 contradictions identified and reconciled during the
 | 27 | Multi-seed training harness | Single-seed training only (seed 42) | **Multi-seed harness `src/rl/train_multiseed.py`** with bootstrap confidence intervals and smoke test suite | `src/rl/train_multiseed.py`, `tests/test_multiseed_smoke.py` |
 | 28 | Test suite count | 32 tests passed | **36 tests passed** (added probes test, allowlist integrity test, and 2 multiseed smoke tests) | `pytest tests/ -v` |
 
+---
+
+## Task A: Cloud OSMesa Black Frame Resolution (fix-black-render-readme)
+
+Env reuse across requests produced black frames on Cloud (OSMesa); replaced by a fresh env per request.
+
+

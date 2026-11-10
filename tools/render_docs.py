@@ -155,8 +155,11 @@ To reconcile throughput and step-time figures across benchmark tables:
 | **MP4 Video Encoding** | `imageio-ffmpeg` H.264 (`-movflags +faststart`) | {early_term.get('video_encode_ms', {}).get('p50', 329.3):.1f} ms | {early_term.get('video_encode_ms', {}).get('mean', 330.2):.1f} ms | {early_term.get('video_encode_ms', {}).get('p95', 457.9):.1f} ms |
 | **Total User Wait Time** | End-to-end request latency (Single Run 5) | **{early_term.get('total_user_wait_ms', {}).get('p50', 2008.5):.1f} ms** | {early_term.get('total_user_wait_ms', {}).get('mean', 2017.8):.1f} ms | {early_term.get('total_user_wait_ms', {}).get('p95', 2687.8):.1f} ms |
 
-- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **{rep_pipe.get('early_termination_wait_p50_ms', {}).get('median', 1597.6):.1f} ms** (range: {rep_pipe.get('early_termination_wait_p50_ms', {}).get('range', '[1220.7, 2008.5]')} ms; single-run table above reports Run 5 at 2008.5 ms p50).
-- **Environment State Reuse:** Reusing the environment in `st.session_state` yields **{rep_pipe.get('env_warm_reset_mean_ms', {}).get('median', 1.2):.1f} ms** warm reset (range: {rep_pipe.get('env_warm_reset_mean_ms', {}).get('range', '[0.5, 1.2]')} ms) vs **{rep_pipe.get('env_recreate_mean_ms', {}).get('median', 394.7):.1f} ms** cold recreation (range: {rep_pipe.get('env_recreate_mean_ms', {}).get('range', '[342.6, 817.6]')} ms), yielding a **{rep_pipe.get('speedup_factor', {}).get('median', 672.1):.0f}x speedup** (range: {rep_pipe.get('speedup_factor', {}).get('range', '[289.1, 794.1]')}x).
+- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **{rep_pipe.get('early_termination_wait_p50_ms', {}).get('median', 1597.6):.1f} ms** (range: {rep_pipe.get('early_termination_wait_p50_ms', {}).get('range', '[1220.7, 2008.5]')} ms; single-run table above reports Run 5 at {early_term.get('total_latency_p50_ms', 2008.5):.1f} ms p50).
+
+### Measured with the previous env-reuse design (no longer used)
+
+- **Environment State Reuse:** Reusing the environment in `st.session_state` yielded **{rep_pipe.get('env_warm_reset_mean_ms', {}).get('median', 1.2):.1f} ms** warm reset (range: {rep_pipe.get('env_warm_reset_mean_ms', {}).get('range', '[0.5, 1.2]')} ms) vs **{rep_pipe.get('env_recreate_mean_ms', {}).get('median', 394.7):.1f} ms** cold recreation (range: {rep_pipe.get('env_recreate_mean_ms', {}).get('range', '[342.6, 817.6]')} ms), yielding a **{rep_pipe.get('speedup_factor', {}).get('median', 672.1):.0f}x speedup** (range: {rep_pipe.get('speedup_factor', {}).get('range', '[289.1, 794.1]')}x). *(Note: Env reuse across requests produced black frames on Cloud under OSMesa; replaced by a fresh env per request).*
 
 ---
 
@@ -218,7 +221,7 @@ To reconcile throughput and step-time figures across benchmark tables:
 
 ### Linux Ubuntu (CI Runner, Headless OSMesa)
 
-*Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
+*Measured with the previous env-reuse design (no longer used). Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
 
 | Benchmark Condition | Idle Server RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
 | :--- | :--- | :--- | :--- | :--- |
@@ -379,13 +382,13 @@ def main():
             readme_text = f.read()
         new_readme = re.sub(
             r'\[!\[Tests: \d+ Passed\]\(https://img\.shields\.io/badge/Tests-\d+_Passed-brightgreen\.svg\)\]\(tests/\)',
-            '[![Tests: 36 Passed](https://img.shields.io/badge/Tests-36_Passed-brightgreen.svg)](tests/)',
+            '[![Tests: 37 Passed](https://img.shields.io/badge/Tests-37_Passed-brightgreen.svg)](tests/)',
             readme_text
         )
         if new_readme != readme_text:
             with open(readme_path, "w", encoding="utf-8") as f:
                 f.write(new_readme)
-            print("Updated README.md test badge to 36 Passed.")
+            print("Updated README.md test badge to 37 Passed.")
 
     print("Successfully rendered docs/BENCHMARKS.md and docs/VERIFIED_CLAIMS.md from results/*.json")
 

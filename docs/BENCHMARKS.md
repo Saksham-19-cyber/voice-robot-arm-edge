@@ -80,7 +80,10 @@ To reconcile throughput and step-time figures across benchmark tables:
 | **Total User Wait Time** | End-to-end request latency (Single Run 5) | **2008.5 ms** | 2017.8 ms | 2687.8 ms |
 
 - **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **1597.6 ms** (range: [1220.7, 2008.5] ms; single-run table above reports Run 5 at 2008.5 ms p50).
-- **Environment State Reuse:** Reusing the environment in `st.session_state` yields **1.2 ms** warm reset (range: [0.5, 1.2] ms) vs **394.7 ms** cold recreation (range: [342.6, 817.6] ms), yielding a **672x speedup** (range: [289.1, 794.1]x).
+
+### Measured with the previous env-reuse design (no longer used)
+
+- **Environment State Reuse:** Reusing the environment in `st.session_state` yielded **1.2 ms** warm reset (range: [0.5, 1.2] ms) vs **394.7 ms** cold recreation (range: [342.6, 817.6] ms), yielding a **672x speedup** (range: [289.1, 794.1]x). *(Note: Env reuse across requests produced black frames on Cloud under OSMesa; replaced by a fresh env per request).*
 
 ---
 
@@ -149,7 +152,7 @@ To reconcile throughput and step-time figures across benchmark tables:
 
 ### Linux Ubuntu (CI Runner, Headless OSMesa)
 
-*Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
+*Measured with the previous env-reuse design (no longer used). Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
 
 | Benchmark Condition | Idle Server RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
 | :--- | :--- | :--- | :--- | :--- |

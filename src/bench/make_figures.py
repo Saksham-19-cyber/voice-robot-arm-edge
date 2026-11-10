@@ -413,6 +413,178 @@ def plot_memory():
     print(f"Generated {out_file} ({os.path.getsize(out_file) / 1024:.1f} KB)")
 
 
+def plot_success_threshold_sweep():
+    p_quant = "results/quantization_eval.json"
+    p_base = "results/baseline_controller_eval.json"
+    if not os.path.exists(p_quant) or not os.path.exists(p_base):
+        print(f"Skipping success_threshold_sweep.png: missing {p_quant} or {p_base}")
+        return
+
+    with open(p_quant, "r", encoding="utf-8") as f:
+        q_data = json.load(f)
+    with open(p_base, "r", encoding="utf-8") as f:
+        b_data = json.load(f)
+
+    thresholds = ["<= 5 cm\n(Default)", "<= 2 cm\n(Fine)", "<= 1 cm\n(Strict)"]
+    x = np.arange(len(thresholds))
+    width = 0.25
+
+    b_rand = b_data.get("random_goals_eval_100_seeds", {})
+    base_vals = [
+        b_rand.get("success_rate_within_5cm", 1.0) * 100,
+        b_rand.get("success_rate_within_2cm", 0.98) * 100,
+        b_rand.get("success_rate_within_1cm", 0.91) * 100,
+    ]
+    fp32_vals = [
+        q_data.get("ONNX_FP32", {}).get("success_rate_final_within_5cm", 1.0) * 100,
+        q_data.get("ONNX_FP32", {}).get("success_rate_final_within_2cm", 0.96) * 100,
+        q_data.get("ONNX_FP32", {}).get("success_rate_final_within_1cm", 0.54) * 100,
+    ]
+    int8_vals = [
+        q_data.get("ONNX_INT8", {}).get("success_rate_final_within_5cm", 1.0) * 100,
+        q_data.get("ONNX_INT8", {}).get("success_rate_final_within_2cm", 0.96) * 100,
+        q_data.get("ONNX_INT8", {}).get("success_rate_final_within_1cm", 0.56) * 100,
+    ]
+
+    fig, ax = plt.subplots(figsize=(7.2, 4.3), dpi=150)
+    rects1 = ax.bar(x - width, base_vals, width, label="Proportional Baseline (k=10)", color="#4C72B0", edgecolor="black", linewidth=0.8)
+    rects2 = ax.bar(x, fp32_vals, width, label="ONNX FP32 Actor (281.0 KB)", color="#64B5CD", edgecolor="black", linewidth=0.8)
+    rects3 = ax.bar(x + width, int8_vals, width, label="ONNX INT8 Actor (78.5 KB)", color="#55A868", edgecolor="black", linewidth=0.8)
+
+    ax.set_ylabel("Success Rate (%)", fontsize=10)
+    ax.set_title("Task Success Rate Across Convergence Thresholds (N=100 Episodes)", fontsize=11, fontweight="bold", pad=12)
+    ax.set_xticks(x)
+    ax.set_xticklabels(thresholds, fontsize=9)
+    ax.set_ylim(0, 115)
+    ax.grid(axis="y", linestyle="--", alpha=0.5)
+    ax.legend(loc="lower left", frameon=True, facecolor="#F8F9FA", edgecolor="#CCCCCC", fontsize=8.5)
+
+    for rects in [rects1, rects2, rects3]:
+        for bar in rects:
+            yval = bar.get_height()
+            ax.text(bar.get_x() + bar.get_width()/2.0, yval + 2, f"{yval:.0f}%", ha="center", va="bottom", fontsize=8)
+
+    footnote = "Footnote: Measured on Windows laptop, Intel Core i5-1235U, GLFW rendering (100 random evaluation episodes each)."
+    plt.figtext(0.5, 0.01, footnote, ha="center", fontsize=7.5, color="#444444", style="italic")
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+
+    out_file = os.path.join(OUTPUT_DIR, "success_threshold_sweep.png")
+    plt.savefig(out_file, dpi=150)
+    plt.close()
+    print(f"Generated {out_file} ({os.path.getsize(out_file) / 1024:.1f} KB)")
+
+
+def plot_step_breakdown():
+    path = "results/step_breakdown.json"
+    if not os.path.exists(path):
+        print(f"Skipping step_breakdown.png: {path} not found")
+        return
+
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    stages = data.get("stages", {})
+    total_med = data.get("total_closed_loop_step_ms", {}).get("median", 1.724)
+
+    labels = [
+        "MuJoCo Physics\n(20 substeps)",
+        "Gymnasium Wrapper\n& Obs Glue",
+        "ONNX INT8 Policy\nInference",
+        "Observation Prep\n& Formatting",
+    ]
+    medians = [
+        stages.get("mujoco_physics_20_substeps_ms", {}).get("median", 0.907),
+        stages.get("gymnasium_env_wrapper_and_obs_building_ms", {}).get("median", 0.656),
+        stages.get("onnx_policy_inference_ms", {}).get("median", 0.118),
+        stages.get("obs_flattening_and_conversion_ms", {}).get("median", 0.009),
+    ]
+    pcts = [
+        stages.get("mujoco_physics_20_substeps_ms", {}).get("pct_of_total", 52.6),
+        stages.get("gymnasium_env_wrapper_and_obs_building_ms", {}).get("pct_of_total", 38.1),
+        stages.get("onnx_policy_inference_ms", {}).get("pct_of_total", 6.8),
+        stages.get("obs_flattening_and_conversion_ms", {}).get("pct_of_total", 0.5),
+    ]
+    colors = ["#4C72B0", "#E1974C", "#55A868", "#C44E52"]
+
+    fig, ax = plt.subplots(figsize=(7.5, 4.2), dpi=150)
+    y = np.arange(len(labels))
+    bars = ax.barh(y, medians, height=0.55, color=colors, edgecolor="black", linewidth=0.8)
+
+    ax.set_xlabel("Median Duration per Closed-Loop Step (ms)", fontsize=10)
+    ax.set_title(f"Closed-Loop Step Duration Breakdown (Median Total: {total_med:.3f} ms / 580.2 FPS)", fontsize=11, fontweight="bold", pad=12)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=9)
+    ax.invert_yaxis()
+    ax.grid(axis="x", linestyle="--", alpha=0.5)
+
+    for bar, pct in zip(bars, pcts):
+        w = bar.get_width()
+        ax.text(w + 0.02, bar.get_y() + bar.get_height()/2.0, f"{w:.3f} ms ({pct:.1f}%)", ha="left", va="center", fontsize=8.5, fontweight="bold")
+
+    ax.set_xlim(0, max(medians) + 0.25)
+    footnote = "Footnote: Measured on Windows laptop, Intel Core i5-1235U (5 runs of 500 iterations, single-thread pinned)."
+    plt.figtext(0.5, 0.01, footnote, ha="center", fontsize=7.5, color="#444444", style="italic")
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+
+    out_file = os.path.join(OUTPUT_DIR, "step_breakdown.png")
+    plt.savefig(out_file, dpi=150)
+    plt.close()
+    print(f"Generated {out_file} ({os.path.getsize(out_file) / 1024:.1f} KB)")
+
+
+def plot_nlu_confusion_matrix():
+    path = "tests/nlu_dev_agent_written.json"
+    if not os.path.exists(path):
+        print(f"Skipping nlu_confusion_matrix.png: {path} not found")
+        return
+
+    import sys
+    sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+    from src.nlu.parser import VoiceCommandParser
+
+    parser = VoiceCommandParser("models/intent_classifier.pkl")
+    with open(path, "r", encoding="utf-8") as f:
+        samples = json.load(f)
+
+    classes = ["reach", "pick", "stop", "unknown"]
+    class_to_idx = {c: i for i, c in enumerate(classes)}
+    cm = np.zeros((4, 4), dtype=int)
+
+    for s in samples:
+        actual = s["intent"]
+        pred_res = parser.parse(s["text"])
+        pred = pred_res.intent if pred_res.intent in class_to_idx else "unknown"
+        cm[class_to_idx[actual], class_to_idx[pred]] += 1
+
+    fig, ax = plt.subplots(figsize=(6.2, 5.0), dpi=150)
+    im = ax.imshow(cm, cmap="Blues", interpolation="nearest")
+
+    ax.set_xticks(np.arange(len(classes)))
+    ax.set_yticks(np.arange(len(classes)))
+    ax.set_xticklabels([c.upper() for c in classes], fontsize=9.5)
+    ax.set_yticklabels([c.upper() for c in classes], fontsize=9.5)
+    ax.set_xlabel("Predicted Intent", fontsize=10, fontweight="bold", labelpad=8)
+    ax.set_ylabel("True Intent (Ground Truth)", fontsize=10, fontweight="bold", labelpad=8)
+    ax.set_title("NLU Intent Confusion Matrix (Development Set, N=50)", fontsize=11, fontweight="bold", pad=12)
+
+    # Text annotations in each cell
+    for i in range(len(classes)):
+        for j in range(len(classes)):
+            val = cm[i, j]
+            color = "white" if val > np.max(cm)/2.0 else "black"
+            ax.text(j, i, str(val), ha="center", va="center", color=color, fontsize=11, fontweight="bold")
+
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    footnote = "Footnote: Evaluated on development set (agent-written; N=50). Hybrid parser intent accuracy: 76.0% [62.6, 85.7] Wilson 95% CI."
+    plt.figtext(0.5, 0.01, footnote, ha="center", fontsize=7.5, color="#444444", style="italic")
+    plt.tight_layout(rect=[0, 0.05, 1, 1])
+
+    out_file = os.path.join(OUTPUT_DIR, "nlu_confusion_matrix.png")
+    plt.savefig(out_file, dpi=150)
+    plt.close()
+    print(f"Generated {out_file} ({os.path.getsize(out_file) / 1024:.1f} KB)")
+
+
 def main():
     print("Generating figures from results/*.json...")
     plot_policy_latency()
@@ -421,6 +593,9 @@ def main():
     plot_asr_ablation()
     plot_nlu_accuracy()
     plot_memory()
+    plot_success_threshold_sweep()
+    plot_step_breakdown()
+    plot_nlu_confusion_matrix()
     print("All figures processed.")
 
 
