@@ -59,6 +59,12 @@ This document records the exact, unrounded measurements produced by benchmark sc
 - **Observation Array Formatting & Flattening:** 0.009 ms (0.5%)
 - **Closure:** Sum of component medians is 1.690 ms (closure difference: 2.0% from closed-loop step, well within 5%).
 
+### Measurement Definitions
+
+To reconcile throughput and step-time figures across benchmark tables:
+- **Closed-Loop Rollout Step (~580 FPS / 1.72 ms/step):** Measured in `results/rollout_fps_audit.json` and `results/step_breakdown.json`. Benchmarks the continuous real-time closed-loop execution loop (environment physics step, observation formatting, and ONNX policy forward pass without episode reset overhead). This reflects the true real-time throughput of the policy loop during execution.
+- **Evaluation Harness Step (~230 FPS / 4.38 ms/step):** Derived from `results/quantization_eval.json` (227.8 FPS FP32, 230.8 FPS INT8). Benchmarks the full batch test harness across 100 evaluation episodes, which includes per-episode environment resets, deepcopy observation storage, multi-threshold distance evaluations (<=5cm, <=2cm, <=1cm), and per-step metric aggregation overhead.
+
 ---
 
 ## 4. End-to-End Request Latency & Pipeline Stages
@@ -71,10 +77,13 @@ This document records the exact, unrounded measurements produced by benchmark sc
 | **NLU Intent Parsing** | Dual-engine hybrid (Regex + Classifier fallback) | 3.27 ms | 4.19 ms | 9.25 ms |
 | **Rollout + Visual Render** | Early termination (13.0 steps) @ 320x320 | 34.9 ms | 37.0 ms | 53.7 ms |
 | **MP4 Video Encoding** | `imageio-ffmpeg` H.264 (`-movflags +faststart`) | 329.3 ms | 330.2 ms | 457.9 ms |
-| **Total User Wait Time** | End-to-end request latency | **2008.5 ms** | 2017.8 ms | 2687.8 ms |
+| **Total User Wait Time** | End-to-end request latency (Single Run 5) | **2008.5 ms** | 2017.8 ms | 2687.8 ms |
 
-- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **1597.6 ms** (range: [1220.7, 2008.5] ms).
-- **Environment State Reuse:** Reusing the environment in `st.session_state` yields **1.2 ms** warm reset (range: [0.5, 1.2] ms) vs **394.7 ms** cold recreation (range: [342.6, 817.6] ms), yielding a **672x speedup** (range: [289.1, 794.1]x).
+- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **1597.6 ms** (range: [1220.7, 2008.5] ms; single-run table above reports Run 5 at 2008.5 ms p50).
+
+### Measured with the previous env-reuse design (no longer used)
+
+- **Environment State Reuse:** Reusing the environment in `st.session_state` yielded **1.2 ms** warm reset (range: [0.5, 1.2] ms) vs **394.7 ms** cold recreation (range: [342.6, 817.6] ms), yielding a **672x speedup** (range: [289.1, 794.1]x). *(Note: Env reuse across requests produced black frames on Cloud under OSMesa; replaced by a fresh env per request).*
 
 ---
 
@@ -109,7 +118,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
 - **Without Stop-List Expansion:** Hybrid Intent: 66.0% (Wilson CI: [52.2%, 77.6%]), End-to-End: 58.0% (Wilson CI: [44.2%, 70.6%])
 - **With Stop-List Expansion (25 phrases):** Hybrid Intent: 76.0% (Wilson CI: [62.6%, 85.7%]), End-to-End: 68.0% (Wilson CI: [54.2%, 79.2%])
 - **Effect:** Effect of stop list on development set: contributed +10.0 pp absolute accuracy gain to both intent and end-to-end metrics on the development set.
-- **Frozen Protocol:** The parser was frozen at git commit `aa35fd4` (tag `nlu-frozen-v1`). Future human evaluation (`tests/nlu_heldout_human.json`) must be evaluated exactly once on this tag without further tuning.
+- **Frozen Protocol:** Initial parser baseline frozen at tag `nlu-frozen-v1`. Following audit pass 3 fixes (resolving regression probes, unit conversions, stop priority, and goal invention avoidance), the updated parser is tagged as `nlu-frozen-v2`. The human held-out set (`tests/nlu_heldout_human.json`) must be evaluated once on tag `nlu-frozen-v2` with no tuning afterwards.
 
 ---
 
@@ -122,7 +131,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
   - y: `[0.5991, 0.8991]`
   - z: `[0.3847, 0.6847]`
 - **Out-of-Range NLU Goals Found:** 12 commands produce coordinates beyond the environment training bounds prior to clipping.
-- **NLU Goal Closed-Loop Success Rate:** **100.0%** across all 30 goal categories (mean steps to goal: 2.97, mean final distance: 1.08 cm).
+- **NLU Goal Closed-Loop Success Rate:** **100.0%** across all 33 goal categories (mean steps to goal: 2.97, mean final distance: 1.08 cm).
 
 ---
 
@@ -143,7 +152,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 ### Linux Ubuntu (CI Runner, Headless OSMesa)
 
-*Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
+*Measured with the previous env-reuse design (no longer used). Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
 
 | Benchmark Condition | Idle Server RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
 | :--- | :--- | :--- | :--- | :--- |

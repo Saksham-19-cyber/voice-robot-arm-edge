@@ -1,47 +1,19 @@
 # Allowlist of non-benchmark numbers with units appearing in README.md and documentation
 # Format: <number> <unit> # reason
 
-3.11 s # Python version parsed with unit in badge or text
+## Active doc numbers
+4.38 ms # Evaluation harness step duration cited in BENCHMARKS.md (derived from quantization_eval)
 2.0 s # Audio fixture clip duration (sample_2s.wav length)
-2.0s # Audio fixture clip duration
-0.002 s # MuJoCo internal physics integration timestep (dt = 0.002s)
-0.04 s # Gymnasium control timestep (20 substeps * 0.002s = 0.04s)
-50 steps # Gymnasium FetchReach-v4 max episode step limit
-25 steps # Smoke test rollout step horizon
-10 steps # Early termination HOLD_STEPS parameter
-100 steps # Episode budget limit
-4000 steps # Total RL policy training steps budget
-1500 steps # Training steps where 100% success was first reached
-1024 MB # Streamlit Community Cloud memory limit
+2.0s # Audio fixture clip duration without space
 1 GB # Streamlit Community Cloud memory limit
-10 cm # Preset command displacement distance ("move up by 10 cm")
-5 cm # Task success distance threshold in FetchReach (0.05 m)
-2 cm # Task accuracy distance threshold in FetchReach (0.02 m)
-1 cm # Tight accuracy distance threshold in FetchReach (0.01 m)
-30 cm # Metric offset evaluation boundary range
-95 % # Wilson score and bootstrap confidence level (95% CI)
-74 % # Rollout step reduction percentage (from 50 to 13 steps: (50-13)/50 = 74%)
-80 % # Memory headroom percentage (>80% headroom under 1024 MB limit)
-100.0 % # Task success rate percentage on random and NLU goals
-0.114 s # rounding match for action difference
-0.042 s # rounding match for action difference
-52 s # Test suite execution duration on Windows laptop (pytest run)
-39 s # Test suite execution duration on Linux CI runner
-22 pp # Percentage points improvement on agent-written dev set (76.0% - 54.0% = 22 pp)
-10 pp # Percentage points improvement on agent-written dev set (58.0% - 48.0% = 10 pp)
-16 kHz # Audio sampling rate for speech recognition
-16 bit # Audio bit depth for PCM recordings
-32 bit # Audio bit depth for PCM/float WAV formats
 3.2 MB # PyTorch SB3 model zip size on disk (models/fetch_reach_sac.zip)
-300 MB # PyTorch baseline process resident memory footprint
-700 MB # PyTorch C++ runtime disk footprint
-1337.4 ms # ASR stage in full pipeline (from prompt instruction)
-12000 steps # Quoted previous wrong claim in audit table
-156.9 fps # Quoted previous wrong claim in audit table
-683.5 fps # Quoted previous measurement in audit log
-851.6 fps # Quoted previous measurement in audit log
-692.7 ms # Quoted previous wrong claim in audit table
-4.3 ms # Quoted previous wrong claim in audit table
-163 x # Quoted previous wrong claim in audit table
-1.70 s # Rounding of 1699.5 ms to seconds in ASR cold start
 737.6 ms # Delta between 1-thread and 4-thread transcribe() in ASR ablation table
+
+## Historical quotes (AUDIT_LOG.md only)
+12000 steps # Quoted previous wrong claim in AUDIT_LOG.md
+156.9 fps # Quoted previous wrong claim in AUDIT_LOG.md
+692.7 ms # Quoted previous wrong claim in AUDIT_LOG.md
+4.3 ms # Quoted previous wrong claim in AUDIT_LOG.md
+163 x # Quoted previous wrong claim in AUDIT_LOG.md
+5.86 steps # Quoted previous wrong claim in AUDIT_LOG.md
+1337.4 ms # Quoted previous unverified claim in AUDIT_LOG.md

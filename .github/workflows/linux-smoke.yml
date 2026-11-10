@@ -88,6 +88,40 @@ jobs:
           print('(int(raw_type) in (HINGE, SLIDE)):', (int(raw_type) in (HINGE, SLIDE)))
           "
 
+      - name: Dump and Upload Enum Diagnostics Artifact
+        run: |
+          mkdir -p results
+          python -c "
+          import mujoco
+          import numpy as np
+
+          xml = '''<mujoco><worldbody><body name=\"b1\"><joint type=\"hinge\" name=\"j1\"/><geom size=\"0.1\" type=\"sphere\"/></body></worldbody></mujoco>'''
+          model = mujoco.MjModel.from_xml_string(xml)
+          joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, 'j1')
+          raw_type = model.jnt_type[joint_id]
+          HINGE = mujoco.mjtJoint.mjJNT_HINGE
+          SLIDE = mujoco.mjtJoint.mjJNT_SLIDE
+
+          with open('results/enum_diagnostics_linux.txt', 'w') as f:
+              f.write('=== LINUX ENUM DIAGNOSTICS ===\n')
+              f.write(f'type(raw_type): {type(raw_type)}\n')
+              f.write(f'repr(raw_type): {repr(raw_type)}\n')
+              f.write(f'(raw_type == HINGE): {raw_type == HINGE}\n')
+              f.write(f'(HINGE == raw_type): {HINGE == raw_type}\n')
+              f.write(f'(raw_type in (HINGE, SLIDE)): {raw_type in (HINGE, SLIDE)}\n')
+              f.write(f'type(int(raw_type)): {type(int(raw_type))}\n')
+              f.write(f'repr(int(raw_type)): {repr(int(raw_type))}\n')
+              f.write(f'(int(raw_type) == HINGE): {int(raw_type) == HINGE}\n')
+              f.write(f'(HINGE == int(raw_type)): {HINGE == int(raw_type)}\n')
+              f.write(f'(int(raw_type) in (HINGE, SLIDE)): {int(raw_type) in (HINGE, SLIDE)}\n')
+          "
+
+      - name: Upload Enum Diagnostics Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: enum-diagnostics-mujoco-${{ matrix.mujoco_ver }}
+          path: results/enum_diagnostics_linux.txt
+
       - name: Test Strategy A - Stock Env Creation (NO Patch)
         env:
           MUJOCO_GL: osmesa

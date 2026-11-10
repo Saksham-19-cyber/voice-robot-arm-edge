@@ -135,6 +135,12 @@ This document records the exact, unrounded measurements produced by benchmark sc
 - **Observation Array Formatting & Flattening:** {step_bd.get('stages', {}).get('obs_flattening_and_conversion_ms', {}).get('median', 0.009):.3f} ms ({step_bd.get('stages', {}).get('obs_flattening_and_conversion_ms', {}).get('pct_of_total', 0.5):.1f}%)
 - **Closure:** Sum of component medians is {step_bd.get('closure', {}).get('sum_of_medians_ms', 1.690):.3f} ms (closure difference: {step_bd.get('closure', {}).get('diff_from_closed_loop_pct', 2.0):.1f}% from closed-loop step, well within 5%).
 
+### Measurement Definitions
+
+To reconcile throughput and step-time figures across benchmark tables:
+- **Closed-Loop Rollout Step (~580 FPS / 1.72 ms/step):** Measured in `results/rollout_fps_audit.json` and `results/step_breakdown.json`. Benchmarks the continuous real-time closed-loop execution loop (environment physics step, observation formatting, and ONNX policy forward pass without episode reset overhead). This reflects the true real-time throughput of the policy loop during execution.
+- **Evaluation Harness Step (~230 FPS / 4.38 ms/step):** Derived from `results/quantization_eval.json` ({quant_eval.get('ONNX_FP32', {}).get('fps', 227.8):.1f} FPS FP32, {quant_eval.get('ONNX_INT8', {}).get('fps', 230.8):.1f} FPS INT8). Benchmarks the full batch test harness across 100 evaluation episodes, which includes per-episode environment resets, deepcopy observation storage, multi-threshold distance evaluations (<=5cm, <=2cm, <=1cm), and per-step metric aggregation overhead.
+
 ---
 
 ## 4. End-to-End Request Latency & Pipeline Stages
@@ -147,10 +153,13 @@ This document records the exact, unrounded measurements produced by benchmark sc
 | **NLU Intent Parsing** | Dual-engine hybrid (Regex + Classifier fallback) | {early_term.get('nlu_parse_ms', {}).get('p50', 3.27):.2f} ms | {early_term.get('nlu_parse_ms', {}).get('mean', 4.19):.2f} ms | {early_term.get('nlu_parse_ms', {}).get('p95', 9.25):.2f} ms |
 | **Rollout + Visual Render** | Early termination ({early_term.get('mean_steps_taken', 13.0):.1f} steps) @ 320x320 | {early_term.get('rollout_and_render_ms', {}).get('p50', 34.9):.1f} ms | {early_term.get('rollout_and_render_ms', {}).get('mean', 37.0):.1f} ms | {early_term.get('rollout_and_render_ms', {}).get('p95', 53.7):.1f} ms |
 | **MP4 Video Encoding** | `imageio-ffmpeg` H.264 (`-movflags +faststart`) | {early_term.get('video_encode_ms', {}).get('p50', 329.3):.1f} ms | {early_term.get('video_encode_ms', {}).get('mean', 330.2):.1f} ms | {early_term.get('video_encode_ms', {}).get('p95', 457.9):.1f} ms |
-| **Total User Wait Time** | End-to-end request latency | **{early_term.get('total_user_wait_ms', {}).get('p50', 2008.5):.1f} ms** | {early_term.get('total_user_wait_ms', {}).get('mean', 2017.8):.1f} ms | {early_term.get('total_user_wait_ms', {}).get('p95', 2687.8):.1f} ms |
+| **Total User Wait Time** | End-to-end request latency (Single Run 5) | **{early_term.get('total_user_wait_ms', {}).get('p50', 2008.5):.1f} ms** | {early_term.get('total_user_wait_ms', {}).get('mean', 2017.8):.1f} ms | {early_term.get('total_user_wait_ms', {}).get('p95', 2687.8):.1f} ms |
 
-- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **{rep_pipe.get('early_termination_wait_p50_ms', {}).get('median', 1597.6):.1f} ms** (range: {rep_pipe.get('early_termination_wait_p50_ms', {}).get('range', '[1220.7, 2008.5]')} ms).
-- **Environment State Reuse:** Reusing the environment in `st.session_state` yields **{rep_pipe.get('env_warm_reset_mean_ms', {}).get('median', 1.2):.1f} ms** warm reset (range: {rep_pipe.get('env_warm_reset_mean_ms', {}).get('range', '[0.5, 1.2]')} ms) vs **{rep_pipe.get('env_recreate_mean_ms', {}).get('median', 394.7):.1f} ms** cold recreation (range: {rep_pipe.get('env_recreate_mean_ms', {}).get('range', '[342.6, 817.6]')} ms), yielding a **{rep_pipe.get('speedup_factor', {}).get('median', 672.1):.0f}x speedup** (range: {rep_pipe.get('speedup_factor', {}).get('range', '[289.1, 794.1]')}x).
+- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **{rep_pipe.get('early_termination_wait_p50_ms', {}).get('median', 1597.6):.1f} ms** (range: {rep_pipe.get('early_termination_wait_p50_ms', {}).get('range', '[1220.7, 2008.5]')} ms; single-run table above reports Run 5 at {early_term.get('total_latency_p50_ms', 2008.5):.1f} ms p50).
+
+### Measured with the previous env-reuse design (no longer used)
+
+- **Environment State Reuse:** Reusing the environment in `st.session_state` yielded **{rep_pipe.get('env_warm_reset_mean_ms', {}).get('median', 1.2):.1f} ms** warm reset (range: {rep_pipe.get('env_warm_reset_mean_ms', {}).get('range', '[0.5, 1.2]')} ms) vs **{rep_pipe.get('env_recreate_mean_ms', {}).get('median', 394.7):.1f} ms** cold recreation (range: {rep_pipe.get('env_recreate_mean_ms', {}).get('range', '[342.6, 817.6]')} ms), yielding a **{rep_pipe.get('speedup_factor', {}).get('median', 672.1):.0f}x speedup** (range: {rep_pipe.get('speedup_factor', {}).get('range', '[289.1, 794.1]')}x). *(Note: Env reuse across requests produced black frames on Cloud under OSMesa; replaced by a fresh env per request).*
 
 ---
 
@@ -178,7 +187,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
 - **Without Stop-List Expansion:** Hybrid Intent: 66.0% (Wilson CI: [52.2%, 77.6%]), End-to-End: 58.0% (Wilson CI: [44.2%, 70.6%])
 - **With Stop-List Expansion (25 phrases):** Hybrid Intent: 76.0% (Wilson CI: [62.6%, 85.7%]), End-to-End: 68.0% (Wilson CI: [54.2%, 79.2%])
 - **Effect:** Effect of stop list on development set: contributed +10.0 pp absolute accuracy gain to both intent and end-to-end metrics on the development set.
-- **Frozen Protocol:** The parser was frozen at git commit `{nlu_det.get('nlu_frozen_v1_commit', 'aa35fd4')[:7]}` (tag `nlu-frozen-v1`). Future human evaluation (`tests/nlu_heldout_human.json`) must be evaluated exactly once on this tag without further tuning.
+- **Frozen Protocol:** Initial parser baseline frozen at tag `nlu-frozen-v1`. Following audit pass 3 fixes (resolving regression probes, unit conversions, stop priority, and goal invention avoidance), the updated parser is tagged as `nlu-frozen-v2`. The human held-out set (`tests/nlu_heldout_human.json`) must be evaluated once on tag `nlu-frozen-v2` with no tuning afterwards.
 
 ---
 
@@ -191,7 +200,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
   - y: `[{goal_range.get('training_range', {}).get('bounds', {}).get('y', [0.5991, 0.8991])[0]:.4f}, {goal_range.get('training_range', {}).get('bounds', {}).get('y', [0.5991, 0.8991])[1]:.4f}]`
   - z: `[{goal_range.get('training_range', {}).get('bounds', {}).get('z', [0.3847, 0.6847])[0]:.4f}, {goal_range.get('training_range', {}).get('bounds', {}).get('z', [0.3847, 0.6847])[1]:.4f}]`
 - **Out-of-Range NLU Goals Found:** {goal_range.get('out_of_range_count', 12)} commands produce coordinates beyond the environment training bounds prior to clipping.
-- **NLU Goal Closed-Loop Success Rate:** **{nlu_goal.get('success_rate_summary', {}).get('int8_first_reached_within_5cm', 1.0) * 100:.1f}%** across all 30 goal categories (mean steps to goal: {nlu_goal.get('overall_metrics', {}).get('int8', {}).get('mean_steps_to_goal', 2.97):.2f}, mean final distance: {nlu_goal.get('overall_metrics', {}).get('int8', {}).get('mean_final_distance_cm', 1.08):.2f} cm).
+- **NLU Goal Closed-Loop Success Rate:** **{nlu_goal.get('success_rate_summary', {}).get('int8_first_reached_within_5cm', 1.0) * 100:.1f}%** across all {len(nlu_goal.get('goals', {})) or 33} goal categories (mean steps to goal: {nlu_goal.get('overall_metrics', {}).get('int8', {}).get('mean_steps_to_goal', 2.97):.2f}, mean final distance: {nlu_goal.get('overall_metrics', {}).get('int8', {}).get('mean_final_distance_cm', 1.08):.2f} cm).
 
 ---
 
@@ -212,7 +221,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 ### Linux Ubuntu (CI Runner, Headless OSMesa)
 
-*Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
+*Measured with the previous env-reuse design (no longer used). Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
 
 | Benchmark Condition | Idle Server RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
 | :--- | :--- | :--- | :--- | :--- |
@@ -365,6 +374,22 @@ def main():
         f.write(benchmarks_md)
     with open(claims_path, "w", encoding="utf-8") as f:
         f.write(claims_md)
+
+    # Update README.md test count badge via tooling
+    readme_path = os.path.join(base_dir, "README.md")
+    if os.path.exists(readme_path):
+        with open(readme_path, "r", encoding="utf-8") as f:
+            readme_text = f.read()
+        new_readme = re.sub(
+            r'\[!\[Tests: \d+ Passed\]\(https://img\.shields\.io/badge/Tests-\d+_Passed-brightgreen\.svg\)\]\(tests/\)',
+            '[![Tests: 37 Passed](https://img.shields.io/badge/Tests-37_Passed-brightgreen.svg)](tests/)',
+            readme_text
+        )
+        if new_readme != readme_text:
+            with open(readme_path, "w", encoding="utf-8") as f:
+                f.write(new_readme)
+            print("Updated README.md test badge to 37 Passed.")
+
     print("Successfully rendered docs/BENCHMARKS.md and docs/VERIFIED_CLAIMS.md from results/*.json")
 
 

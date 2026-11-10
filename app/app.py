@@ -31,7 +31,7 @@ if BASE_DIR not in sys.path:
 from src.nlu.parser import VoiceCommandParser
 from src.rl.rollout import run_onnx_rollout, HOLD_STEPS
 from src.tts.speaker import render_tts
-from src.rl.env_utils import WORKSPACE_BOUNDS, WORKSPACE_CENTER, make_fetch_env
+from src.rl.env_utils import WORKSPACE_BOUNDS, WORKSPACE_CENTER
 
 
 
@@ -155,8 +155,6 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
         st.session_state["last_result"] = None
     if "command_text" not in st.session_state:
         st.session_state["command_text"] = "reach to the left"
-    if "sim_env" not in st.session_state:
-        st.session_state["sim_env"] = None
 
 
     prerendered_path = os.path.join(BASE_DIR, "results", "demo_prerendered.mp4")
@@ -289,76 +287,37 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
             elif intent_res.goal_xyz is not None:
                 target_goal = np.array(intent_res.goal_xyz, dtype=np.float32)
 
-
-                current_res = (render_w, render_h)
-                if st.session_state.get("sim_env_res") != current_res and st.session_state["sim_env"] is not None:
+                with st.spinner("Simulating MuJoCo physics rollout..."):
                     try:
-                        st.session_state["sim_env"].close()
-                    except Exception:
-                        pass
-                    st.session_state["sim_env"] = None
-
-
-                env_creation_failed = False
-                if st.session_state["sim_env"] is None:
-                    try:
-                        st.session_state["sim_env"] = make_fetch_env(
-                            "FetchReach-v4",
-                            render_mode="rgb_array",
-                            width=render_w,
-                            height=render_h,
-                            fixed_goal=target_goal,
+                        rollout_res = run_onnx_rollout(
+                            goal_xyz=target_goal,
+                            onnx_path=onnx_path,
+                            max_steps=50 if full_rollout else 25,
+                            early_termination=not full_rollout,
+                            render_width=render_w,
+                            render_height=render_h,
+                            env=None,
                         )
-                        st.session_state["sim_env_res"] = current_res
-                    except Exception as env_err:
+                        st.session_state["last_result"] = {
+                            "kind": "success",
+                            "intent_res": intent_res,
+                            "rollout": rollout_res,
+                            "nlu_latency_ms": nlu_latency_ms,
+                            "asr_latency_ms": asr_latency_ms,
+                        }
+                    except Exception as exc:
                         import mujoco
                         import gymnasium_robotics
-                        st.session_state["sim_env"] = None
-                        st.session_state["sim_env_error"] = traceback.format_exc()
-                        env_creation_failed = True
                         st.session_state["last_result"] = {
                             "kind": "error",
-                            "stage": "Environment Initialization (make_fetch_env)",
+                            "stage": "Rollout Execution (run_onnx_rollout)",
                             "intent_res": intent_res,
-                            "error_type": type(env_err).__name__,
-                            "error_msg": str(env_err),
+                            "error_type": type(exc).__name__,
+                            "error_msg": str(exc),
                             "traceback": traceback.format_exc(),
                             "mujoco_ver": getattr(mujoco, "__version__", "unknown"),
                             "robotics_ver": getattr(gymnasium_robotics, "__version__", "unknown"),
                         }
-
-                if not env_creation_failed:
-                    with st.spinner("Simulating MuJoCo physics rollout..."):
-                        try:
-                            rollout_res = run_onnx_rollout(
-                                goal_xyz=target_goal,
-                                onnx_path=onnx_path,
-                                max_steps=50 if full_rollout else 25,
-                                early_termination=not full_rollout,
-                                render_width=render_w,
-                                render_height=render_h,
-                                env=st.session_state["sim_env"],
-                            )
-                            st.session_state["last_result"] = {
-                                "kind": "success",
-                                "intent_res": intent_res,
-                                "rollout": rollout_res,
-                                "nlu_latency_ms": nlu_latency_ms,
-                                "asr_latency_ms": asr_latency_ms,
-                            }
-                        except Exception as exc:
-                            import mujoco
-                            import gymnasium_robotics
-                            st.session_state["last_result"] = {
-                                "kind": "error",
-                                "stage": "Rollout Execution (run_onnx_rollout)",
-                                "intent_res": intent_res,
-                                "error_type": type(exc).__name__,
-                                "error_msg": str(exc),
-                                "traceback": traceback.format_exc(),
-                                "mujoco_ver": getattr(mujoco, "__version__", "unknown"),
-                                "robotics_ver": getattr(gymnasium_robotics, "__version__", "unknown"),
-                            }
             else:
                 st.session_state["last_result"] = {
                     "kind": "clarification",

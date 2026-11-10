@@ -27,3 +27,27 @@ This document records the 18 contradictions identified and reconciled during the
 | 17 | Baseline controller | Not compared | **100.0% success, 2.61 mean steps, 0.18 cm final dist** | `results/baseline_controller_eval.json` |
 | 18 | Unprofiled causal language | "thread contention", "barrier overhead", "fits in L2 cache" | **Replaced** with "cause not profiled" | `README.md`, `docs/` |
 
+---
+
+## Audit Pass 3 Reconciliation (fix/audit-pass-3)
+
+| # | Topic | Previous Issue / State | Reconciled Value / Resolution | Source File |
+| :--- | :--- | :--- | :--- | :--- |
+| 19 | NLU parser regressions & probes | 6 regression probes failed (center goal invention, pick refusal on "can", missing inches/feet, stop precedence) | **Resolved all 6 probes + 24 edge cases** in `tests/nlu_regression_probes.json`; Stop priority enforced; goal invention avoided; tagged `nlu-frozen-v2` | `src/nlu/rule_parser.py`, `src/nlu/parser.py`, `tests/nlu_regression_probes.json` |
+| 20 | Baseline controller finding & counts | Static stale text (claimed 98.3% / 5.86 steps) and stale key `nlu_goals_eval_600_episodes` | **Dynamically generated finding** matching variables; key renamed to `nlu_goals_eval_660_episodes` (33 categories * 20 episodes) | `src/bench/evaluate_baseline_controller.py`, `results/baseline_controller_eval.json` |
+| 21 | Environment reuse measurement | 20 warm resets with standard timer | **High-precision `perf_counter_ns` over 100 warm resets**, reporting unrounded numbers and ratio of medians | `src/bench/measure_pipeline_latency.py` |
+| 22 | Policy benchmark structure | Top-level conclusion cited single-run 28.8 µs diff | **Single run moved to `superseded_single_run`**; conclusion derives strictly from `repeated_runs` (-6.0 µs median difference spanning zero) | `results/policy_benchmark.json` |
+| 23 | Timing definitions synchronization | Throughput cited as ~580 FPS in one section vs ~230 FPS in another without distinction | **"Measurement definitions" subsection added** to `docs/BENCHMARKS.md` distinguishing closed-loop policy rollout step vs evaluation harness step | `docs/BENCHMARKS.md`, `tools/render_docs.py` |
+| 24 | Allowlist integrity & scope enforcement | Unused number `1337.4 ms` present; no scope checks | **`1337.4 ms` removed**; allowlist split into active numbers and historical quotes scoped strictly to `docs/AUDIT_LOG.md` | `tests/doc_number_allowlist.txt`, `tests/test_docs_match_results.py` |
+| 25 | Cloud deployment record tool | Static commit SHA and timestamp | **Tool `tools/update_cloud_deploy_record.py`** syncs `commit_sha` and `last_commit_at` from git metadata | `tools/update_cloud_deploy_record.py`, `results/cloud_deploy.json` |
+| 26 | CI enum diagnostics evidence | Diagnostic logs not uploaded as artifacts | **Workflow step added to dump & upload enum diagnostics**; documented pybind11 equality asymmetry in `docs/ENUM_DIAGNOSTICS.md` | `.github/workflows/linux-smoke.yml`, `docs/ENUM_DIAGNOSTICS.md` |
+| 27 | Multi-seed training harness | Single-seed training only (seed 42) | **Multi-seed harness `src/rl/train_multiseed.py`** with bootstrap confidence intervals and smoke test suite | `src/rl/train_multiseed.py`, `tests/test_multiseed_smoke.py` |
+| 28 | Test suite count | 32 tests passed | **36 tests passed** (added probes test, allowlist integrity test, and 2 multiseed smoke tests) | `pytest tests/ -v` |
+
+---
+
+## Task A: Cloud OSMesa Black Frame Resolution (fix-black-render-readme)
+
+Env reuse across requests produced black frames on Cloud (OSMesa); replaced by a fresh env per request.
+
+

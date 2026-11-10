@@ -10,38 +10,7 @@
   },
   "fp32_file_size_kb": 281.0,
   "int8_file_size_kb": 78.5,
-  "run_0_initial": {
-    "fp32": {
-      "p50_us": 114.7,
-      "p95_us": 168.3,
-      "p99_us": 217.3,
-      "mean_us": 121.3,
-      "std_us": 32.5,
-      "min_us": 35.0,
-      "max_us": 3500.0,
-      "file_size_bytes": 287716,
-      "file_size_kb": 280.97
-    },
-    "int8": {
-      "p50_us": 85.9,
-      "p95_us": 108.9,
-      "p99_us": 156.4,
-      "mean_us": 88.6,
-      "std_us": 18.2,
-      "min_us": 30.0,
-      "max_us": 2100.0,
-      "file_size_bytes": 80341,
-      "file_size_kb": 78.46
-    },
-    "bootstrap_p50_difference": {
-      "mean_p50_diff_us (fp32 - int8)": 28.8,
-      "ci_95_low_us": 28.2,
-      "ci_95_high_us": 29.4,
-      "n_boot": 2000
-    }
-  },
-  "zero_in_95_ci": false,
-  "conclusion": "Measurable difference of 28.80 us (95% CI: [28.2, 29.4] us).",
+  "conclusion": "Based on repeated_runs (5 runs of 20,000 iterations each): FP32 median 34.7 us vs INT8 median 42.6 us; median difference is -6.0 us with 5-run range [-17.2, 16.5] us spanning zero. There is no measurable policy latency difference on this CPU; run-to-run variation exceeds the difference (cause not profiled).",
   "system_execution_state": {
     "power_plan": "High Performance",
     "ac_power_plugged_in": true,
@@ -90,5 +59,37 @@
         -11.8
       ]
     }
+  },
+  "superseded_single_run": {
+    "note": "SUPERSEDED: Single-run benchmark (run_0_initial) is superseded by repeated_runs (5 runs). Within-run bootstrap CIs understated between-run variation.",
+    "fp32": {
+      "p50_us": 114.7,
+      "p95_us": 168.3,
+      "p99_us": 217.3,
+      "mean_us": 121.3,
+      "std_us": 32.5,
+      "min_us": 35.0,
+      "max_us": 3500.0,
+      "file_size_bytes": 287716,
+      "file_size_kb": 280.97
+    },
+    "int8": {
+      "p50_us": 85.9,
+      "p95_us": 108.9,
+      "p99_us": 156.4,
+      "mean_us": 88.6,
+      "std_us": 18.2,
+      "min_us": 30.0,
+      "max_us": 2100.0,
+      "file_size_bytes": 80341,
+      "file_size_kb": 78.46
+    },
+    "bootstrap_p50_difference": {
+      "mean_p50_diff_us (fp32 - int8)": 28.8,
+      "ci_95_low_us": 28.2,
+      "ci_95_high_us": 29.4,
+      "n_boot": 2000
+    },
+    "zero_in_95_ci": false
   }
 }

@@ -39,21 +39,22 @@
     "n_episodes": 100,
     "success_rate_first_reached_within_5cm": 1.0,
     "success_rate_final_step": 1.0,
-    "mean_steps_to_goal": 2.61,
-    "mean_final_distance_m": 0.0018,
-    "max_final_distance_m": 0.0262,
     "success_rate_final_within_5cm": 1.0,
     "success_rate_final_within_2cm": 0.98,
     "success_rate_final_within_1cm": 0.91,
-    "mean_final_distance_cm": 0.18
+    "mean_steps_to_goal": 2.61,
+    "mean_final_distance_m": 0.0018,
+    "mean_final_distance_cm": 0.18,
+    "max_final_distance_m": 0.0262
   },
-  "nlu_goals_eval_600_episodes": {
+  "nlu_goals_eval_660_episodes": {
     "n_episodes": 660,
     "n_goal_categories": 33,
     "success_rate_first_reached_within_5cm": 1.0,
     "success_rate_final_step": 1.0,
     "mean_steps_to_goal": 2.97,
     "mean_final_distance_m": 0.0016,
+    "mean_final_distance_cm": 0.16,
     "max_final_distance_m": 0.0169
   },
   "comparison_with_learned_policy": {
@@ -62,6 +63,6 @@
     "baseline_mean_steps_to_goal": 2.61,
     "learned_policy_final_distance_m": 0.0101,
     "baseline_final_distance_m": 0.0018,
-    "finding": "Because FetchReach-v4 is a kinematic positioning task without obstacles, a simple proportional controller achieves 100% success rate. The learned SAC policy matches this 100% success rate while reaching the goal in fewer steps (mean ~3.0 steps with early termination vs ~4.2 steps for baseline) and with lower steady-state error (1.01 cm vs 1.25 cm)."
+    "finding": "Because FetchReach-v4 is a kinematic positioning task without obstacles, a simple proportional controller achieves 100.0% success (mean steps 2.61, mean final distance 0.18 cm) across 100 episodes on random goals, and 100.0% success (mean steps 2.97, mean final distance 0.16 cm) across 660 episodes on NLU goals. The learned SAC policy matches this 100% success rate while reaching the goal in comparable steps (mean ~3.0 steps) without manual gain tuning."
   }
 }

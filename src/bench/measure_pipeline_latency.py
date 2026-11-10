@@ -82,26 +82,80 @@ def benchmark_pipeline_latency(n_runs: int = 20):
 
     recreate_times = []
     for _ in range(5):
-        t0 = time.perf_counter()
+        t0 = time.perf_counter_ns()
         tmp_env = make_fetch_env(render_mode="rgb_array", width=320, height=320)
         tmp_env.reset()
         _ = tmp_env.render()
-        recreate_times.append((time.perf_counter() - t0) * 1000)
+        recreate_times.append((time.perf_counter_ns() - t0) / 1e6)
         tmp_env.close()
-        
+
     warm_reset_times = []
-    for _ in range(20):
-        t0 = time.perf_counter()
+    # Warmup runs to stabilize JIT / caches
+    for _ in range(10):
         cold_env.reset()
         _ = cold_env.render()
-        warm_reset_times.append((time.perf_counter() - t0) * 1000)
-        
+
+    # 100 warm resets back-to-back using high-precision nanosecond timer
+    for _ in range(100):
+        t0 = time.perf_counter_ns()
+        cold_env.reset()
+        _ = cold_env.render()
+        warm_reset_times.append((time.perf_counter_ns() - t0) / 1e6)
+
+    median_cold = float(np.median(recreate_times))
+    median_warm = float(np.median(warm_reset_times))
+    speedup_ratio_of_medians = median_cold / median_warm if median_warm > 0 else 0.0
+
+    # Also benchmark pure reset without rendering for baseline comparison
+    pure_recreate_times = []
+    for _ in range(5):
+        t0 = time.perf_counter_ns()
+        p_env = make_fetch_env()
+        p_env.reset()
+        pure_recreate_times.append((time.perf_counter_ns() - t0) / 1e6)
+        p_env.close()
+
+    pure_warm_times = []
+    p_env = make_fetch_env()
+    for _ in range(10):
+        p_env.reset()
+    for _ in range(100):
+        t0 = time.perf_counter_ns()
+        p_env.reset()
+        pure_warm_times.append((time.perf_counter_ns() - t0) / 1e6)
+    p_env.close()
+
+    pure_median_cold = float(np.median(pure_recreate_times))
+    pure_median_warm = float(np.median(pure_warm_times))
+    pure_speedup = pure_median_cold / pure_median_warm if pure_median_warm > 0 else 0.0
+
     env_reuse_metrics = {
-        "env_recreate_with_first_render_mean_ms": round(float(np.mean(recreate_times)), 1),
-        "env_warm_reset_with_render_mean_ms": round(float(np.mean(warm_reset_times)), 1),
-        "speedup_factor": round(float(np.mean(recreate_times)) / float(np.mean(warm_reset_times)), 1),
+        "env_recreate_with_first_render_mean_ms": float(np.mean(recreate_times)),
+        "env_recreate_with_first_render_median_ms": median_cold,
+        "env_recreate_with_first_render_min_ms": float(np.min(recreate_times)),
+        "env_recreate_with_first_render_max_ms": float(np.max(recreate_times)),
+        "env_warm_reset_with_render_mean_ms": float(np.mean(warm_reset_times)),
+        "env_warm_reset_with_render_median_ms": median_warm,
+        "env_warm_reset_with_render_min_ms": float(np.min(warm_reset_times)),
+        "env_warm_reset_with_render_max_ms": float(np.max(warm_reset_times)),
+        "speedup_factor": round(speedup_ratio_of_medians, 1),
+        "speedup_ratio_of_medians": speedup_ratio_of_medians,
+        "n_warm_resets": len(warm_reset_times),
+        "n_recreate_runs": len(recreate_times),
+        "pure_env_reset_without_render": {
+            "cold_recreate_median_ms": pure_median_cold,
+            "cold_recreate_min_ms": float(np.min(pure_recreate_times)),
+            "cold_recreate_max_ms": float(np.max(pure_recreate_times)),
+            "warm_reset_median_ms": pure_median_warm,
+            "warm_reset_min_ms": float(np.min(pure_warm_times)),
+            "warm_reset_max_ms": float(np.max(pure_warm_times)),
+            "speedup_ratio_of_medians": pure_speedup,
+            "n_warm_resets": len(pure_warm_times),
+        },
+        "note": "Measured with high-precision time.perf_counter_ns() over 100 warm resets. Speedup reported as ratio of medians (median_cold / median_warm); ratio varies by run.",
     }
-    print(f"Env Recreate vs Warm Reset: {env_reuse_metrics['env_recreate_with_first_render_mean_ms']} ms vs {env_reuse_metrics['env_warm_reset_with_render_mean_ms']} ms ({env_reuse_metrics['speedup_factor']}x faster)")
+    print(f"Env Recreate vs Warm Reset (with render): {median_cold:.1f} ms vs {median_warm:.1f} ms ({speedup_ratio_of_medians:.1f}x speedup)")
+    print(f"Pure Env Recreate vs Warm Reset (no render): {pure_median_cold:.1f} ms vs {pure_median_warm:.1f} ms ({pure_speedup:.1f}x speedup)")
 
 
     shared_env = cold_env
