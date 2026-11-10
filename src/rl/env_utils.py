@@ -9,6 +9,7 @@ import os
 import sys
 import numpy as np
 import gymnasium as gym
+from typing import Optional
 
 
 try:
@@ -184,17 +185,11 @@ def clip_to_workspace(coords: np.ndarray) -> np.ndarray:
 
 
 class GoalOverrideWrapper(gym.Wrapper):
-
-
-
-
-
-    def __init__(self, env: gym.Env, fixed_goal: np.ndarray = WORKSPACE_CENTER):
+    def __init__(self, env: gym.Env, fixed_goal: Optional[np.ndarray] = None):
         super().__init__(env)
-        self.fixed_goal = np.array(fixed_goal, dtype=np.float32)
+        self.fixed_goal = np.array(fixed_goal, dtype=np.float32) if fixed_goal is not None else None
 
     def set_goal(self, goal: np.ndarray):
-
         self.fixed_goal = np.array(goal, dtype=np.float32)
         if hasattr(self.env.unwrapped, "goal"):
             self.env.unwrapped.goal = self.fixed_goal.copy()
@@ -218,10 +213,6 @@ def make_fetch_env(
     width: int = 320,
     height: int = 320,
 ) -> gym.Env:
-
-
-
-
     setup_headless_rendering()
 
     try:
@@ -232,13 +223,9 @@ def make_fetch_env(
             height=height,
         )
     except TypeError:
-
         env = gym.make(env_id, render_mode=render_mode)
 
-    if fixed_goal is not None:
-        env = GoalOverrideWrapper(env, fixed_goal=fixed_goal)
-
-    return env
+    return GoalOverrideWrapper(env, fixed_goal=fixed_goal)
 
 
 def flatten_observation(obs: dict) -> np.ndarray:

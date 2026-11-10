@@ -1,19 +1,53 @@
 {
-  "pure_mujoco_step_alone_ms": 2.269,
-  "pure_obs_formatting_alone_ms": 0.0051,
+  "timing_method": "src/bench/timing.py: time_callable with time.perf_counter_ns",
+  "definitions": {
+    "pure_mujoco_physics_20_substeps": "Exactly 20 calls to mj_step(model, data). No rendering, no wrappers.",
+    "isolated_env_step": "Full gymnasium env.step() call including observation dict and reward computation.",
+    "closed_loop_rollout": "Sequential rollout of obs prep + ONNX inference + env.step() over 2,500 total steps."
+  },
+  "machine_state": {
+    "power_plan": "High Performance",
+    "ac_power_plugged_in": true,
+    "background_apps_closed": true,
+    "hardware": "Intel Core i5-1235U, 12 threads, Windows 11"
+  },
+  "gl_backend": "glfw",
+  "raw_mujoco_physics_20_substeps_ms": {
+    "median_ms": 1.1168,
+    "p50_ms": 1.1168,
+    "mean_ms": 1.4853,
+    "std_ms": 1.4402,
+    "p95_ms": 4.0381,
+    "p99_ms": 8.3063,
+    "min_ms": 0.8959,
+    "max_ms": 10.4748,
+    "n_iter": 300
+  },
+  "pure_mujoco_step_alone_ms": 1.1168,
+  "isolated_env_step_ms": {
+    "median_ms": 1.5755,
+    "p50_ms": 1.5755,
+    "mean_ms": 1.8205,
+    "std_ms": 0.6773,
+    "p95_ms": 2.8826,
+    "p99_ms": 4.289,
+    "min_ms": 1.2581,
+    "max_ms": 7.449,
+    "n_iter": 300
+  },
+  "pure_obs_formatting_alone_ms": 0.0063,
   "closed_loop_single_thread_ort": {
     "total_steps": 2500,
-    "total_time_sec": 6.239,
-    "effective_fps": 400.7,
-    "ms_per_step": 2.496
+    "total_time_sec": 3.444,
+    "effective_fps": 726.0,
+    "ms_per_step": 1.377
   },
   "closed_loop_default_thread_ort": {
     "total_steps": 2500,
-    "total_time_sec": 5.909,
-    "effective_fps": 423.1,
-    "ms_per_step": 2.363
+    "total_time_sec": 2.838,
+    "effective_fps": 880.8,
+    "ms_per_step": 1.135
   },
-  "fps_gap_explanation": "The initial ~228 FPS in quantization_eval was measured across an uninterrupted 100-episode batch where CPU frequency was boosted and thread-pool caches were hot (~4.39 ms/step). Under repeated isolated benchmarking with fresh process initialization or thermal throttling on battery/laptop CPU, effective closed-loop throughput ranges between 110-230 FPS (4.3 ms to 9.1 ms per step). Pure MuJoCo physics step accounts for ~3.5-4.0 ms, obs prep takes ~0.01 ms, and ONNX takes ~0.1-0.2 ms.",
   "system_execution_state": {
     "power_plan": "High Performance",
     "ac_power_plugged_in": true,
@@ -24,55 +58,55 @@
   "repeated_runs": {
     "n_runs": 5,
     "pure_mujoco_step_alone_ms": {
-      "median": 2.531,
-      "min": 2.269,
-      "max": 3.546,
-      "range": "[2.269, 3.546]",
+      "median": 1.134,
+      "min": 1.117,
+      "max": 1.286,
+      "range": "[1.117, 1.286]",
       "values": [
-        2.531,
-        3.218,
-        2.416,
-        3.546,
-        2.269
+        1.1224,
+        1.1648,
+        1.2858,
+        1.1336,
+        1.1168
       ]
     },
     "closed_loop_single_thread_ort_fps": {
-      "median": 428.5,
-      "min": 400.7,
-      "max": 475.7,
-      "range": "[400.7, 475.7]",
+      "median": 683.5,
+      "min": 671.0,
+      "max": 726.0,
+      "range": "[671.0, 726.0]",
       "values": [
-        428.5,
-        475.7,
-        438.9,
-        417.7,
-        400.7
+        705.2,
+        675.3,
+        671.0,
+        683.5,
+        726.0
       ]
     },
     "closed_loop_single_thread_ort_step_ms": {
-      "median": 2.334,
-      "min": 2.102,
-      "max": 2.496,
-      "range": "[2.102, 2.496]",
+      "median": 1.463,
+      "min": 1.377,
+      "max": 1.49,
+      "range": "[1.377, 1.490]",
       "values": [
-        2.334,
-        2.102,
-        2.279,
-        2.394,
-        2.496
+        1.418,
+        1.481,
+        1.49,
+        1.463,
+        1.377
       ]
     },
     "closed_loop_default_thread_ort_fps": {
-      "median": 423.1,
-      "min": 278.1,
-      "max": 502.6,
-      "range": "[278.1, 502.6]",
+      "median": 851.6,
+      "min": 755.1,
+      "max": 919.7,
+      "range": "[755.1, 919.7]",
       "values": [
-        278.1,
-        502.6,
-        339.7,
-        485.2,
-        423.1
+        795.3,
+        755.1,
+        919.7,
+        851.6,
+        880.8
       ]
     }
   }

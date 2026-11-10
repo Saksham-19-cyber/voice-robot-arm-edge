@@ -1,8 +1,8 @@
 {
   "run_index": 2,
-  "pure_mujoco_step_alone_ms": 3.218,
-  "closed_loop_single_thread_ort_fps": 475.7,
-  "closed_loop_single_thread_ort_ms": 2.102,
-  "closed_loop_default_thread_ort_fps": 502.6,
-  "closed_loop_default_thread_ort_ms": 1.99
+  "pure_mujoco_step_alone_ms": 1.1648,
+  "closed_loop_single_thread_ort_fps": 675.3,
+  "closed_loop_single_thread_ort_ms": 1.481,
+  "closed_loop_default_thread_ort_fps": 755.1,
+  "closed_loop_default_thread_ort_ms": 1.324
 }

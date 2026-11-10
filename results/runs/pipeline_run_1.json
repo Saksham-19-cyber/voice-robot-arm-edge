@@ -1,8 +1,8 @@
 {
   "run_index": 1,
-  "env_recreate_mean_ms": 488.5,
-  "env_warm_reset_mean_ms": 1.0,
-  "speedup_factor": 498.1,
-  "early_termination_p50_ms": 2372.2,
-  "full_50_steps_p50_ms": 2927.1
+  "env_recreate_mean_ms": 394.7,
+  "env_warm_reset_mean_ms": 1.2,
+  "speedup_factor": 324.1,
+  "early_termination_p50_ms": 1796.5,
+  "full_50_steps_p50_ms": 2275.3
 }

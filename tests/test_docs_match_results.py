@@ -61,40 +61,13 @@ def _extract_all_numbers_from_json(data):
     return nums
 
 
-def test_readme_unit_numbers_match_results_or_allowlist():
-    """Verify that every number with a unit in README.md matches results/*.json or allowlist."""
+def _check_text_unit_numbers(text, source_name, all_json_nums, allowlist):
+    """Scan text for numeric values with units and ensure they match results/*.json or allowlist."""
     import re
-    import glob
-
-    # 1. Collect all results/*.json numbers
-    all_json_nums = []
-    for json_file in glob.glob("results/**/*.json", recursive=True):
-        try:
-            with open(json_file, "r", encoding="utf-8") as f:
-                content = json.load(f)
-                all_json_nums.extend(_extract_all_numbers_from_json(content))
-        except Exception:
-            pass
-
-    # 2. Collect allowlist entries
-    allowlist = set()
-    with open("tests/doc_number_allowlist.txt", "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#"):
-                # Take token before '#'
-                token = line.split("#")[0].strip().lower()
-                allowlist.add(token)
-
-    # 3. Read README.md
-    with open("README.md", "r", encoding="utf-8") as f:
-        readme = f.read()
-
-    # Find numbers with units: ms, us, µs, MB, KB, GB, FPS, fps, x, %, steps, s
     pattern = r'(?<![A-Za-z0-9_.])(\d+(?:,\d+)*(?:\.\d+)?)\s*(ms|µs|us|MB|KB|GB|FPS|fps|x|%|steps|s)\b'
 
     unmatched = []
-    for m in re.finditer(pattern, readme):
+    for m in re.finditer(pattern, text):
         raw_num = m.group(1).replace(",", "")
         unit = m.group(2)
         try:
@@ -123,11 +96,73 @@ def test_readme_unit_numbers_match_results_or_allowlist():
                 break
 
         if not matched:
-            line_no = readme[:m.start()].count("\n") + 1
-            unmatched.append((line_no, m.group(0), val, unit))
+            line_no = text[:m.start()].count("\n") + 1
+            unmatched.append((source_name, line_no, m.group(0), val, unit))
+    return unmatched
 
+
+def test_readme_unit_numbers_match_results_or_allowlist():
+    """Verify that every number with a unit in README.md matches results/*.json or allowlist."""
+    import glob
+
+    all_json_nums = []
+    for json_file in glob.glob("results/**/*.json", recursive=True):
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                content = json.load(f)
+                all_json_nums.extend(_extract_all_numbers_from_json(content))
+        except Exception:
+            pass
+
+    allowlist = set()
+    with open("tests/doc_number_allowlist.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                token = line.split("#")[0].strip().lower()
+                allowlist.add(token)
+
+    with open("README.md", "r", encoding="utf-8") as f:
+        readme = f.read()
+
+    unmatched = _check_text_unit_numbers(readme, "README.md", all_json_nums, allowlist)
     assert not unmatched, (
         f"Found {len(unmatched)} numbers with units in README.md that neither match results/*.json nor appear in tests/doc_number_allowlist.txt:\n"
-        + "\n".join([f"  Line {l}: '{text}'" for l, text, _, _ in unmatched])
+        + "\n".join([f"  Line {l}: '{text}'" for _, l, text, _, _ in unmatched])
+    )
+
+
+def test_all_docs_and_captions_unit_numbers_match_results_or_allowlist():
+    """Verify numbers with units in docs/*.md and src/bench/make_figures.py match results/*.json or allowlist."""
+    import glob
+
+    all_json_nums = []
+    for json_file in glob.glob("results/**/*.json", recursive=True):
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                content = json.load(f)
+                all_json_nums.extend(_extract_all_numbers_from_json(content))
+        except Exception:
+            pass
+
+    allowlist = set()
+    with open("tests/doc_number_allowlist.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                token = line.split("#")[0].strip().lower()
+                allowlist.add(token)
+
+    targets = glob.glob("docs/*.md") + ["src/bench/make_figures.py"]
+    total_unmatched = []
+    for t in targets:
+        with open(t, "r", encoding="utf-8") as f:
+            content = f.read()
+        unm = _check_text_unit_numbers(content, t, all_json_nums, allowlist)
+        total_unmatched.extend(unm)
+
+    assert not total_unmatched, (
+        f"Found {len(total_unmatched)} unmatched numbers with units in docs/*.md or make_figures.py:\n"
+        + "\n".join([f"  {src}:{l} '{text}'" for src, l, text, _, _ in total_unmatched])
     )
 

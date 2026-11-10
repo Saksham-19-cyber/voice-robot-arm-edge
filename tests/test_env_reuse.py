@@ -61,3 +61,29 @@ def test_env_reuse_goal_update_and_frame_divergence():
             shared_env.close()
         except Exception:
             pass
+
+
+def test_env_unwrapped_goal_matches_requested_goal_on_reused_env():
+    """Verify that env.unwrapped.goal matches requested goal after reset on reused env."""
+    shared_env = make_fetch_env("FetchReach-v4", render_mode="rgb_array")
+    test_targets = [
+        np.array([1.25, 0.70, 0.60], dtype=np.float32),
+        np.array([1.45, 0.85, 0.45], dtype=np.float32),
+        np.array([1.30, 0.65, 0.50], dtype=np.float32),
+    ]
+    try:
+        for target in test_targets:
+            shared_env.set_goal(target)
+            obs, _ = shared_env.reset(seed=123)
+            assert np.allclose(shared_env.unwrapped.goal, target, atol=1e-4), (
+                f"env.unwrapped.goal {shared_env.unwrapped.goal} != target {target}"
+            )
+            assert np.allclose(obs["desired_goal"], target, atol=1e-4), (
+                f"obs['desired_goal'] {obs['desired_goal']} != target {target}"
+            )
+            res = run_onnx_rollout(goal_xyz=target, env=shared_env, max_steps=5, seed=123)
+            assert np.allclose(shared_env.unwrapped.goal, target, atol=1e-4), (
+                f"After rollout: env.unwrapped.goal {shared_env.unwrapped.goal} != target {target}"
+            )
+    finally:
+        shared_env.close()

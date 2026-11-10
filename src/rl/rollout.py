@@ -70,6 +70,13 @@ def run_onnx_rollout(
     t0 = time.perf_counter()
     obs_dict, _ = env.reset(seed=seed)
 
+    # Defensively ensure unwrapped.goal and obs_dict["desired_goal"] match clipped_goal exactly
+    if not np.allclose(env.unwrapped.goal, clipped_goal, atol=1e-4):
+        env.unwrapped.goal = clipped_goal.copy()
+        obs_dict["desired_goal"] = clipped_goal.copy()
+        if hasattr(env.unwrapped, "_render_callback"):
+            env.unwrapped._render_callback()
+
     start_pos = [round(float(x), 4) for x in obs_dict["achieved_goal"]]
     frames: List[np.ndarray] = []
     render_times_ms: List[float] = []

@@ -11,13 +11,13 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 | Controller / Policy Engine | Precision | Model Size | First-Reached (<5cm) | Final-Step Success | Mean Steps to Goal | Platform / Rendering |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Proportional Baseline Controller** | N/A (Linear) | 0 KB | **100.0%** | **100.0%** | 2.61 steps | Windows / GLFW |
-| PyTorch SAC Actor | FP32 | 3.2 MB (.zip) | **100.0%** | **100.0%** | 2.65 ± 0.93 | Windows / GLFW |
-| ONNX Runtime | FP32 | 281.0 KB | **100.0%** | **100.0%** | 2.65 ± 0.93 | Windows / GLFW |
-| **ONNX Runtime (Edge)** | **INT8 Dynamic** | **78.5 KB** | **100.0%** | **100.0%** | **2.65 ± 0.93** | Windows / GLFW |
+| **Proportional Baseline Controller** | N/A (Linear) | n/a (hand-coded) | **100.0%** | **100.0%** | 2.61 steps | Windows / GLFW |
+| PyTorch SAC Actor | FP32 | 3.2 MB (SB3 .zip) | **100.0%** | **100.0%** | 2.65 ± 0.93 | Windows / GLFW |
+| ONNX Runtime | FP32 | 281.0 KB (.onnx) | **100.0%** | **100.0%** | 2.65 ± 0.93 | Windows / GLFW |
+| **ONNX Runtime (Edge)** | **INT8 Dynamic** | **78.5 KB (.onnx)** | **100.0%** | **100.0%** | **2.65 ± 0.93** | Windows / GLFW |
 
 - **Dual Success Metric Finding:** Both success metrics ("first reached within 5 cm at any step" and "is_success at final step") are identical at **100.0%**. Once the arm reaches the goal, it holds its position at the goal through step 50.
-- **Baseline Controller Comparison:** Because FetchReach-v4 is a kinematic positioning task without obstacles, a simple proportional controller (`k=3.0`, `action = clip(k * delta / max_step, -1, 1)`) achieves 100% success rate with mean 2.61 steps and 0.18 cm final distance. The learned SAC policy matches this 100% success rate without hand-engineering control laws.
+- **Baseline Controller Comparison:** FetchReach-v4 is an obstacle-free kinematic positioning task. The proportional controller achieves 100.0% success with mean 2.61 steps and 0.18 cm final distance. The learned SAC policy achieves 100.0% success with mean 2.65 steps on random goals (2.97 steps on NLU goals) and 1.01 cm final distance on random goals (1.08 cm on NLU goals). The proportional controller is more precise due to direct analytical error minimization; the SAC policy operates tabula rasa without manual gain tuning.
 - **Training Convergence:** Converges to 100.0% success at step 1,500; total training budget 4,000 steps completed in 363.27 s (~6.1 min on CPU).
 - **Max Absolute Action Difference:** PyTorch vs ONNX FP32: `7.79e-07`; ONNX FP32 vs INT8: `0.1640` across 1,000 random inputs.
 
@@ -30,11 +30,11 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 | Model Precision | Model Size | Single-Run p50 | 5-Run Median p50 | 5-Run Min-Max Range | Single-Run p95 | Single-Run p99 |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **ONNX FP32** | 281.0 KB | 114.7 µs | **43.8 µs** | [25.4, 57.5] µs | 168.3 µs | 217.3 µs |
-| **ONNX INT8** | 78.5 KB | 85.9 µs | **57.0 µs** | [27.4, 66.0] µs | 108.9 µs | 156.4 µs |
+| **ONNX FP32** | 281.0 KB | 114.7 µs | **34.7 µs** | [25.4, 61.9] µs | 168.3 µs | 217.3 µs |
+| **ONNX INT8** | 78.5 KB | 85.9 µs | **42.6 µs** | [38.4, 50.4] µs | 108.9 µs | 156.4 µs |
 
 - **Bootstrap 95% Confidence Interval (FP32 p50 − INT8 p50):** `[28.2 µs, 29.4 µs]` (2,000 resamples).
-- **Repeated Runs Stability:** Across 5 independent 20,000-iteration runs under High Performance power plan, the p50 difference has median **-2.0 µs** (range: [-30.3, 5.6] µs), confirming that INT8 vs FP32 execution speed difference is within standard OS scheduling noise on modern x86 laptop CPUs.
+- **Repeated Runs Finding:** Across 5 independent 20,000-iteration runs under High Performance power plan, INT8 dynamic quantization yields a 3.58x smaller model (78.5 KB vs 281.0 KB) with no measurable latency difference on this CPU (median difference -6.0 µs, range: [-17.2, 16.5] µs spanning zero; cause not profiled).
 
 ---
 
@@ -44,17 +44,17 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 | Component / Mode | Execution Details | Single-Run Value | 5-Run Median Value | 5-Run Min-Max Range |
 | :--- | :--- | :--- | :--- | :--- |
-| **Pure MuJoCo Physics Step** | `env.step()` without observation formatting or ONNX forward pass | 2.269 ms/step | **2.531 ms/step** | [2.269, 3.546] ms/step |
-| **Closed-Loop Rollout (1 Thread)** | Full simulation loop (`intra_op=1, inter_op=1`, no render) | 400.7 FPS | **428.5 FPS** | [400.7, 475.7] FPS |
-| **Closed-Loop Rollout (Default Threads)** | Full simulation loop (unconstrained threads, no render) | 423.1 FPS | **423.1 FPS** | [278.1, 502.6] FPS |
+| **Pure MuJoCo Physics Step** | Raw 20 substeps of `mj_step` alone (no wrappers, no obs formatting, no inference) | 1.117 ms/step | **1.134 ms/step** | [1.117, 1.286] ms/step |
+| **Closed-Loop Rollout (1 Thread)** | Full simulation loop (`intra_op=1, inter_op=1`, no render) | 726.0 FPS | **683.5 FPS** | [671.0, 726.0] FPS |
+| **Closed-Loop Rollout (Default Threads)** | Full simulation loop (unconstrained threads, no render) | 880.8 FPS | **851.6 FPS** | [755.1, 919.7] FPS |
 
 ### Detailed Step Time Breakdown (`results/step_breakdown.json`)
-*Single-thread INT8 closed-loop step (1.604 ms total p50):*
-- **MuJoCo Physics (20 substeps):** 0.831 ms (51.8%)
-- **Gymnasium Environment Wrapper & Obs Dict Building:** 0.630 ms (39.2%)
-- **ONNX Policy Forward Pass:** 0.135 ms (8.4%)
-- **Observation Array Formatting & Flattening:** 0.009 ms (0.5%)
-- **Finding:** Raw physics and Gymnasium Python glue account for >90% of per-step execution time; policy inference accounts for only 8.4%.
+*Single-thread INT8 closed-loop step (0.906 ms total median):*
+- **MuJoCo Physics (20 substeps):** 0.465 ms (51.4%)
+- **Gymnasium Environment Wrapper & Obs Dict Building:** 0.342 ms (37.8%)
+- **ONNX Policy Forward Pass:** 0.070 ms (7.8%)
+- **Observation Array Formatting & Flattening:** 0.005 ms (0.5%)
+- **Closure:** Sum of component medians is 0.883 ms (closure difference: 2.6% from closed-loop step, well within 5%).
 
 ---
 
@@ -64,16 +64,14 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 | Pipeline Stage | Implementation | Median Latency (p50) | Mean Latency | 95th Percentile (p95) |
 | :--- | :--- | :--- | :--- | :--- |
-| **ASR stage in pipeline** | faster-whisper `tiny.en` INT8 (`cpu_threads=1`) | 1620.7 ms | 1561.1 ms | 1946.5 ms |
-| **NLU Intent Parsing** | Dual-engine hybrid (Regex + Classifier fallback) | 3.41 ms | 3.33 ms | 4.82 ms |
-| **Rollout + Visual Render** | Early termination (13.0 steps) @ 320x320 | 34.2 ms | 36.5 ms | 53.9 ms |
-| **MP4 Video Encoding** | `imageio-ffmpeg` H.264 (`-movflags +faststart`) | 263.4 ms | 265.9 ms | 390.1 ms |
-| **Total User Wait Time** | End-to-end request latency | **1562.7 ms** | 1639.4 ms | 2175.4 ms |
+| **ASR stage in pipeline** | faster-whisper `tiny.en` INT8 (`cpu_threads=1`) | 1639.9 ms | 1645.2 ms | 2169.6 ms |
+| **NLU Intent Parsing** | Dual-engine hybrid (Regex + Classifier fallback) | 3.27 ms | 4.19 ms | 9.25 ms |
+| **Rollout + Visual Render** | Early termination (13.0 steps) @ 320x320 | 34.9 ms | 37.0 ms | 53.7 ms |
+| **MP4 Video Encoding** | `imageio-ffmpeg` H.264 (`-movflags +faststart`) | 329.3 ms | 330.2 ms | 457.9 ms |
+| **Total User Wait Time** | End-to-end request latency | **2008.5 ms** | 2017.8 ms | 2687.8 ms |
 
-- **ASR Latency Measurement Distinction:**
-  - `transcribe() only` microbenchmark (`results/asr_ablation.json`): **992.8 ms p50** (measures isolated model forward pass on pre-decoded audio).
-  - `ASR stage in pipeline` (`results/pipeline_latency.json`): **1,337.4 ms p50** (measures full pipeline stage including WAV disk/byte parsing, RMS energy silence calculation, PyAV decoding, VAD filter execution, and segment text reconstruction).
-- **Environment State Reuse:** Reusing the environment in `st.session_state` yields **1.0 ms** warm reset (range: [0.8, 1.4] ms) vs **488.5 ms** cold recreation (range: [477.1, 956.5] ms), yielding a **584x speedup** (range: [333.8, 874.0]x).
+- **Repeated Runs User Wait Time:** Across 5 independent runs, warm early-termination wait time has median **1597.6 ms** (range: [1220.7, 2008.5] ms).
+- **Environment State Reuse:** Reusing the environment in `st.session_state` yields **1.2 ms** warm reset (range: [0.5, 1.2] ms) vs **394.7 ms** cold recreation (range: [342.6, 817.6] ms), yielding a **672x speedup** (range: [289.1, 794.1]x).
 
 ---
 
@@ -100,14 +98,14 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 | Evaluation Split | Sample Count | Rule Parser Intent Acc | Classifier Alone Intent Acc | Hybrid Parser Intent Acc | Hybrid End-to-End Acc |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Synthetic Test Split** | N=80 | 97.5% | 100.0% | **100.0%** | **100.0%** |
+| **Template Split (parser fixes were made after inspecting its failures; not held-out)** | N=80 | 97.5% | 100.0% | **100.0%** | **100.0%** |
 | **Development Set (Agent-Written; tuned on dev set; not independent)** | N=50 | 60.0% | 70.0% | **76.0%** | **68.0%** |
-| **Human-Written Held-Out** | N=0 | not measured | not measured | not measured | not measured |
+| **Human-Written Held-Out (`tests/nlu_heldout_human.json`)** | N=0 | not measured | not measured | not measured | not measured |
 
 ### Stop-List Expansion Ablation (Dev Set, N=50)
 - **Without Stop-List Expansion:** Hybrid Intent: 66.0% (Wilson CI: [52.2%, 77.6%]), End-to-End: 58.0% (Wilson CI: [44.2%, 70.6%])
 - **With Stop-List Expansion (25 phrases):** Hybrid Intent: 76.0% (Wilson CI: [62.6%, 85.7%]), End-to-End: 68.0% (Wilson CI: [54.2%, 79.2%])
-- **Effect:** Stop list expansion contributed +10.0 pp absolute accuracy gain to both intent and end-to-end metrics on the development set.
+- **Effect:** Effect of stop list on development set: contributed +10.0 pp absolute accuracy gain to both intent and end-to-end metrics on the development set.
 - **Frozen Protocol:** The parser was frozen at git commit `aa35fd4` (tag `nlu-frozen-v1`). Future human evaluation (`tests/nlu_heldout_human.json`) must be evaluated exactly once on this tag without further tuning.
 
 ---
@@ -121,7 +119,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
   - y: `[0.5991, 0.8991]`
   - z: `[0.3847, 0.6847]`
 - **Out-of-Range NLU Goals Found:** 12 commands produce coordinates beyond the environment training bounds prior to clipping.
-- **NLU Goal Closed-Loop Success Rate:** **100.0%** across all 30 goal categories (presets, metric offsets 5-30 cm, and edge clipped goals).
+- **NLU Goal Closed-Loop Success Rate:** **100.0%** across all 30 goal categories (mean steps to goal: 2.97, mean final distance: 1.08 cm).
 
 ---
 
@@ -136,19 +134,30 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 ---
 
-## 9. Server Process Memory Footprint
+## 9. Server Process Memory Footprint (By Operating System)
 
-*Source: `results/streamlit_memory_v2.json`, `results/streamlit_memory_v3.json`*
+*Source: `results/streamlit_memory_v2.json`, `results/streamlit_memory_v3.json`, `results/streamlit_memory_v4.json`*
 
-| Platform / Environment | Benchmark Condition | Idle Server RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Linux Ubuntu (CI Runner, v2)** | 1 session (3 presets, OSMesa, ASR not cached) | 54.2 MB | 103.92 MB | 103.92 MB | >89% |
-| **Linux Ubuntu (CI Runner, v2)** | 3 concurrent sessions (3 presets, OSMesa, ASR not cached) | 54.2 MB | **193.65 MB** | **193.65 MB** | >80% |
-| **Linux Ubuntu (CI Runner, v3)** | 3 concurrent sessions (3 presets, OSMesa, faster-whisper INT8 loaded) | 54.5 MB | **187.06 MB** | **187.06 MB** | >80% |
-| **Linux Ubuntu (CI Runner, v4)** | 3 concurrent sessions + real transcription (OSMesa, faster-whisper INT8) | 54.3 MB | **185.59 MB** | **185.59 MB** | >80% |
-| **Windows Laptop (v3)** | Active browser session (Whisper loaded dynamically) | 127.1 MB | **205.1 MB** (+78.0 MB attributable ASR delta) | 291.7 MB | >70% |
+### Linux Ubuntu (CI Runner, Headless OSMesa)
 
-- **Measurement Method Explanation:** The Linux CI baseline (54.2-54.5 MB) measures the raw Streamlit Python process tree in headless server mode before browser connection. The Windows idle baseline (127.1 MB) reflects a fully connected browser client session with frontend WebSocket connection, DOM element state, and GLFW OpenGL context initialized.
+*Measured on Linux CI runner in headless server mode using OSMesa software rendering.*
+
+| Benchmark Condition | Idle Server RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 session (3 presets, OSMesa, ASR not cached) | 54.2 MB | 103.92 MB | 103.92 MB | >89% |
+| 3 concurrent sessions (3 presets, OSMesa, ASR not cached) | 54.2 MB | **193.65 MB** | **193.65 MB** | >80% |
+| 3 concurrent sessions (3 presets, OSMesa, faster-whisper INT8 loaded) | 54.5 MB | **187.06 MB** | **187.06 MB** | >80% |
+| 3 concurrent sessions + real transcription (OSMesa, faster-whisper INT8) | 54.3 MB | **185.59 MB** | **185.59 MB** | >80% |
+
+### Windows Laptop (Interactive Client, GLFW)
+
+*Measured on Windows laptop, Intel Core i5-1235U, interactive browser session with hardware-accelerated GLFW rendering.*
+
+| Benchmark Condition | Idle Connected RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
+| :--- | :--- | :--- | :--- | :--- |
+| Active browser session (Whisper loaded dynamically) | 127.1 MB | **205.1 MB** (+78.0 MB attributable ASR delta) | 291.7 MB | >70% |
+
+- **Measurement Distinction:** Linux CI baseline (54.2-54.5 MB) measures the raw headless Streamlit Python process tree before browser connection. Windows idle baseline (127.1 MB) reflects a fully connected browser client session with frontend WebSocket connection, DOM element state, and GLFW OpenGL context initialized.
 
 ---
 

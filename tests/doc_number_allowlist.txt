@@ -28,6 +28,7 @@
 16 kHz # Audio sampling rate for speech recognition
 16 bit # Audio bit depth for PCM recordings
 32 bit # Audio bit depth for PCM/float WAV formats
+3.2 MB # PyTorch SB3 model zip size on disk (models/fetch_reach_sac.zip)
 1337.4 ms # ASR stage in full pipeline (from prompt instruction)
 12000 steps # Quoted previous wrong claim in audit table
 156.9 fps # Quoted previous wrong claim in audit table

@@ -18,43 +18,49 @@ def plot_policy_latency():
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    fp32 = data.get("fp32")
-    int8 = data.get("int8")
-    boot = data.get("bootstrap_p50_difference", {})
-    if not fp32 or not int8:
-        print("Skipping policy_latency.png: fp32 or int8 data missing")
+    rep = data.get("repeated_runs", {})
+    if not rep:
+        print("Skipping policy_latency.png: repeated_runs missing")
         return
 
-    metrics = ["p50 (Median)", "p95", "p99"]
-    fp32_vals = [fp32["p50_us"], fp32["p95_us"], fp32["p99_us"]]
-    int8_vals = [int8["p50_us"], int8["p95_us"], int8["p99_us"]]
+    fp32_vals = rep.get("fp32_p50_us", {}).get("values", [])
+    int8_vals = rep.get("int8_p50_us", {}).get("values", [])
+    fp32_med = rep.get("fp32_p50_us", {}).get("median", 0.0)
+    int8_med = rep.get("int8_p50_us", {}).get("median", 0.0)
 
-    x = np.arange(len(metrics))
-    width = 0.35
+    fig, ax = plt.subplots(figsize=(6.5, 4.2), dpi=150)
 
-    fig, ax = plt.subplots(figsize=(7, 4.5), dpi=150)
-    bars1 = ax.bar(x - width/2, fp32_vals, width, label="FP32 ONNX", color="#4C72B0", edgecolor="black", linewidth=0.8)
-    bars2 = ax.bar(x + width/2, int8_vals, width, label="INT8 ONNX", color="#55A868", edgecolor="black", linewidth=0.8)
+    # Plot bars for medians
+    models = ["FP32 ONNX", "INT8 ONNX"]
+    medians = [fp32_med, int8_med]
+    colors = ["#4C72B0", "#55A868"]
 
-    ax.set_ylabel("Latency (µs)")
-    ax.set_title("Single-Thread Policy Inference Latency (20,000 Iterations)", fontsize=11, fontweight="bold", pad=12)
+    x = np.array([0, 1])
+    bars = ax.bar(x, medians, width=0.45, color=colors, alpha=0.35, edgecolor="black", linewidth=1.0, label="Median p50")
+
+    # Plot individual run points (dots)
+    np.random.seed(42)
+    jitter_fp32 = np.random.uniform(-0.08, 0.08, size=len(fp32_vals))
+    jitter_int8 = np.random.uniform(-0.08, 0.08, size=len(int8_vals))
+
+    ax.scatter(np.zeros(len(fp32_vals)) + jitter_fp32, fp32_vals, color="#1D3557", s=45, zorder=5, label="Individual Runs (5x)")
+    ax.scatter(np.ones(len(int8_vals)) + jitter_int8, int8_vals, color="#2A9D8F", s=45, zorder=5)
+
+    # Annotate medians
+    ax.text(0, fp32_med + 3, f"Median: {fp32_med:.1f} µs\nRange: [{min(fp32_vals):.1f}, {max(fp32_vals):.1f}]", ha="center", va="bottom", fontsize=8.5, fontweight="bold")
+    ax.text(1, int8_med + 3, f"Median: {int8_med:.1f} µs\nRange: [{min(int8_vals):.1f}, {max(int8_vals):.1f}]", ha="center", va="bottom", fontsize=8.5, fontweight="bold")
+
+    ax.set_ylabel("Single-Thread Latency p50 (µs)")
+    ax.set_title("Policy Latency Distribution Across 5 Repeated Benchmark Runs", fontsize=10.5, fontweight="bold", pad=12)
     ax.set_xticks(x)
-    ax.set_xticklabels(metrics, fontsize=10)
-    ax.legend(frameon=True, facecolor="#F8F9FA", edgecolor="#CCCCCC")
+    ax.set_xticklabels(models, fontsize=9.5)
+    ax.set_ylim(0, max(max(fp32_vals), max(int8_vals)) + 20)
     ax.grid(axis="y", linestyle="--", alpha=0.5)
+    ax.legend(frameon=True, facecolor="#F8F9FA", edgecolor="#CCCCCC", fontsize=8.5)
 
-    for bar in bars1:
-        yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2.0, yval + 3, f"{yval:.1f} µs", ha="center", va="bottom", fontsize=8)
-    for bar in bars2:
-        yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2.0, yval + 3, f"{yval:.1f} µs", ha="center", va="bottom", fontsize=8)
-
-    ci_low = boot.get("ci_95_low_us", 28.2)
-    ci_high = boot.get("ci_95_high_us", 29.4)
     footnote = (
-        f"Footnote: Measured on Windows laptop, Intel Core i5-1235U (single thread pinned, intra_op=1, inter_op=1).\n"
-        f"Bootstrap 95% CI on p50 difference (FP32 - INT8): [{ci_low:.1f}, {ci_high:.1f}] µs (2,000 resamples)."
+        "Footnote: Measured on Windows laptop, Intel Core i5-1235U (single thread pinned, intra_op=1, 20k iter/run).\n"
+        "3.58x smaller; no measurable latency difference on this CPU; cause not profiled."
     )
     plt.figtext(0.5, 0.01, footnote, ha="center", fontsize=7.5, color="#444444", style="italic")
     plt.tight_layout(rect=[0, 0.07, 1, 1])
@@ -343,8 +349,8 @@ def plot_nlu_accuracy():
 
 
 def plot_memory():
-    p_linux = "results/streamlit_memory_v2.json"
-    p_win = "results/streamlit_memory.json"
+    p_linux = "results/streamlit_memory_v4.json"
+    p_win = "results/streamlit_memory_v3.json"
     if not os.path.exists(p_linux) or not os.path.exists(p_win):
         print(f"Skipping memory.png: missing {p_linux} or {p_win}")
         return
@@ -354,42 +360,51 @@ def plot_memory():
     with open(p_win, "r", encoding="utf-8") as f:
         win_data = json.load(f)
 
-    labels = [
-        "Linux CI\nIdle Baseline",
-        "Linux CI\n1 Session (Presets)",
-        "Linux CI\n3 Concurrent (Presets)",
-        "Windows Laptop\n1 Session (Full Demo)"
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8.5, 4.4), dpi=150, gridspec_kw={'width_ratios': [3, 2]})
+
+    # Panel 1: Linux CI (OSMesa)
+    labels_l = ["Idle\nBaseline", "1 Session\n(Presets+Whisper)", "3 Concurrent\n(Presets+Whisper)"]
+    vals_l = [
+        linux_data.get("server_baseline_rss_mb", 54.28),
+        linux_data.get("single_session", {}).get("peak_rss_mb", 88.88),
+        linux_data.get("three_concurrent_sessions", {}).get("peak_rss_mb", 185.59),
     ]
-    rss_vals = [
-        linux_data.get("server_baseline_rss_mb", 54.2),
-        linux_data.get("single_session", {}).get("peak_rss_mb", 103.92),
-        linux_data.get("three_concurrent_sessions", {}).get("peak_rss_mb", 193.65),
-        win_data.get("peak_rss_mb", 243.6),
-    ]
+    colors_l = ["#4C72B0", "#64B5CD", "#55A868"]
+    bars1 = ax1.bar(labels_l, vals_l, color=colors_l, edgecolor="black", linewidth=0.8, width=0.55)
+    ax1.axhline(1024, color="#C44E52", linestyle="--", linewidth=1.5, label="1,024 MB Limit")
+    ax1.set_ylabel("Peak Resident Memory RSS (MB)")
+    ax1.set_title("Linux CI (Headless OSMesa, Real Whisper)", fontsize=9.5, fontweight="bold")
+    ax1.set_ylim(0, 1150)
+    ax1.grid(axis="y", linestyle="--", alpha=0.5)
+    ax1.legend(loc="upper right", frameon=True, fontsize=7.5)
 
-    colors = ["#4C72B0", "#64B5CD", "#55A868", "#E1974C"]
-
-    fig, ax = plt.subplots(figsize=(7.2, 4.5), dpi=150)
-    bars = ax.bar(labels, rss_vals, color=colors, edgecolor="black", linewidth=0.8, width=0.55)
-
-    ax.axhline(1024, color="#C44E52", linestyle="--", linewidth=1.5, label="1,024 MB Container Limit (Streamlit Cloud)")
-
-    ax.set_ylabel("Peak Resident Memory RSS (MB)")
-    ax.set_title("Streamlit Server Process Peak RSS vs 1 GB Container Budget", fontsize=11, fontweight="bold", pad=12)
-    ax.set_ylim(0, 1150)
-    ax.grid(axis="y", linestyle="--", alpha=0.5)
-    ax.legend(loc="upper right", frameon=True, facecolor="#F8F9FA", edgecolor="#CCCCCC", fontsize=8)
-
-    for bar in bars:
+    for bar in bars1:
         yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2.0, yval + 20, f"{yval:.1f} MB", ha="center", va="bottom", fontsize=8.5, fontweight="bold")
+        ax1.text(bar.get_x() + bar.get_width()/2.0, yval + 25, f"{yval:.1f} MB", ha="center", va="bottom", fontsize=8, fontweight="bold")
+
+    # Panel 2: Windows Laptop (GLFW)
+    labels_w = ["Idle\nBaseline", "Active Session\n(Whisper Loaded)"]
+    vals_w = [
+        win_data.get("windows_laptop_live_browser", {}).get("idle_server_rss_mb", 127.1),
+        win_data.get("windows_laptop_live_browser", {}).get("peak_rss_mb", 205.1),
+    ]
+    colors_w = ["#C44E52", "#E1974C"]
+    bars2 = ax2.bar(labels_w, vals_w, color=colors_w, edgecolor="black", linewidth=0.8, width=0.45)
+    ax2.set_ylabel("Memory RSS (MB)")
+    ax2.set_title("Windows Laptop (GLFW Rendering)", fontsize=9.5, fontweight="bold")
+    ax2.set_ylim(0, 350)
+    ax2.grid(axis="y", linestyle="--", alpha=0.5)
+
+    for bar in bars2:
+        yval = bar.get_height()
+        ax2.text(bar.get_x() + bar.get_width()/2.0, yval + 10, f"{yval:.1f} MB", ha="center", va="bottom", fontsize=8, fontweight="bold")
 
     footnote = (
-        "Footnote: Measured on Linux Ubuntu (CI runner, OSMesa rendering) and Windows laptop (Intel i5-1235U, GLFW).\n"
-        "Linux preset runs execute simulation rollout + MP4 encoding (ASR uncalled). Windows run includes Whisper model loaded."
+        "Footnote: Separated by OS. Linux measured on Ubuntu CI runner (OSMesa headless); Windows measured on Intel i5-1235U.\n"
+        "Idle measures bare server; 1-session measures sequential presets + Whisper; 3-session measures concurrent load."
     )
     plt.figtext(0.5, 0.01, footnote, ha="center", fontsize=7.5, color="#444444", style="italic")
-    plt.tight_layout(rect=[0, 0.06, 1, 1])
+    plt.tight_layout(rect=[0, 0.07, 1, 1])
 
     out_file = os.path.join(OUTPUT_DIR, "memory.png")
     plt.savefig(out_file, dpi=150)

@@ -1,56 +1,60 @@
-"""Closed-loop rollout throughput benchmark."""
-
-
-
-
-
-
-
-
+"""Audit closed-loop rollout throughput and raw MuJoCo physics step latency."""
 
 import os
 import sys
-import time
 import json
+import time
 import numpy as np
 import onnxruntime as ort
-import gymnasium as gym
-import gymnasium_robotics
+import mujoco
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-from src.rl.env_utils import make_fetch_env, setup_headless_rendering
+from src.rl.env_utils import make_fetch_env
+from src.bench.timing import time_callable, get_machine_state
+
 
 def audit_rollout_fps():
-    setup_headless_rendering()
-    env = gym.make("FetchReach-v4")
+    print("=== AUDITING CLOSED-LOOP ROLLOUT FPS AND MUJOCO PHYSICS LATENCY ===", flush=True)
+    env = make_fetch_env("FetchReach-v4", render_mode="rgb_array")
     
-
+    # 1. Single thread ONNX session
     opts1 = ort.SessionOptions()
     opts1.intra_op_num_threads = 1
     opts1.inter_op_num_threads = 1
     session_st = ort.InferenceSession("models/fetch_reach_actor_int8.onnx", sess_options=opts1, providers=["CPUExecutionProvider"])
     
-
+    # 2. Default multi-threaded ONNX session
     session_mt = ort.InferenceSession("models/fetch_reach_actor_int8.onnx", providers=["CPUExecutionProvider"])
     
-
     obs_dict, _ = env.reset(seed=42)
     zero_action = np.zeros(4, dtype=np.float32)
-    t0 = time.perf_counter()
-    for _ in range(500):
-        obs_dict, _, _, _, _ = env.step(zero_action)
-    t_env_step_ms = ((time.perf_counter() - t0) / 500) * 1000
-    
+    model = env.unwrapped.model
+    data = env.unwrapped.data
+    n_substeps = env.unwrapped.n_substeps
 
-    t0 = time.perf_counter()
-    for _ in range(500):
+    # A. Raw MuJoCo physics: exactly 20 substeps of mj_step (no env wrappers, no rendering)
+    def time_raw_physics():
+        for _ in range(n_substeps):
+            mujoco.mj_step(model, data)
+
+    res_physics = time_callable(time_raw_physics, n_warmup=50, n_iter=300)
+    
+    # B. Isolated env.step() (wrapper + 20 substeps)
+    def time_env_step():
+        env.step(zero_action)
+
+    res_env_step = time_callable(time_env_step, n_warmup=50, n_iter=300)
+
+    # C. Observation prep alone
+    def time_obs_prep():
         ob = obs_dict["observation"]
         ag = obs_dict["achieved_goal"]
         dg = obs_dict["desired_goal"]
-        obs_flat = np.concatenate([ob, ag, dg], axis=0).astype(np.float32).reshape(1, 16)
-    t_obs_prep_ms = ((time.perf_counter() - t0) / 500) * 1000
-    
+        return np.concatenate([ob, ag, dg], axis=0).astype(np.float32).reshape(1, 16)
 
+    res_obs_prep = time_callable(time_obs_prep, n_warmup=50, n_iter=300)
+    
+    # D. Closed loop rollout with 1-thread ORT (50 episodes x 50 steps = 2500 steps)
     t0 = time.perf_counter()
     total_steps_st = 0
     for ep in range(50):
@@ -67,7 +71,7 @@ def audit_rollout_fps():
     fps_st = total_steps_st / total_time_st
     ms_per_step_st = (total_time_st / total_steps_st) * 1000
     
-
+    # E. Closed loop rollout with default threads ORT (50 episodes x 50 steps = 2500 steps)
     t0 = time.perf_counter()
     total_steps_mt = 0
     for ep in range(50):
@@ -87,8 +91,18 @@ def audit_rollout_fps():
     env.close()
     
     report = {
-        "pure_mujoco_step_alone_ms": round(t_env_step_ms, 3),
-        "pure_obs_formatting_alone_ms": round(t_obs_prep_ms, 4),
+        "timing_method": "src/bench/timing.py: time_callable with time.perf_counter_ns",
+        "definitions": {
+            "pure_mujoco_physics_20_substeps": "Exactly 20 calls to mj_step(model, data). No rendering, no wrappers.",
+            "isolated_env_step": "Full gymnasium env.step() call including observation dict and reward computation.",
+            "closed_loop_rollout": "Sequential rollout of obs prep + ONNX inference + env.step() over 2,500 total steps."
+        },
+        "machine_state": get_machine_state(),
+        "gl_backend": os.environ.get("MUJOCO_GL", "glfw"),
+        "raw_mujoco_physics_20_substeps_ms": res_physics,
+        "pure_mujoco_step_alone_ms": res_physics["median_ms"],
+        "isolated_env_step_ms": res_env_step,
+        "pure_obs_formatting_alone_ms": res_obs_prep["median_ms"],
         "closed_loop_single_thread_ort": {
             "total_steps": total_steps_st,
             "total_time_sec": round(total_time_st, 3),
@@ -101,13 +115,6 @@ def audit_rollout_fps():
             "effective_fps": round(fps_mt, 1),
             "ms_per_step": round(ms_per_step_mt, 3)
         },
-        "fps_gap_explanation": (
-            "The initial ~228 FPS in quantization_eval was measured across an uninterrupted 100-episode batch "
-            "where CPU frequency was boosted and thread-pool caches were hot (~4.39 ms/step). "
-            "Under repeated isolated benchmarking with fresh process initialization or thermal throttling on battery/laptop CPU, "
-            "effective closed-loop throughput ranges between 110-230 FPS (4.3 ms to 9.1 ms per step). "
-            "Pure MuJoCo physics step accounts for ~3.5-4.0 ms, obs prep takes ~0.01 ms, and ONNX takes ~0.1-0.2 ms."
-        )
     }
     
     with open("results/rollout_fps_audit.json", "w") as f:
@@ -115,6 +122,7 @@ def audit_rollout_fps():
     print("Rollout FPS Audit Report:", flush=True)
     print(json.dumps(report, indent=2), flush=True)
     return report
+
 
 if __name__ == "__main__":
     audit_rollout_fps()

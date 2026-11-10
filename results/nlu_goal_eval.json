@@ -1,14 +1,6 @@
 {
   "n_episodes_per_goal": 20,
   "gl_backend": "glfw",
-  "success_rate_summary": {
-    "total_episodes": 600,
-    "fp32_first_reached_within_5cm": 1.0,
-    "fp32_is_success_final_step": 1.0,
-    "int8_first_reached_within_5cm": 1.0,
-    "int8_is_success_final_step": 1.0,
-    "metric_difference_note": "Both success metrics are 100.0% (first-reached and final-step): policy reaches within 5 cm and holds position."
-  },
   "goals": {
     "preset_reach_left": {
       "command": "reach to the left",
@@ -19,14 +11,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0107,
+        "max_final_distance_m": 0.0107
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0105,
+        "max_final_distance_m": 0.0105,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.87,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3393,
+              0.8684,
+              0.5605
+            ],
+            "distance_to_requested_cm": 1.05,
+            "steps_to_goal": 3
+          }
+        ]
       }
     },
     "preset_reach_right": {
@@ -38,14 +238,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0115,
+        "max_final_distance_m": 0.0115
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0113,
+        "max_final_distance_m": 0.0113,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.63,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.6362,
+              0.5598
+            ],
+            "distance_to_requested_cm": 1.13,
+            "steps_to_goal": 3
+          }
+        ]
       }
     },
     "preset_reach_up": {
@@ -57,14 +465,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0102,
+        "max_final_distance_m": 0.0102
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0103,
+        "max_final_distance_m": 0.0103,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          }
+        ]
       }
     },
     "offset_5cm_left": {
@@ -76,14 +692,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0098,
+        "max_final_distance_m": 0.0098
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0097,
+        "max_final_distance_m": 0.0097,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.8,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3398,
+              0.8016,
+              0.5599
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          }
+        ]
       }
     },
     "offset_10cm_left": {
@@ -95,14 +919,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0103,
+        "max_final_distance_m": 0.0103
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.01,
+        "max_final_distance_m": 0.01,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.85,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.34,
+              0.8496,
+              0.5601
+            ],
+            "distance_to_requested_cm": 1.0,
+            "steps_to_goal": 2
+          }
+        ]
       }
     },
     "offset_20cm_left": {
@@ -114,14 +1146,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0115,
+        "max_final_distance_m": 0.0115
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0111,
+        "max_final_distance_m": 0.0111,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "offset_30cm_left": {
@@ -133,14 +1373,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0115,
+        "max_final_distance_m": 0.0115
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0111,
+        "max_final_distance_m": 0.0111,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "offset_5cm_right": {
@@ -152,14 +1600,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0099,
+        "max_final_distance_m": 0.0099
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0098,
+        "max_final_distance_m": 0.0098,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.7,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3381,
+              0.7033,
+              0.5593
+            ],
+            "distance_to_requested_cm": 0.98,
+            "steps_to_goal": 1
+          }
+        ]
       }
     },
     "offset_10cm_right": {
@@ -171,14 +1827,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0109,
+        "max_final_distance_m": 0.0109
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.011,
+        "max_final_distance_m": 0.011,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.65,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3392,
+              0.6555,
+              0.5599
+            ],
+            "distance_to_requested_cm": 1.1,
+            "steps_to_goal": 2
+          }
+        ]
       }
     },
     "offset_20cm_right": {
@@ -190,14 +2054,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0125,
+        "max_final_distance_m": 0.0125
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0122,
+        "max_final_distance_m": 0.0122,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "offset_30cm_right": {
@@ -209,14 +2281,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0125,
+        "max_final_distance_m": 0.0125
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0122,
+        "max_final_distance_m": 0.0122,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "offset_5cm_up": {
@@ -228,14 +2508,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0098,
+        "max_final_distance_m": 0.0098
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0097,
+        "max_final_distance_m": 0.0097,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.58
+            ],
+            "achieved_final_position": [
+              1.3395,
+              0.7507,
+              0.6097
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 1
+          }
+        ]
       }
     },
     "offset_10cm_up": {
@@ -247,14 +2735,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0102,
+        "max_final_distance_m": 0.0102
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0103,
+        "max_final_distance_m": 0.0103,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.63
+            ],
+            "achieved_final_position": [
+              1.341,
+              0.7516,
+              0.6605
+            ],
+            "distance_to_requested_cm": 1.03,
+            "steps_to_goal": 2
+          }
+        ]
       }
     },
     "offset_20cm_up": {
@@ -266,14 +2962,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0114,
+        "max_final_distance_m": 0.0114
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0118,
+        "max_final_distance_m": 0.0118,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "offset_30cm_up": {
@@ -285,14 +3189,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0114,
+        "max_final_distance_m": 0.0114
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0118,
+        "max_final_distance_m": 0.0118,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "offset_5cm_down": {
@@ -304,14 +3416,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0092,
+        "max_final_distance_m": 0.0092
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0092,
+        "max_final_distance_m": 0.0092,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.48
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7553,
+              0.5076
+            ],
+            "distance_to_requested_cm": 0.92,
+            "steps_to_goal": 1
+          }
+        ]
       }
     },
     "offset_10cm_down": {
@@ -323,14 +3643,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0098,
+        "max_final_distance_m": 0.0098
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0097,
+        "max_final_distance_m": 0.0097,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.43
+            ],
+            "achieved_final_position": [
+              1.3385,
+              0.7595,
+              0.4516
+            ],
+            "distance_to_requested_cm": 0.97,
+            "steps_to_goal": 2
+          }
+        ]
       }
     },
     "offset_20cm_down": {
@@ -342,14 +3870,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0214,
+        "max_final_distance_m": 0.0214
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0215,
+        "max_final_distance_m": 0.0215,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          }
+        ]
       }
     },
     "offset_30cm_down": {
@@ -361,14 +4097,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0214,
+        "max_final_distance_m": 0.0214
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0215,
+        "max_final_distance_m": 0.0215,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          }
+        ]
       }
     },
     "offset_5cm_forward": {
@@ -380,14 +4324,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0107,
+        "max_final_distance_m": 0.0107
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0106,
+        "max_final_distance_m": 0.0106,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.39,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3877,
+              0.7537,
+              0.56
+            ],
+            "distance_to_requested_cm": 1.06,
+            "steps_to_goal": 1
+          }
+        ]
       }
     },
     "offset_10cm_forward": {
@@ -399,14 +4551,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0098,
+        "max_final_distance_m": 0.0098
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0096,
+        "max_final_distance_m": 0.0096,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.44,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.439,
+              0.7531,
+              0.5587
+            ],
+            "distance_to_requested_cm": 0.96,
+            "steps_to_goal": 2
+          }
+        ]
       }
     },
     "offset_20cm_forward": {
@@ -418,14 +4778,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0083,
+        "max_final_distance_m": 0.0083
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0085,
+        "max_final_distance_m": 0.0085,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "offset_30cm_forward": {
@@ -437,14 +5005,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0083,
+        "max_final_distance_m": 0.0083
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0085,
+        "max_final_distance_m": 0.0085,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "offset_5cm_backward": {
@@ -456,14 +5232,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0069,
+        "max_final_distance_m": 0.0069
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 1.0,
+        "mean_final_distance_m": 0.0068,
+        "max_final_distance_m": 0.0068,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.29,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2901,
+              0.7518,
+              0.5567
+            ],
+            "distance_to_requested_cm": 0.68,
+            "steps_to_goal": 1
+          }
+        ]
       }
     },
     "offset_10cm_backward": {
@@ -475,14 +5459,222 @@
       ],
       "was_clipped": false,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0031,
+        "max_final_distance_m": 0.0031
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 2.0,
+        "mean_final_distance_m": 0.0027,
+        "max_final_distance_m": 0.0027,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.24,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.2394,
+              0.7517,
+              0.552
+            ],
+            "distance_to_requested_cm": 0.27,
+            "steps_to_goal": 2
+          }
+        ]
       }
     },
     "offset_20cm_backward": {
@@ -494,14 +5686,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 5.0,
+        "mean_final_distance_m": 0.0067,
+        "max_final_distance_m": 0.0067
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 5.0,
+        "mean_final_distance_m": 0.0066,
+        "max_final_distance_m": 0.0066,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          }
+        ]
       }
     },
     "offset_30cm_backward": {
@@ -513,14 +5913,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 5.0,
+        "mean_final_distance_m": 0.0067,
+        "max_final_distance_m": 0.0067
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 5.0,
+        "mean_final_distance_m": 0.0066,
+        "max_final_distance_m": 0.0066,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          }
+        ]
       }
     },
     "edge_clipped_forward_max": {
@@ -532,14 +6140,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0083,
+        "max_final_distance_m": 0.0083
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0085,
+        "max_final_distance_m": 0.0085,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.5,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.5025,
+              0.7539,
+              0.5574
+            ],
+            "distance_to_requested_cm": 0.85,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "edge_clipped_backward_min": {
@@ -551,14 +6367,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 5.0,
+        "mean_final_distance_m": 0.0067,
+        "max_final_distance_m": 0.0067
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 5.0,
+        "mean_final_distance_m": 0.0066,
+        "max_final_distance_m": 0.0066,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.15,
+              0.75,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.1502,
+              0.7558,
+              0.5462
+            ],
+            "distance_to_requested_cm": 0.66,
+            "steps_to_goal": 5
+          }
+        ]
       }
     },
     "edge_clipped_left_max": {
@@ -570,14 +6594,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0115,
+        "max_final_distance_m": 0.0115
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0111,
+        "max_final_distance_m": 0.0111,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.9,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3383,
+              0.898,
+              0.5606
+            ],
+            "distance_to_requested_cm": 1.11,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "edge_clipped_right_min": {
@@ -589,14 +6821,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0125,
+        "max_final_distance_m": 0.0125
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0122,
+        "max_final_distance_m": 0.0122,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.6,
+              0.53
+            ],
+            "achieved_final_position": [
+              1.3399,
+              0.6075,
+              0.5597
+            ],
+            "distance_to_requested_cm": 1.22,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "edge_clipped_up_max": {
@@ -608,14 +7048,222 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0114,
+        "max_final_distance_m": 0.0114
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 4.0,
+        "mean_final_distance_m": 0.0118,
+        "max_final_distance_m": 0.0118,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.7
+            ],
+            "achieved_final_position": [
+              1.3423,
+              0.7566,
+              0.7302
+            ],
+            "distance_to_requested_cm": 1.18,
+            "steps_to_goal": 4
+          }
+        ]
       }
     },
     "edge_clipped_down_min": {
@@ -627,20 +7275,231 @@
       ],
       "was_clipped": true,
       "fp32": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.016
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0214,
+        "max_final_distance_m": 0.0214
       },
       "int8": {
+        "success_rate_first_reached_within_5cm": 1.0,
+        "success_rate_final_step": 1.0,
         "success_rate": 1.0,
-        "mean_final_distance_m": 0.0101,
-        "max_final_distance_m": 0.0163
+        "mean_steps_to_goal": 3.0,
+        "mean_final_distance_m": 0.0215,
+        "max_final_distance_m": 0.0215,
+        "sample_episodes_log": [
+          {
+            "episode": 0,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 1,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 2,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 3,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 4,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 5,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 6,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 7,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 8,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          },
+          {
+            "episode": 9,
+            "requested_goal": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "env_goal_after_reset": [
+              1.34,
+              0.75,
+              0.4
+            ],
+            "achieved_final_position": [
+              1.3388,
+              0.7621,
+              0.4093
+            ],
+            "distance_to_requested_cm": 2.15,
+            "steps_to_goal": 3
+          }
+        ]
       }
     }
   },
   "summary": {
     "mean_fp32_success_rate": 1.0,
     "mean_int8_success_rate": 1.0,
+    "mean_int8_success_rate_final_step": 1.0,
+    "mean_int8_steps_to_goal": 2.97,
+    "mean_int8_final_distance_cm": 1.08,
     "presets_int8_success_rate": 1.0,
     "offsets_int8_success_rate": 1.0,
     "edges_int8_success_rate": 1.0
