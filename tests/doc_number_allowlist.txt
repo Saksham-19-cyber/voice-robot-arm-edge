@@ -4,8 +4,14 @@
 3.11 s # Python version parsed with unit in badge or text
 2.0 s # Audio fixture clip duration (sample_2s.wav length)
 2.0s # Audio fixture clip duration
+0.002 s # MuJoCo internal physics integration timestep (dt = 0.002s)
+0.04 s # Gymnasium control timestep (20 substeps * 0.002s = 0.04s)
 50 steps # Gymnasium FetchReach-v4 max episode step limit
+25 steps # Smoke test rollout step horizon
 10 steps # Early termination HOLD_STEPS parameter
+100 steps # Episode budget limit
+4000 steps # Total RL policy training steps budget
+1500 steps # Training steps where 100% success was first reached
 1024 MB # Streamlit Community Cloud memory limit
 1 GB # Streamlit Community Cloud memory limit
 10 cm # Preset command displacement distance ("move up by 10 cm")
@@ -27,6 +33,8 @@
 16 bit # Audio bit depth for PCM recordings
 32 bit # Audio bit depth for PCM/float WAV formats
 3.2 MB # PyTorch SB3 model zip size on disk (models/fetch_reach_sac.zip)
+300 MB # PyTorch baseline process resident memory footprint
+700 MB # PyTorch C++ runtime disk footprint
 1337.4 ms # ASR stage in full pipeline (from prompt instruction)
 12000 steps # Quoted previous wrong claim in audit table
 156.9 fps # Quoted previous wrong claim in audit table
