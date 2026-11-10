@@ -16,9 +16,10 @@ from typing import Dict, Any, List
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.nlu.rule_parser import RuleBasedParser
-from src.nlu.classifier import IntentClassifier
+from src.nlu.classifier import IntentClassifier, generate_synthetic_dataset
 from src.nlu.parser import VoiceCommandParser
 from src.rl.env_utils import WORKSPACE_CENTER
+from sklearn.model_selection import train_test_split
 
 
 def wilson_score_interval(successes: int, total: int, z: float = 1.96) -> Dict[str, float]:
@@ -68,29 +69,18 @@ def verify_goal_region(goal_xyz: np.ndarray, expected_region: str) -> bool:
     return True
 
 
-def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
-    if not os.path.exists(dataset_path):
-        return {"error": f"Dataset file not found: {dataset_path}"}
-
-    with open(dataset_path, "r", encoding="utf-8") as f:
-        samples = json.load(f)
-
-    real_samples = [s for s in samples if not s.get("text", "").startswith("example:")]
-
-    if not real_samples:
+def evaluate_sample_list(samples: List[Dict[str, Any]], dataset_label: str) -> Dict[str, Any]:
+    if not samples:
         return {
             "dataset_label": dataset_label,
             "sample_count": 0,
-            "status": f"not measured (N=0; awaiting human-collected heldout sentences in {dataset_path})",
+            "status": "not measured (N=0; awaiting collected sentences)",
             "accuracy": None,
         }
-
-    samples = real_samples
 
     rule_parser = RuleBasedParser()
     hybrid_parser = VoiceCommandParser("models/intent_classifier.pkl")
     classifier = hybrid_parser.classifier
-
 
     intents = [s.get("expected_intent") or s.get("intent") for s in samples]
     from collections import Counter
@@ -109,12 +99,10 @@ def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
         expected_intent = s.get("expected_intent") or s.get("intent")
         expected_region = s.get("expected_goal_region")
         if not expected_region and expected_intent == "reach":
-
             for kw in ["left", "right", "up", "down", "forward", "front", "back", "backward", "center"]:
                 if kw in text.lower():
                     expected_region = kw
                     break
-
 
         r_res = rule_parser.parse(text)
         r_intent_match = (r_res.intent == expected_intent)
@@ -124,11 +112,9 @@ def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
         if r_e2e_match:
             rule_e2e_ok += 1
 
-
         c_pred, _, _ = classifier.predict_with_prob(text)
         if c_pred == expected_intent:
             clf_intent_ok += 1
-
 
         h_res = hybrid_parser.parse(text)
         h_intent_match = (h_res.intent == expected_intent)
@@ -162,10 +148,43 @@ def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
     }
 
 
+def evaluate_dataset(dataset_path: str, dataset_label: str) -> Dict[str, Any]:
+    if not os.path.exists(dataset_path):
+        return {"error": f"Dataset file not found: {dataset_path}"}
+
+    with open(dataset_path, "r", encoding="utf-8") as f:
+        samples = json.load(f)
+
+    real_samples = [s for s in samples if not s.get("text", "").startswith("example:")]
+
+    if not real_samples:
+        return {
+            "dataset_label": dataset_label,
+            "sample_count": 0,
+            "status": f"not measured (N=0; awaiting human-collected heldout sentences in {dataset_path})",
+            "accuracy": None,
+        }
+
+    return evaluate_sample_list(real_samples, dataset_label)
+
+
 def run_full_nlu_eval():
     results = {}
+
+    print("Evaluating Synthetic Test Split (seed=42, test_size=0.2, N=80)...", flush=True)
+    texts, labels = generate_synthetic_dataset(seed=42)
+    _, X_test, _, y_test = train_test_split(texts, labels, test_size=0.2, random_state=42, stratify=labels)
+    synth_samples = [{"text": t, "expected_intent": y} for t, y in zip(X_test, y_test)]
+    res_synth = evaluate_sample_list(synth_samples, "synthetic_test_split")
+    results["synthetic_test_split"] = res_synth
+
     print("Evaluating Agent-Written Held-Out Phrasings (tests/nlu_heldout_handwritten.json)...", flush=True)
     res_agent = evaluate_dataset("tests/nlu_heldout_handwritten.json", "agent_written_heldout")
+    res_agent["hybrid_parser"]["previous_architecture_comparison"] = {
+        "previous_hybrid_intent_accuracy": 0.54,
+        "previous_hybrid_end_to_end_accuracy": 0.48,
+        "note": "Old hybrid prioritized rules first; new hybrid uses classifier intent with rule spatial extraction and rule fallback."
+    }
     results["agent_written_heldout"] = res_agent
 
     print("Checking Human-Written Held-Out Phrasings (tests/nlu_heldout_human.json)...", flush=True)

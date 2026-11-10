@@ -66,15 +66,20 @@ def run_asr_ablation(n_warmup: int = 5, n_runs: int = 20):
         load_time_ms = (time.perf_counter() - t_load_start) * 1000
 
 
+        # Warm-up runs matching production VAD settings
         for _ in range(n_warmup):
-            _ = list(model.transcribe(audio_path, beam_size=1, language="en")[0])
+            _ = list(model.transcribe(
+                audio_path, beam_size=1, language="en", vad_filter=True, vad_parameters=dict(min_silence_duration_ms=400)
+            )[0])
 
-
+        # Timed evaluation runs
         latencies = []
         transcript = ""
         for i in range(n_runs):
             t0 = time.perf_counter()
-            segs, _ = model.transcribe(audio_path, beam_size=1, language="en")
+            segs, _ = model.transcribe(
+                audio_path, beam_size=1, language="en", vad_filter=True, vad_parameters=dict(min_silence_duration_ms=400)
+            )
             text = " ".join([s.text.strip() for s in segs]).strip()
             lat_ms = (time.perf_counter() - t0) * 1000
             latencies.append(lat_ms)

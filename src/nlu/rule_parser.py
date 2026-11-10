@@ -61,13 +61,52 @@ def extract_distance(text: str) -> Optional[float]:
     return None
 
 
+STOP_PHRASES = [
+    "emergency stop",
+    "kill all motors",
+    "kill motors",
+    "cut power",
+    "shut down",
+    "power off",
+    "don't move",
+    "dont move",
+    "stay put",
+    "hold your position",
+    "hold position",
+    "stand by",
+    "abort current action",
+    "cancel command",
+    "stop the robot",
+    "stop right there",
+    "halt arm",
+    "pause movement",
+    "stop",
+    "halt",
+    "freeze",
+    "abort",
+    "cease",
+    "stay",
+    "pause",
+    "cancel",
+]
+
+GRASP_CUES = ["grab", "grasp", "pick up", "pick", "release", "drop", "snatch", "clasp"]
+OBJECT_CUES = [
+    "block", "cube", "object", "item", "piece", "cylinder", "toy", "box",
+    "nut", "can", "bottle", "tool", "pencil", "cardboard"
+]
+
 class RuleBasedParser:
 
 
     def __init__(self):
-        self.stop_words = {"stop", "halt", "pause", "freeze", "abort", "cancel", "stand by"}
-        self.pick_words = {"pick", "grasp", "grab", "lift", "take", "hold", "snatch", "release", "clasp"}
-        self.reach_words = {"reach", "touch", "go", "move", "navigate", "extend", "point"}
+        self.stop_phrases = STOP_PHRASES
+        self.grasp_cues = GRASP_CUES
+        self.object_cues = OBJECT_CUES
+        self.reach_words = {
+            "reach", "touch", "go", "move", "navigate", "extend", "point",
+            "lift", "raise", "shift", "nudge", "slide"
+        }
 
     def parse(self, text: str, current_gripper_pos: Optional[np.ndarray] = None) -> IntentResult:
         raw_text = text.strip()
@@ -83,9 +122,10 @@ class RuleBasedParser:
                 raw_text=raw_text,
             )
 
-
-        for sw in self.stop_words:
-            if re.search(rf"\b{sw}\b", cleaned):
+        # 1. Check for Stop Commands first
+        for sp in self.stop_phrases:
+            pattern = rf"\b{re.escape(sp)}\b" if " " in sp else rf"\b{sp}\b"
+            if re.search(pattern, cleaned):
                 goal = current_gripper_pos.tolist() if current_gripper_pos is not None else WORKSPACE_CENTER.tolist()
                 return IntentResult(
                     intent="stop",
@@ -93,42 +133,18 @@ class RuleBasedParser:
                     goal_xyz=goal,
                     confidence=0.98,
                     clarification_needed=False,
-                    message="Stopping arm movement immediately.",
+                    message="Emergency stop acknowledged. No rollout is started.",
                     raw_text=raw_text,
                 )
 
+        # 2. Check for Manipulation (Pick and Place) Refusal
+        has_grasp_cue = any(re.search(rf"\b{re.escape(gc)}\b", cleaned) for gc in self.grasp_cues)
+        has_object_cue = any(re.search(rf"\b{re.escape(oc)}\b", cleaned) for oc in self.object_cues)
+        has_ambiguous_manip = any(re.search(rf"\b{w}\b", cleaned) for w in ["lift", "take", "hold"])
 
-        is_pick = any(re.search(rf"\b{pw}\b", cleaned) for pw in self.pick_words)
+        is_manipulation = has_grasp_cue or (has_ambiguous_manip and has_object_cue)
 
-
-        is_reach = any(re.search(rf"\b{rw}\b", cleaned) for rw in self.reach_words)
-
-
-        detected_directions = []
-        for word, vec in DIRECTION_VECTORS.items():
-            if re.search(rf"\b{word}\b", cleaned):
-                detected_directions.append((word, vec))
-
-        detected_anchor = None
-        for anchor_name in ANCHORS:
-            if re.search(rf"\b{anchor_name}\b", cleaned):
-                detected_anchor = anchor_name
-                break
-
-
-        if not is_pick and not is_reach and not detected_directions and not detected_anchor:
-            return IntentResult(
-                intent="unknown",
-                target="unrecognized",
-                confidence=0.1,
-                clarification_needed=True,
-                message=f"I did not understand '{raw_text}'. Try saying 'reach left', 'move up 10cm', or 'pick up the block'.",
-                raw_text=raw_text,
-            )
-
-
-
-        if is_pick or any(re.search(rf"\b{w}\b", cleaned) for w in ["pick", "grab", "snatch", "release", "clasp", "grasp"]):
+        if is_manipulation:
             return IntentResult(
                 intent="pick",
                 target="unsupported",
@@ -140,10 +156,35 @@ class RuleBasedParser:
                 metadata={"supported": False, "requires_gripper": True},
             )
 
-        if is_reach or detected_directions or detected_anchor:
-            intent = "reach"
-        else:
-            intent = "move"
+        # 3. Check for Reach / Navigation Commands
+        is_reach = any(re.search(rf"\b{rw}\b", cleaned) for rw in self.reach_words)
+
+        detected_directions = []
+        for word, vec in DIRECTION_VECTORS.items():
+            if re.search(rf"\b{word}\b", cleaned):
+                detected_directions.append((word, vec))
+
+        # If lift or raise is used without a specific direction, infer upward
+        if not detected_directions and any(re.search(rf"\b{w}\b", cleaned) for w in ["lift", "raise"]):
+            detected_directions.append(("up", DIRECTION_VECTORS["up"]))
+
+        detected_anchor = None
+        for anchor_name in ANCHORS:
+            if re.search(rf"\b{anchor_name}\b", cleaned):
+                detected_anchor = anchor_name
+                break
+
+        if not is_reach and not detected_directions and not detected_anchor:
+            return IntentResult(
+                intent="unknown",
+                target="unrecognized",
+                confidence=0.1,
+                clarification_needed=True,
+                message=f"I did not understand '{raw_text}'. Try saying 'reach left', 'move up 10cm', or 'emergency stop'.",
+                raw_text=raw_text,
+            )
+
+        intent = "reach"
 
 
         base_origin = current_gripper_pos.copy() if current_gripper_pos is not None else WORKSPACE_CENTER.copy()

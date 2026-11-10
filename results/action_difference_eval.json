@@ -1,0 +1,13 @@
+{
+  "random_states": {
+    "n_states": 1000,
+    "mean_absolute_action_error": 0.00774,
+    "max_absolute_action_error": 0.11362
+  },
+  "rollout_visited_states": {
+    "n_states": 1000,
+    "mean_absolute_action_error": 0.00726,
+    "max_absolute_action_error": 0.04207
+  },
+  "gl_backend": "glfw"
+}

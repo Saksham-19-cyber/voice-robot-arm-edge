@@ -1,0 +1,232 @@
+{
+  "training_range": {
+    "target_range": 0.15,
+    "initial_gripper_xpos": [
+      1.3418,
+      0.7491,
+      0.5347
+    ],
+    "bounds": {
+      "x": [
+        1.1918,
+        1.4918
+      ],
+      "y": [
+        0.5991,
+        0.8991
+      ],
+      "z": [
+        0.3847,
+        0.6847
+      ]
+    }
+  },
+  "workspace_bounds_declared": {
+    "x": [
+      1.15,
+      1.5
+    ],
+    "y": [
+      0.6,
+      0.9
+    ],
+    "z": [
+      0.4,
+      0.7
+    ]
+  },
+  "bounds_comparison": {
+    "x_bounds": {
+      "declared": [
+        1.15,
+        1.5
+      ],
+      "training": [
+        1.1918,
+        1.4918
+      ]
+    },
+    "y_bounds": {
+      "declared": [
+        0.6,
+        0.9
+      ],
+      "training": [
+        0.5991,
+        0.8991
+      ]
+    },
+    "z_bounds": {
+      "declared": [
+        0.4,
+        0.7
+      ],
+      "training": [
+        0.3847,
+        0.6847
+      ]
+    }
+  },
+  "total_commands_evaluated": 36,
+  "in_range_count": 24,
+  "out_of_range_count": 12,
+  "out_of_range_goals": [
+    {
+      "command": "move left 20cm",
+      "goal_xyz": [
+        1.34,
+        0.9,
+        0.53
+      ],
+      "target": "left",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "y=0.900 > max_y=0.899"
+      ]
+    },
+    {
+      "command": "move left 30cm",
+      "goal_xyz": [
+        1.34,
+        0.9,
+        0.53
+      ],
+      "target": "left",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "y=0.900 > max_y=0.899"
+      ]
+    },
+    {
+      "command": "move up 20cm",
+      "goal_xyz": [
+        1.34,
+        0.75,
+        0.7
+      ],
+      "target": "up",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "z=0.700 > max_z=0.685"
+      ]
+    },
+    {
+      "command": "move up 30cm",
+      "goal_xyz": [
+        1.34,
+        0.75,
+        0.7
+      ],
+      "target": "up",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "z=0.700 > max_z=0.685"
+      ]
+    },
+    {
+      "command": "move forward 20cm",
+      "goal_xyz": [
+        1.5,
+        0.75,
+        0.53
+      ],
+      "target": "forward",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "x=1.500 > max_x=1.492"
+      ]
+    },
+    {
+      "command": "move forward 30cm",
+      "goal_xyz": [
+        1.5,
+        0.75,
+        0.53
+      ],
+      "target": "forward",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "x=1.500 > max_x=1.492"
+      ]
+    },
+    {
+      "command": "move backward 20cm",
+      "goal_xyz": [
+        1.15,
+        0.75,
+        0.53
+      ],
+      "target": "backward",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "x=1.150 < min_x=1.192"
+      ]
+    },
+    {
+      "command": "move backward 30cm",
+      "goal_xyz": [
+        1.15,
+        0.75,
+        0.53
+      ],
+      "target": "backward",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "x=1.150 < min_x=1.192"
+      ]
+    },
+    {
+      "command": "move forward 10m",
+      "goal_xyz": [
+        1.5,
+        0.75,
+        0.53
+      ],
+      "target": "forward",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "x=1.500 > max_x=1.492"
+      ]
+    },
+    {
+      "command": "move backward 10m",
+      "goal_xyz": [
+        1.15,
+        0.75,
+        0.53
+      ],
+      "target": "backward",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "x=1.150 < min_x=1.192"
+      ]
+    },
+    {
+      "command": "move left 10m",
+      "goal_xyz": [
+        1.34,
+        0.9,
+        0.53
+      ],
+      "target": "left",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "y=0.900 > max_y=0.899"
+      ]
+    },
+    {
+      "command": "move up 10m",
+      "goal_xyz": [
+        1.34,
+        0.75,
+        0.7
+      ],
+      "target": "up",
+      "was_clipped": true,
+      "out_of_range_reasons": [
+        "z=0.700 > max_z=0.685"
+      ]
+    }
+  ],
+  "gl_backend": "glfw"
+}

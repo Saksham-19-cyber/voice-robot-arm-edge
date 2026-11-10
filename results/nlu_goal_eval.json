@@ -1,0 +1,640 @@
+{
+  "n_episodes_per_goal": 20,
+  "gl_backend": "glfw",
+  "goals": {
+    "preset_reach_left": {
+      "command": "reach to the left",
+      "target_goal": [
+        1.34,
+        0.87,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "preset_reach_right": {
+      "command": "reach to the right",
+      "target_goal": [
+        1.34,
+        0.63,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "preset_reach_up": {
+      "command": "reach up",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.63
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_5cm_left": {
+      "command": "move left 5cm",
+      "target_goal": [
+        1.34,
+        0.8,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_10cm_left": {
+      "command": "move left 10cm",
+      "target_goal": [
+        1.34,
+        0.85,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_20cm_left": {
+      "command": "move left 20cm",
+      "target_goal": [
+        1.34,
+        0.9,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_30cm_left": {
+      "command": "move left 30cm",
+      "target_goal": [
+        1.34,
+        0.9,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_5cm_right": {
+      "command": "move right 5cm",
+      "target_goal": [
+        1.34,
+        0.7,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_10cm_right": {
+      "command": "move right 10cm",
+      "target_goal": [
+        1.34,
+        0.65,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_20cm_right": {
+      "command": "move right 20cm",
+      "target_goal": [
+        1.34,
+        0.6,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_30cm_right": {
+      "command": "move right 30cm",
+      "target_goal": [
+        1.34,
+        0.6,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_5cm_up": {
+      "command": "move up 5cm",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.58
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_10cm_up": {
+      "command": "move up 10cm",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.63
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_20cm_up": {
+      "command": "move up 20cm",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.7
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_30cm_up": {
+      "command": "move up 30cm",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.7
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_5cm_down": {
+      "command": "move down 5cm",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.48
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_10cm_down": {
+      "command": "move down 10cm",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.43
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_20cm_down": {
+      "command": "move down 20cm",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.4
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_30cm_down": {
+      "command": "move down 30cm",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.4
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_5cm_forward": {
+      "command": "move forward 5cm",
+      "target_goal": [
+        1.39,
+        0.75,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_10cm_forward": {
+      "command": "move forward 10cm",
+      "target_goal": [
+        1.44,
+        0.75,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_20cm_forward": {
+      "command": "move forward 20cm",
+      "target_goal": [
+        1.5,
+        0.75,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_30cm_forward": {
+      "command": "move forward 30cm",
+      "target_goal": [
+        1.5,
+        0.75,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_5cm_backward": {
+      "command": "move backward 5cm",
+      "target_goal": [
+        1.29,
+        0.75,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_10cm_backward": {
+      "command": "move backward 10cm",
+      "target_goal": [
+        1.24,
+        0.75,
+        0.53
+      ],
+      "was_clipped": false,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_20cm_backward": {
+      "command": "move backward 20cm",
+      "target_goal": [
+        1.15,
+        0.75,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "offset_30cm_backward": {
+      "command": "move backward 30cm",
+      "target_goal": [
+        1.15,
+        0.75,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "edge_clipped_forward_max": {
+      "command": "move forward 10m",
+      "target_goal": [
+        1.5,
+        0.75,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "edge_clipped_backward_min": {
+      "command": "move backward 10m",
+      "target_goal": [
+        1.15,
+        0.75,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "edge_clipped_left_max": {
+      "command": "move left 10m",
+      "target_goal": [
+        1.34,
+        0.9,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "edge_clipped_right_min": {
+      "command": "move right 10m",
+      "target_goal": [
+        1.34,
+        0.6,
+        0.53
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "edge_clipped_up_max": {
+      "command": "move up 10m",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.7
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    },
+    "edge_clipped_down_min": {
+      "command": "move down 10m",
+      "target_goal": [
+        1.34,
+        0.75,
+        0.4
+      ],
+      "was_clipped": true,
+      "fp32": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.016
+      },
+      "int8": {
+        "success_rate": 1.0,
+        "mean_final_distance_m": 0.0101,
+        "max_final_distance_m": 0.0163
+      }
+    }
+  },
+  "summary": {
+    "mean_fp32_success_rate": 1.0,
+    "mean_int8_success_rate": 1.0,
+    "presets_int8_success_rate": 1.0,
+    "offsets_int8_success_rate": 1.0,
+    "edges_int8_success_rate": 1.0
+  }
+}

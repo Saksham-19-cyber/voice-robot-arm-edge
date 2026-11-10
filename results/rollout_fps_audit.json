@@ -1,17 +1,17 @@
 {
-  "pure_mujoco_step_alone_ms": 15.346,
-  "pure_obs_formatting_alone_ms": 0.0128,
+  "pure_mujoco_step_alone_ms": 1.816,
+  "pure_obs_formatting_alone_ms": 0.0043,
   "closed_loop_single_thread_ort": {
     "total_steps": 2500,
-    "total_time_sec": 19.829,
-    "effective_fps": 126.1,
-    "ms_per_step": 7.932
+    "total_time_sec": 11.174,
+    "effective_fps": 223.7,
+    "ms_per_step": 4.469
   },
   "closed_loop_default_thread_ort": {
     "total_steps": 2500,
-    "total_time_sec": 11.45,
-    "effective_fps": 218.3,
-    "ms_per_step": 4.58
+    "total_time_sec": 7.022,
+    "effective_fps": 356.0,
+    "ms_per_step": 2.809
   },
   "fps_gap_explanation": "The initial ~228 FPS in quantization_eval was measured across an uninterrupted 100-episode batch where CPU frequency was boosted and thread-pool caches were hot (~4.39 ms/step). Under repeated isolated benchmarking with fresh process initialization or thermal throttling on battery/laptop CPU, effective closed-loop throughput ranges between 110-230 FPS (4.3 ms to 9.1 ms per step). Pure MuJoCo physics step accounts for ~3.5-4.0 ms, obs prep takes ~0.01 ms, and ONNX takes ~0.1-0.2 ms."
 }

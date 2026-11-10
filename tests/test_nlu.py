@@ -122,3 +122,29 @@ def test_handwritten_heldout_dataset_evaluation(parser):
     accuracy = correct / len(samples)
 
     assert accuracy >= 0.50
+
+
+def test_nlu_regression_known_failures(parser):
+    """Regression tests for known failure cases (NOT part of accuracy benchmarks)."""
+    # 1. 'lift the arm up 10 cm' -> reach upwards, not refused as manipulation
+    res = parser.parse("lift the arm up 10 cm")
+    assert res.intent == "reach", f"Expected reach but got {res.intent}"
+    assert res.goal_xyz is not None
+    assert res.goal_xyz[2] > WORKSPACE_CENTER[2]
+    assert not res.clarification_needed
+
+    # 2. 'hold your position' -> stop, not refused as manipulation
+    res = parser.parse("hold your position")
+    assert res.intent == "stop", f"Expected stop but got {res.intent}"
+    assert not res.clarification_needed
+    assert "No rollout is started" in res.message or "stop" in res.message.lower()
+
+    # 3. 'kill all motors' -> stop
+    res = parser.parse("kill all motors")
+    assert res.intent == "stop", f"Expected stop but got {res.intent}"
+    assert not res.clarification_needed
+
+    # 4. 'cut power' -> stop
+    res = parser.parse("cut power")
+    assert res.intent == "stop", f"Expected stop but got {res.intent}"
+    assert not res.clarification_needed

@@ -34,6 +34,7 @@ class VoiceCommandParser:
         rule_result = self.rule_parser.parse(text, current_gripper_pos=current_gripper_pos)
 
 
+        # If classifier is available, classifier decides intent; rules extract goal/target (rules as fallback)
         if self.classifier is not None and text.strip():
             try:
                 clf_intent, clf_prob, all_probs = self.classifier.predict_with_prob(text)
@@ -41,23 +42,32 @@ class VoiceCommandParser:
                 rule_result.metadata["classifier_confidence"] = clf_prob
                 rule_result.metadata["all_probabilities"] = all_probs
 
+                # Classifier decides intent when confidence is sufficient
+                final_intent = clf_intent if clf_prob >= 0.50 else rule_result.intent
 
-                if rule_result.intent == "unknown" and clf_intent != "unknown" and clf_prob > 0.70:
-                    rule_result.intent = clf_intent
-                    rule_result.confidence = clf_prob
+                if final_intent == "stop":
+                    rule_result.intent = "stop"
                     rule_result.clarification_needed = False
-                elif clf_intent == "unknown" and clf_prob > 0.85:
-                    rule_result.intent = "unknown"
-                    rule_result.clarification_needed = True
-                    rule_result.message = f"I'm not sure what you mean by '{text.strip()}'. Please specify a command like 'reach left' or 'stop'."
-
-
-                if rule_result.intent == "pick" or (clf_intent == "pick" and clf_prob > 0.75):
+                    rule_result.message = "Emergency stop acknowledged. No rollout is started."
+                    rule_result.confidence = max(rule_result.confidence, clf_prob)
+                elif final_intent == "pick":
                     rule_result.intent = "pick"
                     rule_result.goal_xyz = None
                     rule_result.clarification_needed = True
                     rule_result.message = "I can only move the arm to a position. Gripper manipulation (pick and place) is not supported by this policy."
                     rule_result.metadata["supported"] = False
+                    rule_result.confidence = max(rule_result.confidence, clf_prob)
+                elif final_intent == "unknown":
+                    rule_result.intent = "unknown"
+                    rule_result.clarification_needed = True
+                    rule_result.message = f"I did not understand '{text.strip()}'. Try saying 'reach left', 'move up 10cm', or 'emergency stop'."
+                    rule_result.confidence = clf_prob
+                elif final_intent == "reach":
+                    rule_result.intent = "reach"
+                    rule_result.clarification_needed = False
+                    rule_result.confidence = max(rule_result.confidence, clf_prob)
+                    if rule_result.goal_xyz is None:
+                        rule_result.goal_xyz = self.rule_parser.parse("center", current_gripper_pos).goal_xyz
             except Exception as e:
                 rule_result.metadata["classifier_error"] = str(e)
 

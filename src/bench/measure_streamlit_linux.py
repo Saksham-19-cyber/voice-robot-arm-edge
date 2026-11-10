@@ -138,6 +138,7 @@ def main():
     port = 8501
     env = os.environ.copy()
     env["MUJOCO_GL"] = "osmesa"
+    env["BENCHMARK_LOAD_WHISPER"] = "1"
     env["PYTHONUNBUFFERED"] = "1"
 
     cmd = [
@@ -246,11 +247,11 @@ def main():
         }
 
         os.makedirs("results", exist_ok=True)
-        out_path = "results/streamlit_memory_v2.json"
+        out_path = "results/streamlit_memory_v3.json"
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(res, f, indent=2)
 
-        print("\n=== FINAL MEMORY RESULTS (results/streamlit_memory_v2.json) ===")
+        print("\n=== FINAL MEMORY RESULTS (results/streamlit_memory_v3.json) ===")
         print(json.dumps(res, indent=2), flush=True)
         return res
 

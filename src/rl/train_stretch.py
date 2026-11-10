@@ -61,7 +61,7 @@ class StretchLoggerCallback(BaseCallback):
         return True
 
 
-def run_stretch(env_id="FetchPickAndPlace-v4", total_timesteps=3000, seed=42):
+def run_stretch(env_id="FetchPickAndPlace-v4", total_timesteps=1000, seed=42):
     os.makedirs("models", exist_ok=True)
     os.makedirs("results", exist_ok=True)
     setup_headless_rendering()

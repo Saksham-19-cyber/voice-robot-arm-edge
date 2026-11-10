@@ -17,11 +17,78 @@ HALLUCINATIONS = {
 }
 
 
+def _extract_wav_samples_and_duration(raw_bytes: bytes) -> Tuple[np.ndarray, float]:
+    """Parse RIFF/WAV audio bytes into float32 array in [-1.0, 1.0] and duration.
+    
+    Robustly handles PCM int16, PCM int32 (format code 1), and IEEE float32 (format code 3)
+    without relying on external soundfile library or python wave limitations on float32.
+    """
+    import struct
+    if len(raw_bytes) < 12 or raw_bytes[:4] != b"RIFF" or raw_bytes[8:12] != b"WAVE":
+        # Fallback to standard wave if not standard RIFF header
+        import wave
+        with wave.open(io.BytesIO(raw_bytes), "rb") as wf:
+            sampwidth = wf.getsampwidth()
+            framerate = wf.getframerate() or 16000
+            n_frames = wf.getnframes()
+            duration = n_frames / float(framerate)
+            frames = wf.readframes(n_frames)
+            samples = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
+            return samples, duration
+
+    offset = 12
+    fmt_info = None
+    data_bytes = None
+
+    while offset + 8 <= len(raw_bytes):
+        chunk_id = raw_bytes[offset:offset + 4]
+        chunk_size = struct.unpack("<I", raw_bytes[offset + 4:offset + 8])[0]
+        chunk_data_start = offset + 8
+        chunk_data_end = chunk_data_start + chunk_size
+
+        if chunk_id == b"fmt ":
+            audio_format, num_channels, sample_rate, byte_rate, block_align, bits_per_sample = struct.unpack(
+                "<HHIIHH", raw_bytes[chunk_data_start:chunk_data_start + 16]
+            )
+            fmt_info = {
+                "audio_format": audio_format,
+                "num_channels": num_channels,
+                "sample_rate": sample_rate,
+                "bits_per_sample": bits_per_sample,
+            }
+        elif chunk_id == b"data":
+            data_bytes = raw_bytes[chunk_data_start:chunk_data_end]
+
+        offset = chunk_data_end + (chunk_size % 2)
+
+    if fmt_info is None or data_bytes is None:
+        raise ValueError("Missing fmt or data chunk in WAV")
+
+    audio_format = fmt_info["audio_format"]
+    bits = fmt_info["bits_per_sample"]
+    channels = fmt_info["num_channels"]
+    sample_rate = fmt_info["sample_rate"]
+
+    if bits == 16:
+        samples = np.frombuffer(data_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+    elif bits == 8:
+        samples = (np.frombuffer(data_bytes, dtype=np.uint8).astype(np.float32) - 128.0) / 128.0
+    elif bits == 32:
+        if audio_format == 3:  # IEEE float32
+            samples = np.frombuffer(data_bytes, dtype=np.float32)
+        else:  # PCM int32 (format 1)
+            samples = np.frombuffer(data_bytes, dtype=np.int32).astype(np.float32) / 2147483648.0
+    else:
+        samples = np.frombuffer(data_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+
+    if channels > 1:
+        samples = samples.reshape(-1, channels).mean(axis=1)
+
+    duration = len(samples) / float(sample_rate) if sample_rate > 0 else 0.0
+    return samples, duration
+
+
 def analyze_audio_source(audio_source: Union[str, bytes, io.BytesIO, np.ndarray]) -> Tuple[float, float]:
-
-
-
-
     rms = 1.0
     duration = 0.0
     try:
@@ -39,48 +106,15 @@ def analyze_audio_source(audio_source: Union[str, bytes, io.BytesIO, np.ndarray]
             raw_bytes = bytes(audio_source)
         elif isinstance(audio_source, io.BytesIO):
             raw_bytes = audio_source.getvalue()
+        elif isinstance(audio_source, str) and os.path.exists(audio_source):
+            with open(audio_source, "rb") as f:
+                raw_bytes = f.read()
 
         if raw_bytes is not None:
-            import wave
             try:
-                with wave.open(io.BytesIO(raw_bytes), "rb") as wf:
-                    sampwidth = wf.getsampwidth()
-                    framerate = wf.getframerate() or 16000
-                    n_frames = wf.getnframes()
-                    duration = n_frames / float(framerate)
-                    frames = wf.readframes(n_frames)
-                    if sampwidth == 2:
-                        samples = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
-                    elif sampwidth == 1:
-                        samples = (np.frombuffer(frames, dtype=np.uint8).astype(np.float32) - 128) / 128.0
-                    elif sampwidth == 4:
-                        samples = np.frombuffer(frames, dtype=np.float32)
-                    else:
-                        samples = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
-                    rms = float(np.sqrt(np.mean(samples ** 2))) if len(samples) > 0 else 0.0
-                    return rms, duration
-            except Exception:
-                pass
-
-        if isinstance(audio_source, str) and os.path.exists(audio_source):
-            import wave
-            try:
-                with wave.open(audio_source, "rb") as wf:
-                    sampwidth = wf.getsampwidth()
-                    framerate = wf.getframerate() or 16000
-                    n_frames = wf.getnframes()
-                    duration = n_frames / float(framerate)
-                    frames = wf.readframes(n_frames)
-                    if sampwidth == 2:
-                        samples = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
-                    elif sampwidth == 1:
-                        samples = (np.frombuffer(frames, dtype=np.uint8).astype(np.float32) - 128) / 128.0
-                    elif sampwidth == 4:
-                        samples = np.frombuffer(frames, dtype=np.float32)
-                    else:
-                        samples = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
-                    rms = float(np.sqrt(np.mean(samples ** 2))) if len(samples) > 0 else 0.0
-                    return rms, duration
+                samples, duration = _extract_wav_samples_and_duration(raw_bytes)
+                rms = float(np.sqrt(np.mean(samples ** 2))) if len(samples) > 0 else 0.0
+                return rms, duration
             except Exception:
                 pass
     except Exception:

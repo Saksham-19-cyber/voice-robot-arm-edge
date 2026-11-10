@@ -194,8 +194,8 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
             if p_cols2[1].button("📦 Pick Block (unsupported: safe refusal)"):
                 preset_clicked_text = "pick up the red block"
                 trigger_run = True
-            if p_cols2[2].button("🛑 Emergency Stop"):
-                preset_clicked_text = "stop the arm immediately"
+            if p_cols2[2].button("🛑 Emergency Stop (no motion)"):
+                preset_clicked_text = "emergency stop"
                 trigger_run = True
 
             if preset_clicked_text:
@@ -278,7 +278,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
                 st.session_state["last_result"] = {
                     "kind": "stop",
                     "intent_res": intent_res,
-                    "message": "Arm emergency brake engaged. Simulation halted with zero motion.",
+                    "message": "Emergency stop acknowledged. No rollout is started.",
                     "nlu_latency_ms": nlu_latency_ms,
                 }
 
@@ -374,7 +374,7 @@ def render_demo_page(render_w: int, render_h: int, full_rollout: bool):
         elif res["kind"] == "stop":
             st.error(f"🛑 {res['message']}")
             st.caption(f"Parsed Intent: `STOP` | Target: `current_position`")
-            render_tts("Arm halted.", st_module=st)
+            render_tts("Stop acknowledged. No rollout is started.", st_module=st)
         elif res["kind"] == "clarification":
             st.warning(f"⚠️ {res['message']}")
         elif res["kind"] == "error":
@@ -643,7 +643,7 @@ def render_about_page():
         2. **Observation Normalization Baked into ONNX:**
            Running mean and running variance statistics from training are embedded directly as constant buffers inside the ONNX graph. The web app sends raw coordinate arrays without maintaining separate normalization objects.
         3. **Environment Reuse in Session State:**
-           Keeping the simulation environment in `st.session_state` eliminates repeated renderer initialization, reducing per-request env overhead from **{recreate_ms:.1f} ms** down to **{warm_reset_ms:.1f} ms** warm reset (**{speedup_x:.0f}x speedup**).
+           Keeping the simulation environment in `st.session_state` avoids repeated renderer initialization, reducing per-request env overhead from **{recreate_ms:.1f} ms** down to **{warm_reset_ms:.1f} ms** warm reset (**{speedup_x:.0f}x speedup**).
         4. **Client-Side Speech Synthesis:**
            Server-side TTS libraries (`pyttsx3`, `espeak`) fail in headless Linux containers lacking audio hardware. The app injects a zero-overhead HTML5 Web Speech API snippet executed inside the client browser.
         5. **Honest Quantization Reporting:**

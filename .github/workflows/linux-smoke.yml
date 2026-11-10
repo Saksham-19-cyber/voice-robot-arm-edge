@@ -2,7 +2,7 @@ name: Linux Smoke & MuJoCo Compatibility
 
 on:
   push:
-    branches: [ main, cleanup-experiments, polish ]
+    branches: [ main, cleanup-experiments, polish, truth-pass ]
   workflow_dispatch:
 
 jobs:
@@ -72,16 +72,20 @@ jobs:
           model = mujoco.MjModel.from_xml_string(xml)
           joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, 'j1')
           raw_type = model.jnt_type[joint_id]
+          HINGE = mujoco.mjtJoint.mjJNT_HINGE
+          SLIDE = mujoco.mjtJoint.mjJNT_SLIDE
 
           print('=== LINUX ENUM DIAGNOSTICS ===')
-          print('model.jnt_type[i] type:', type(raw_type))
-          print('model.jnt_type[i] dtype:', model.jnt_type.dtype)
-          print('model.jnt_type[i] repr:', repr(raw_type))
-          print('mujoco.mjtJoint.mjJNT_HINGE type:', type(mujoco.mjtJoint.mjJNT_HINGE))
-          print('mujoco.mjtJoint.mjJNT_HINGE repr:', repr(mujoco.mjtJoint.mjJNT_HINGE))
-          print('Equality (==):', raw_type == mujoco.mjtJoint.mjJNT_HINGE)
-          print('Membership (in):', raw_type in (mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE))
-          print('Coerced int Membership:', int(raw_type) in (int(mujoco.mjtJoint.mjJNT_HINGE), int(mujoco.mjtJoint.mjJNT_SLIDE)))
+          print('type(raw_type):', type(raw_type))
+          print('repr(raw_type):', repr(raw_type))
+          print('(raw_type == HINGE):', (raw_type == HINGE))
+          print('(HINGE == raw_type):', (HINGE == raw_type))
+          print('(raw_type in (HINGE, SLIDE)):', (raw_type in (HINGE, SLIDE)))
+          print('type(int(raw_type)):', type(int(raw_type)))
+          print('repr(int(raw_type)):', repr(int(raw_type)))
+          print('(int(raw_type) == HINGE):', (int(raw_type) == HINGE))
+          print('(HINGE == int(raw_type)):', (HINGE == int(raw_type)))
+          print('(int(raw_type) in (HINGE, SLIDE)):', (int(raw_type) in (HINGE, SLIDE)))
           "
 
       - name: Test Strategy A - Stock Env Creation (NO Patch)
@@ -279,6 +283,6 @@ jobs:
       - name: Upload Memory Results Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: streamlit_memory_v2
-          path: results/streamlit_memory_v2.json
+          name: streamlit_memory_v3
+          path: results/streamlit_memory_v3.json
 
