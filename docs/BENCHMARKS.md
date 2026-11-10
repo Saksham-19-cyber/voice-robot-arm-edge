@@ -145,6 +145,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
 | **Linux Ubuntu (CI Runner, v2)** | 1 session (3 presets, OSMesa, ASR not cached) | 54.2 MB | 103.92 MB | 103.92 MB | >89% |
 | **Linux Ubuntu (CI Runner, v2)** | 3 concurrent sessions (3 presets, OSMesa, ASR not cached) | 54.2 MB | **193.65 MB** | **193.65 MB** | >80% |
 | **Linux Ubuntu (CI Runner, v3)** | 3 concurrent sessions (3 presets, OSMesa, faster-whisper INT8 loaded) | 54.5 MB | **187.06 MB** | **187.06 MB** | >80% |
+| **Linux Ubuntu (CI Runner, v4)** | 3 concurrent sessions + real transcription (OSMesa, faster-whisper INT8) | 54.3 MB | **185.59 MB** | **185.59 MB** | >80% |
 | **Windows Laptop (v3)** | Active browser session (Whisper loaded dynamically) | 127.1 MB | **205.1 MB** (+78.0 MB attributable ASR delta) | 291.7 MB | >70% |
 
 - **Measurement Method Explanation:** The Linux CI baseline (54.2-54.5 MB) measures the raw Streamlit Python process tree in headless server mode before browser connection. The Windows idle baseline (127.1 MB) reflects a fully connected browser client session with frontend WebSocket connection, DOM element state, and GLFW OpenGL context initialized.

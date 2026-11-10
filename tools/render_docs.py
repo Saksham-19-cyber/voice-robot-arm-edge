@@ -30,6 +30,7 @@ def build_benchmarks_markdown():
     act_diff = load_json("results/action_difference_eval.json") or {}
     mem_v2 = load_json("results/streamlit_memory_v2.json") or {}
     mem_v3 = load_json("results/streamlit_memory_v3.json") or {}
+    mem_v4 = load_json("results/streamlit_memory_v4.json") or {}
     step_bd = load_json("results/step_breakdown.json") or {}
     baseline_eval = load_json("results/baseline_controller_eval.json") or {}
     cloud_dep = load_json("results/cloud_deploy.json") or {}
@@ -207,6 +208,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
 | **Linux Ubuntu (CI Runner, v2)** | 1 session (3 presets, OSMesa, ASR not cached) | {mem_v2.get('server_baseline_rss_mb', 54.2):.1f} MB | {mem_v2.get('single_session', {}).get('peak_rss_mb', 103.92):.2f} MB | {mem_v2.get('single_session', {}).get('peak_working_set_mb', 103.92):.2f} MB | >89% |
 | **Linux Ubuntu (CI Runner, v2)** | 3 concurrent sessions (3 presets, OSMesa, ASR not cached) | {mem_v2.get('server_baseline_rss_mb', 54.2):.1f} MB | **{mem_v2.get('three_concurrent_sessions', {}).get('peak_rss_mb', 193.65):.2f} MB** | **{mem_v2.get('three_concurrent_sessions', {}).get('peak_working_set_mb', 193.65):.2f} MB** | >80% |
 | **Linux Ubuntu (CI Runner, v3)** | 3 concurrent sessions (3 presets, OSMesa, faster-whisper INT8 loaded) | {mem_v3.get('server_baseline_rss_mb', 54.51):.1f} MB | **{mem_v3.get('three_concurrent_sessions', {}).get('peak_rss_mb', 187.06):.2f} MB** | **{mem_v3.get('three_concurrent_sessions', {}).get('peak_working_set_mb', 187.06):.2f} MB** | >80% |
+| **Linux Ubuntu (CI Runner, v4)** | 3 concurrent sessions + real transcription (OSMesa, faster-whisper INT8) | {mem_v4.get('server_baseline_rss_mb', 54.28):.1f} MB | **{mem_v4.get('three_concurrent_sessions', {}).get('peak_rss_mb', 185.59):.2f} MB** | **{mem_v4.get('three_concurrent_sessions', {}).get('peak_working_set_mb', 185.59):.2f} MB** | >80% |
 | **Windows Laptop (v3)** | Active browser session (Whisper loaded dynamically) | 127.1 MB | **205.1 MB** (+78.0 MB attributable ASR delta) | 291.7 MB | >70% |
 
 - **Measurement Method Explanation:** The Linux CI baseline (54.2-54.5 MB) measures the raw Streamlit Python process tree in headless server mode before browser connection. The Windows idle baseline (127.1 MB) reflects a fully connected browser client session with frontend WebSocket connection, DOM element state, and GLFW OpenGL context initialized.
@@ -236,6 +238,7 @@ def build_verified_claims_markdown():
     act_diff = load_json("results/action_difference_eval.json") or {}
     mem_v2 = load_json("results/streamlit_memory_v2.json") or {}
     mem_v3 = load_json("results/streamlit_memory_v3.json") or {}
+    mem_v4 = load_json("results/streamlit_memory_v4.json") or {}
     baseline_eval = load_json("results/baseline_controller_eval.json") or {}
 
     fp32_pb = policy_bench.get("fp32", {})
