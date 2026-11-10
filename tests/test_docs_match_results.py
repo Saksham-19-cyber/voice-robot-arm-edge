@@ -33,9 +33,19 @@ def test_readme_numbers_match_results():
     assert fp32_kb in readme or "281.0" in readme
     assert int8_kb in readme or "78.5" in readme
 
-    # Training steps (4,000 steps, not 12,000)
+    # Training steps (4,000 steps, not 12,000 as a live claim).
+    # Note: "~12,000" is allowed inside the audit table (quoted as a historical wrong value).
     with open("results/reach_eval.json", "r", encoding="utf-8") as f:
         re_data = json.load(f)
-    assert "12,000" not in readme, "README still has stale 12,000 steps claim"
+    # Strip lines that are clearly part of the reconciliation table (contain "12,000" quoted with surrounding pipe characters)
+    live_lines = [
+        line for line in readme.splitlines()
+        if "12,000" in line
+        and not (line.strip().startswith("|") and '"~12,000' in line)
+    ]
+    assert not live_lines, (
+        f"README has live (non-audit-table) 12,000 steps claim on line(s):\n"
+        + "\n".join(live_lines)
+    )
     assert "4,000 steps" in readme, "README missing true 4,000 steps"
 
