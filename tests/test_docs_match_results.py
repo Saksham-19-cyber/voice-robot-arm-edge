@@ -176,3 +176,66 @@ def test_all_docs_and_captions_unit_numbers_match_results_or_allowlist():
         + "\n".join([f"  {src}:{l} '{text}'" for src, l, text, _, _ in total_unmatched])
     )
 
+
+def test_doc_number_allowlist_integrity_and_historical_scope():
+    """Verify that every allowlisted number appears in documentation and historical entries are scoped to AUDIT_LOG.md."""
+    import glob
+    import re
+
+    active_entries = []
+    historical_entries = []
+    current_section = "active"
+
+    with open("tests/doc_number_allowlist.txt", "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("## Historical quotes"):
+                current_section = "historical"
+                continue
+            elif line.startswith("#"):
+                continue
+
+            parts = line.split("#")
+            token = parts[0].strip()
+            reason = parts[1].strip() if len(parts) > 1 else ""
+            assert reason and "(from prompt instruction)" not in reason, (
+                f"Allowlist entry '{token}' has invalid or missing reason: '{reason}'"
+            )
+            if current_section == "active":
+                active_entries.append((token, reason))
+            else:
+                historical_entries.append((token, reason))
+
+    assert active_entries, "Active allowlist entries must not be empty"
+    assert historical_entries, "Historical allowlist entries must not be empty"
+
+    targets = glob.glob("docs/*.md") + ["README.md", "src/bench/make_figures.py"]
+    doc_contents = {}
+    for t in targets:
+        with open(t, "r", encoding="utf-8") as f:
+            doc_contents[t] = f.read()
+
+    def check_presence(token, text):
+        parts = token.split()
+        if len(parts) == 2:
+            num, unit = parts
+            num_pat = r'(?:12000|12,000)' if num == '12000' else re.escape(num)
+            pat = rf'\b{num_pat}\s*{re.escape(unit)}\b'
+            return bool(re.search(pat, text, re.IGNORECASE))
+        return token.lower() in text.lower()
+
+    # 1. Assert every allowlist entry appears in at least one documentation file
+    for token, reason in active_entries + historical_entries:
+        found = any(check_presence(token, text) for text in doc_contents.values())
+        assert found, f"Allowlisted number '{token}' never appears anywhere in documentation files."
+
+    # 2. Assert historical entries NEVER appear outside docs/AUDIT_LOG.md
+    for token, reason in historical_entries:
+        for doc_path, text in doc_contents.items():
+            if os.path.basename(doc_path).lower() != "audit_log.md":
+                assert not check_presence(token, text), (
+                    f"Historical allowlist entry '{token}' found outside docs/AUDIT_LOG.md in '{doc_path}'"
+                )
+
