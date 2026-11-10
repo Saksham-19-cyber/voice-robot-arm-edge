@@ -133,7 +133,7 @@ Detailed numeric tables are maintained in [`docs/BENCHMARKS.md`](docs/BENCHMARKS
 ### Observed Behavior on Linux
 Stock `gymnasium-robotics==1.4.2` fails on Linux when instantiating `FetchReach-v4` across evaluated MuJoCo versions (`3.1.6`, `3.2.7`, `3.12.0`, `3.17.0`, `4.0.0`) with `AssertionError` in `gymnasium_robotics/utils/mujoco_utils.py` (line 142 in `set_joint_qpos` and line 192 in `get_joint_qpos`).
 
-- **Diagnostic Investigation:** In Linux CI with `numpy==1.26.4` and `numpy==2.1.3`, `type(raw_type)` is `<class 'numpy.int32'>` while `mjtJoint` enum variants are pybind11 enums. The precise mechanism causing tuple membership failure under Linux GCC is not established.
+- **Diagnostic Investigation:** In Linux CI with `numpy==1.26.4` and `numpy==2.1.3`, `type(raw_type)` is `<class 'numpy.int32'>` while `mjtJoint` enum variants are pybind11 enums. Empirically, `raw_type == HINGE` evaluates to `True`, but `HINGE == raw_type` evaluates to `False`. Because Python's `raw_type in (HINGE, SLIDE)` tests `item == raw_type`, it fails with `AssertionError`. Coercing to Python `int()` restores symmetric equality.
 - **The Fix:** `src/rl/env_utils.py` applies a targeted import-time compatibility patch to `gymnasium_robotics.utils.mujoco_utils` (`get_joint_qpos`, `set_joint_qpos`, `get_joint_qvel`, `set_joint_qvel`, `reset_mocap_welds`, `reset_mocap2body_xpos`), coercing array values and enum variants to Python `int()`.
 - **Validation:** Validated via `tests/test_enum_patch.py` and GitHub Actions CI workflow (`.github/workflows/linux-smoke.yml`) on Ubuntu Linux with `MUJOCO_GL=osmesa`.
 
