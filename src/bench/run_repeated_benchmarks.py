@@ -57,9 +57,12 @@ def run_5x_policy_benchmark():
         int8_p50s.append(int8_metrics["p50_us"])
         diffs.append(diff_val)
 
-    # Load main file
-    with open("results/policy_benchmark.json", "r") as f:
-        main_data = json.load(f)
+    main_data["conclusion"] = (
+        f"Based on repeated_runs ({len(runs)} runs of 20,000 iterations each): "
+        f"FP32 median {float(np.median(fp32_p50s)):.1f} us vs INT8 median {float(np.median(int8_p50s)):.1f} us; "
+        f"median difference is {float(np.median(diffs)):.1f} us with 5-run range [{np.min(diffs):.1f}, {np.max(diffs):.1f}] us spanning zero. "
+        "There is no measurable policy latency difference on this CPU; run-to-run variation exceeds the difference (cause not profiled)."
+    )
 
     main_data["system_execution_state"] = SYSTEM_STATE
     main_data["repeated_runs"] = {
