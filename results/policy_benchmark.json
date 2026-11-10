@@ -8,33 +8,37 @@
     "input_dim": 16,
     "output_dim": 4
   },
-  "fp32": {
-    "p50_us": 114.7,
-    "p95_us": 168.3,
-    "p99_us": 217.3,
-    "mean_us": 121.3,
-    "std_us": 32.5,
-    "min_us": 35.0,
-    "max_us": 3500.0,
-    "file_size_bytes": 287716,
-    "file_size_kb": 280.97
-  },
-  "int8": {
-    "p50_us": 85.9,
-    "p95_us": 108.9,
-    "p99_us": 156.4,
-    "mean_us": 88.6,
-    "std_us": 18.2,
-    "min_us": 30.0,
-    "max_us": 2100.0,
-    "file_size_bytes": 80341,
-    "file_size_kb": 78.46
-  },
-  "bootstrap_p50_difference": {
-    "mean_p50_diff_us (fp32 - int8)": 28.8,
-    "ci_95_low_us": 28.2,
-    "ci_95_high_us": 29.4,
-    "n_boot": 2000
+  "fp32_file_size_kb": 281.0,
+  "int8_file_size_kb": 78.5,
+  "run_0_initial": {
+    "fp32": {
+      "p50_us": 114.7,
+      "p95_us": 168.3,
+      "p99_us": 217.3,
+      "mean_us": 121.3,
+      "std_us": 32.5,
+      "min_us": 35.0,
+      "max_us": 3500.0,
+      "file_size_bytes": 287716,
+      "file_size_kb": 280.97
+    },
+    "int8": {
+      "p50_us": 85.9,
+      "p95_us": 108.9,
+      "p99_us": 156.4,
+      "mean_us": 88.6,
+      "std_us": 18.2,
+      "min_us": 30.0,
+      "max_us": 2100.0,
+      "file_size_bytes": 80341,
+      "file_size_kb": 78.46
+    },
+    "bootstrap_p50_difference": {
+      "mean_p50_diff_us (fp32 - int8)": 28.8,
+      "ci_95_low_us": 28.2,
+      "ci_95_high_us": 29.4,
+      "n_boot": 2000
+    }
   },
   "zero_in_95_ci": false,
   "conclusion": "Measurable difference of 28.80 us (95% CI: [28.2, 29.4] us).",

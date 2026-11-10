@@ -1,52 +1,37 @@
 {
-  "timing_method": "src/bench/timing.py: time_callable with time.perf_counter_ns",
+  "timing_method": "src/bench/timing.py: profile_rollout_step_and_breakdown with synchronized perf_counter_ns",
   "definitions": {
     "pure_mujoco_physics_20_substeps": "Exactly 20 calls to mj_step(model, data). No rendering, no wrappers.",
-    "isolated_env_step": "Full gymnasium env.step() call including observation dict and reward computation.",
-    "closed_loop_rollout": "Sequential rollout of obs prep + ONNX inference + env.step() over 2,500 total steps."
+    "wrapper_overhead": "Gymnasium env.step() duration outside raw physics (obs dict, action setup, reward).",
+    "closed_loop_rollout": "Sequential rollout of obs prep + ONNX inference + env.step() without reset overhead."
   },
   "machine_state": {
     "power_plan": "High Performance",
     "ac_power_plugged_in": true,
     "background_apps_closed": true,
-    "hardware": "Intel Core i5-1235U, 12 threads, Windows 11"
+    "hardware": "Intel Core i5-1235U, 12 threads, Windows 11",
+    "gl_backend": "glfw"
   },
   "gl_backend": "glfw",
   "raw_mujoco_physics_20_substeps_ms": {
-    "median_ms": 1.1168,
-    "p50_ms": 1.1168,
-    "mean_ms": 1.4853,
-    "std_ms": 1.4402,
-    "p95_ms": 4.0381,
-    "p99_ms": 8.3063,
-    "min_ms": 0.8959,
-    "max_ms": 10.4748,
-    "n_iter": 300
+    "median_ms": 0.7015,
+    "p50_ms": 0.7015,
+    "mean_ms": 0.7645,
+    "p95_ms": 1.0493,
+    "min_ms": 0.4983,
+    "max_ms": 3.6363,
+    "pct_of_total": 53.3
   },
-  "pure_mujoco_step_alone_ms": 1.1168,
-  "isolated_env_step_ms": {
-    "median_ms": 1.5755,
-    "p50_ms": 1.5755,
-    "mean_ms": 1.8205,
-    "std_ms": 0.6773,
-    "p95_ms": 2.8826,
-    "p99_ms": 4.289,
-    "min_ms": 1.2581,
-    "max_ms": 7.449,
-    "n_iter": 300
-  },
-  "pure_obs_formatting_alone_ms": 0.0063,
+  "pure_mujoco_step_alone_ms": 0.907,
   "closed_loop_single_thread_ort": {
-    "total_steps": 2500,
-    "total_time_sec": 3.444,
-    "effective_fps": 726.0,
-    "ms_per_step": 1.377
+    "total_steps": 500,
+    "effective_fps": 580.2,
+    "ms_per_step": 1.724
   },
   "closed_loop_default_thread_ort": {
-    "total_steps": 2500,
-    "total_time_sec": 2.838,
-    "effective_fps": 880.8,
-    "ms_per_step": 1.135
+    "total_steps": 500,
+    "effective_fps": 609.6,
+    "ms_per_step": 1.64
   },
   "system_execution_state": {
     "power_plan": "High Performance",
@@ -58,55 +43,68 @@
   "repeated_runs": {
     "n_runs": 5,
     "pure_mujoco_step_alone_ms": {
-      "median": 1.134,
-      "min": 1.117,
-      "max": 1.286,
-      "range": "[1.117, 1.286]",
+      "median": 0.907,
+      "min": 0.702,
+      "max": 0.973,
+      "range": "[0.702, 0.973]",
       "values": [
-        1.1224,
-        1.1648,
-        1.2858,
-        1.1336,
-        1.1168
+        0.7015,
+        0.9317,
+        0.8892,
+        0.9725,
+        0.9074
       ]
     },
     "closed_loop_single_thread_ort_fps": {
-      "median": 683.5,
-      "min": 671.0,
-      "max": 726.0,
-      "range": "[671.0, 726.0]",
+      "median": 580.2,
+      "min": 527.0,
+      "max": 760.2,
+      "range": "[527.0, 760.2]",
       "values": [
-        705.2,
-        675.3,
-        671.0,
-        683.5,
-        726.0
+        760.2,
+        577.0,
+        580.2,
+        527.0,
+        583.9
       ]
     },
     "closed_loop_single_thread_ort_step_ms": {
-      "median": 1.463,
-      "min": 1.377,
-      "max": 1.49,
-      "range": "[1.377, 1.490]",
+      "median": 1.724,
+      "min": 1.315,
+      "max": 1.898,
+      "range": "[1.315, 1.898]",
       "values": [
-        1.418,
-        1.481,
-        1.49,
-        1.463,
-        1.377
+        1.3155,
+        1.7332,
+        1.7235,
+        1.8977,
+        1.7126
       ]
     },
     "closed_loop_default_thread_ort_fps": {
-      "median": 851.6,
-      "min": 755.1,
-      "max": 919.7,
-      "range": "[755.1, 919.7]",
+      "median": 609.6,
+      "min": 478.4,
+      "max": 703.4,
+      "range": "[478.4, 703.4]",
       "values": [
-        795.3,
-        755.1,
-        919.7,
-        851.6,
-        880.8
+        499.5,
+        664.0,
+        478.4,
+        703.4,
+        609.6
+      ]
+    },
+    "closed_loop_default_thread_ort_step_ms": {
+      "median": 1.64,
+      "min": 1.422,
+      "max": 2.09,
+      "range": "[1.422, 2.090]",
+      "values": [
+        2.0022,
+        1.5059,
+        2.0903,
+        1.4217,
+        1.6404
       ]
     }
   }

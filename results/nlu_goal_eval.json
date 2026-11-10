@@ -7502,6 +7502,12 @@
     "mean_int8_final_distance_cm": 1.08,
     "presets_int8_success_rate": 1.0,
     "offsets_int8_success_rate": 1.0,
-    "edges_int8_success_rate": 1.0
+    "edges_int8_success_rate": 1.0,
+    "success_rate_within_5cm": 1.0,
+    "success_rate_within_2cm": 0.9091,
+    "success_rate_within_1cm": 0.4545,
+    "fp32_success_rate_within_5cm": 1.0,
+    "fp32_success_rate_within_2cm": 0.9091,
+    "fp32_success_rate_within_1cm": 0.4242
   }
 }

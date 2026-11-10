@@ -1,0 +1,7 @@
+# Allowlist of external github.com/<owner>/<repo> references permitted in the repository
+# Format: <owner>/<repo> # reason
+
+actions/checkout # Official GitHub Actions checkout action in CI workflows
+actions/setup-python # Official GitHub Actions Python setup action in CI workflows
+actions/upload-artifact # Official GitHub Actions artifact upload action in CI workflows
+

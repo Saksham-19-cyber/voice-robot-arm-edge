@@ -6,7 +6,11 @@
     "mean_steps_to_goal": 2.65,
     "std_steps_to_goal": 0.93,
     "total_eval_time_sec": 56.45,
-    "fps": 88.6
+    "fps": 88.6,
+    "success_rate_final_within_5cm": 1.0,
+    "success_rate_final_within_2cm": 0.96,
+    "success_rate_final_within_1cm": 0.54,
+    "mean_final_distance_cm": 1.08
   },
   "ONNX_FP32": {
     "success_rate": 1.0,
@@ -15,7 +19,11 @@
     "mean_steps_to_goal": 2.65,
     "std_steps_to_goal": 0.93,
     "total_eval_time_sec": 21.95,
-    "fps": 227.8
+    "fps": 227.8,
+    "success_rate_final_within_5cm": 1.0,
+    "success_rate_final_within_2cm": 0.96,
+    "success_rate_final_within_1cm": 0.54,
+    "mean_final_distance_cm": 1.08
   },
   "ONNX_INT8": {
     "success_rate": 1.0,
@@ -24,7 +32,11 @@
     "mean_steps_to_goal": 2.65,
     "std_steps_to_goal": 0.93,
     "total_eval_time_sec": 21.67,
-    "fps": 230.8
+    "fps": 230.8,
+    "success_rate_final_within_5cm": 1.0,
+    "success_rate_final_within_2cm": 0.96,
+    "success_rate_final_within_1cm": 0.56,
+    "mean_final_distance_cm": 1.08
   },
   "fp32_size_bytes": 287716,
   "int8_size_bytes": 80341,

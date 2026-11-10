@@ -93,81 +93,207 @@ def run_5x_policy_benchmark():
 
 
 def run_5x_rollout_fps():
-    print("=== Running Rollout FPS Benchmark 5x ===")
-    runs = []
-    mujoco_alone_ms = []
-    st_fps_list = []
-    st_step_ms_list = []
-    mt_fps_list = []
-    mt_step_ms_list = []
+    print("=== Running Synchronized Rollout FPS and Step Breakdown Benchmarks 5x ===", flush=True)
+    from src.rl.env_utils import make_fetch_env
+    from src.bench.timing import profile_rollout_step_and_breakdown
+    import onnxruntime as ort
+
+    opts1 = ort.SessionOptions()
+    opts1.intra_op_num_threads = 1
+    opts1.inter_op_num_threads = 1
+
+    runs_st = []
+    runs_mt = []
+
+    phys_list = []
+    wrap_list = []
+    onnx_list = []
+    obs_list = []
+    total_st_list = []
+    fps_st_list = []
+
+    total_mt_list = []
+    fps_mt_list = []
 
     for run_idx in range(1, 6):
-        print(f"  Rollout FPS run {run_idx}/5...")
-        res = audit_rollout_fps()
+        print(f"  Rollout & Step Breakdown run {run_idx}/5...", flush=True)
+        env = make_fetch_env("FetchReach-v4", render_mode="rgb_array")
+        session_st = ort.InferenceSession("models/fetch_reach_actor_int8.onnx", sess_options=opts1, providers=["CPUExecutionProvider"])
+        session_mt = ort.InferenceSession("models/fetch_reach_actor_int8.onnx", providers=["CPUExecutionProvider"])
 
-        m_ms = res["pure_mujoco_step_alone_ms"]
-        st_fps = res["closed_loop_single_thread_ort"]["effective_fps"]
-        st_ms = res["closed_loop_single_thread_ort"]["ms_per_step"]
-        mt_fps = res["closed_loop_default_thread_ort"]["effective_fps"]
-        mt_ms = res["closed_loop_default_thread_ort"]["ms_per_step"]
+        res_st = profile_rollout_step_and_breakdown(env, session_st, n_steps=500, n_warmup=50)
+        res_mt = profile_rollout_step_and_breakdown(env, session_mt, n_steps=500, n_warmup=50)
+        env.close()
 
-        run_summary = {
+        # Save individual run files
+        with open(f"results/runs/step_breakdown_run_{run_idx}.json", "w", encoding="utf-8") as f:
+            json.dump(res_st, f, indent=2)
+
+        fps_run_data = {
             "run_index": run_idx,
-            "pure_mujoco_step_alone_ms": m_ms,
-            "closed_loop_single_thread_ort_fps": st_fps,
-            "closed_loop_single_thread_ort_ms": st_ms,
-            "closed_loop_default_thread_ort_fps": mt_fps,
-            "closed_loop_default_thread_ort_ms": mt_ms,
+            "pure_mujoco_step_alone_ms": res_st["pure_mujoco_physics_ms"]["median_ms"],
+            "closed_loop_single_thread_ort_fps": res_st["closed_loop_step_ms"]["effective_fps"],
+            "closed_loop_single_thread_ort_ms": res_st["closed_loop_step_ms"]["median_ms"],
+            "closed_loop_default_thread_ort_fps": res_mt["closed_loop_step_ms"]["effective_fps"],
+            "closed_loop_default_thread_ort_ms": res_mt["closed_loop_step_ms"]["median_ms"],
         }
-        with open(f"results/runs/rollout_fps_run_{run_idx}.json", "w") as f:
-            json.dump(run_summary, f, indent=2)
+        with open(f"results/runs/rollout_fps_run_{run_idx}.json", "w", encoding="utf-8") as f:
+            json.dump(fps_run_data, f, indent=2)
 
-        runs.append(run_summary)
-        mujoco_alone_ms.append(m_ms)
-        st_fps_list.append(st_fps)
-        st_step_ms_list.append(st_ms)
-        mt_fps_list.append(mt_fps)
-        mt_step_ms_list.append(mt_ms)
+        runs_st.append(res_st)
+        runs_mt.append(res_mt)
 
-    with open("results/rollout_fps_audit.json", "r") as f:
-        main_data = json.load(f)
+        phys_list.append(res_st["pure_mujoco_physics_ms"]["median_ms"])
+        wrap_list.append(res_st["gymnasium_wrapper_ms"]["median_ms"])
+        onnx_list.append(res_st["onnx_inference_ms"]["median_ms"])
+        obs_list.append(res_st["obs_formatting_ms"]["median_ms"])
+        total_st_list.append(res_st["closed_loop_step_ms"]["median_ms"])
+        fps_st_list.append(res_st["closed_loop_step_ms"]["effective_fps"])
 
-    main_data["system_execution_state"] = SYSTEM_STATE
-    main_data["repeated_runs"] = {
+        total_mt_list.append(res_mt["closed_loop_step_ms"]["median_ms"])
+        fps_mt_list.append(res_mt["closed_loop_step_ms"]["effective_fps"])
+
+    med_phys = round(float(np.median(phys_list)), 3)
+    med_wrap = round(float(np.median(wrap_list)), 3)
+    med_onnx = round(float(np.median(onnx_list)), 3)
+    med_obs = round(float(np.median(obs_list)), 3)
+    med_total_st = round(float(np.median(total_st_list)), 3)
+    med_fps_st = round(float(np.median(fps_st_list)), 1)
+
+    med_total_mt = round(float(np.median(total_mt_list)), 3)
+    med_fps_mt = round(float(np.median(fps_mt_list)), 1)
+
+    sum_meds = round(med_phys + med_wrap + med_onnx + med_obs, 3)
+    closure_diff_pct = round(abs(sum_meds - med_total_st) / med_total_st * 100, 1)
+
+    pct_phys = round(med_phys / med_total_st * 100, 1)
+    pct_wrap = round(med_wrap / med_total_st * 100, 1)
+    pct_onnx = round(med_onnx / med_total_st * 100, 1)
+    pct_obs = round(med_obs / med_total_st * 100, 1)
+
+    # 1. Write results/step_breakdown.json
+    step_breakdown_data = {
         "n_runs": 5,
-        "pure_mujoco_step_alone_ms": {
-            "median": round(float(np.median(mujoco_alone_ms)), 3),
-            "min": round(float(np.min(mujoco_alone_ms)), 3),
-            "max": round(float(np.max(mujoco_alone_ms)), 3),
-            "range": f"[{np.min(mujoco_alone_ms):.3f}, {np.max(mujoco_alone_ms):.3f}]",
-            "values": mujoco_alone_ms,
+        "n_iter_per_run": 500,
+        "timing_method": "src/bench/timing.py: profile_rollout_step_and_breakdown",
+        "definitions": {
+            "physics_step": "Exactly 20 substeps of mujoco.mj_step(model, data). No rendering, no wrappers.",
+            "wrapper_overhead": "Gymnasium env.step() duration outside raw physics (obs dict, action setup, reward).",
+            "policy_inference": "Single-thread pinned ONNX INT8 actor session.run().",
+            "obs_formatting": "Concatenation of ob, ag, dg into float32 (1, 16) array.",
+            "closed_loop_step": "End-to-end execution of obs formatting + ONNX inference + env.step().",
         },
-        "closed_loop_single_thread_ort_fps": {
-            "median": round(float(np.median(st_fps_list)), 1),
-            "min": round(float(np.min(st_fps_list)), 1),
-            "max": round(float(np.max(st_fps_list)), 1),
-            "range": f"[{np.min(st_fps_list):.1f}, {np.max(st_fps_list):.1f}]",
-            "values": st_fps_list,
+        "machine_state": SYSTEM_STATE,
+        "gl_backend": os.environ.get("MUJOCO_GL", "glfw"),
+        "total_closed_loop_step_ms": {
+            "median": med_total_st,
+            "p50": med_total_st,
+            "mean": round(float(np.mean(total_st_list)), 3),
+            "min": round(float(np.min(total_st_list)), 3),
+            "max": round(float(np.max(total_st_list)), 3),
+            "range": f"[{np.min(total_st_list):.3f}, {np.max(total_st_list):.3f}]",
         },
-        "closed_loop_single_thread_ort_step_ms": {
-            "median": round(float(np.median(st_step_ms_list)), 3),
-            "min": round(float(np.min(st_step_ms_list)), 3),
-            "max": round(float(np.max(st_step_ms_list)), 3),
-            "range": f"[{np.min(st_step_ms_list):.3f}, {np.max(st_step_ms_list):.3f}]",
-            "values": st_step_ms_list,
+        "stages": {
+            "mujoco_physics_20_substeps_ms": {
+                "median": med_phys,
+                "p50": med_phys,
+                "range": f"[{np.min(phys_list):.3f}, {np.max(phys_list):.3f}]",
+                "pct_of_total": pct_phys,
+            },
+            "gymnasium_env_wrapper_and_obs_building_ms": {
+                "median": med_wrap,
+                "p50": med_wrap,
+                "range": f"[{np.min(wrap_list):.3f}, {np.max(wrap_list):.3f}]",
+                "pct_of_total": pct_wrap,
+            },
+            "onnx_policy_inference_ms": {
+                "median": med_onnx,
+                "p50": med_onnx,
+                "range": f"[{np.min(onnx_list):.3f}, {np.max(onnx_list):.3f}]",
+                "pct_of_total": pct_onnx,
+            },
+            "obs_flattening_and_conversion_ms": {
+                "median": med_obs,
+                "p50": med_obs,
+                "range": f"[{np.min(obs_list):.3f}, {np.max(obs_list):.3f}]",
+                "pct_of_total": pct_obs,
+            },
         },
-        "closed_loop_default_thread_ort_fps": {
-            "median": round(float(np.median(mt_fps_list)), 1),
-            "min": round(float(np.min(mt_fps_list)), 1),
-            "max": round(float(np.max(mt_fps_list)), 1),
-            "range": f"[{np.min(mt_fps_list):.1f}, {np.max(mt_fps_list):.1f}]",
-            "values": mt_fps_list,
+        "closure": {
+            "sum_of_medians_ms": sum_meds,
+            "diff_from_closed_loop_pct": closure_diff_pct,
+        },
+        "individual_runs": runs_st,
+    }
+    with open("results/step_breakdown.json", "w", encoding="utf-8") as f:
+        json.dump(step_breakdown_data, f, indent=2)
+
+    # 2. Write results/rollout_fps_audit.json
+    audit_data = {
+        "timing_method": "src/bench/timing.py: profile_rollout_step_and_breakdown with synchronized perf_counter_ns",
+        "definitions": {
+            "pure_mujoco_physics_20_substeps": "Exactly 20 calls to mj_step(model, data). No rendering, no wrappers.",
+            "wrapper_overhead": "Gymnasium env.step() duration outside raw physics (obs dict, action setup, reward).",
+            "closed_loop_rollout": "Sequential rollout of obs prep + ONNX inference + env.step() without reset overhead.",
+        },
+        "machine_state": SYSTEM_STATE,
+        "gl_backend": os.environ.get("MUJOCO_GL", "glfw"),
+        "raw_mujoco_physics_20_substeps_ms": runs_st[0]["pure_mujoco_physics_ms"],
+        "pure_mujoco_step_alone_ms": med_phys,
+        "closed_loop_single_thread_ort": {
+            "total_steps": 500,
+            "effective_fps": med_fps_st,
+            "ms_per_step": med_total_st,
+        },
+        "closed_loop_default_thread_ort": {
+            "total_steps": 500,
+            "effective_fps": med_fps_mt,
+            "ms_per_step": med_total_mt,
+        },
+        "system_execution_state": SYSTEM_STATE,
+        "repeated_runs": {
+            "n_runs": 5,
+            "pure_mujoco_step_alone_ms": {
+                "median": med_phys,
+                "min": round(float(np.min(phys_list)), 3),
+                "max": round(float(np.max(phys_list)), 3),
+                "range": f"[{np.min(phys_list):.3f}, {np.max(phys_list):.3f}]",
+                "values": phys_list,
+            },
+            "closed_loop_single_thread_ort_fps": {
+                "median": med_fps_st,
+                "min": round(float(np.min(fps_st_list)), 1),
+                "max": round(float(np.max(fps_st_list)), 1),
+                "range": f"[{np.min(fps_st_list):.1f}, {np.max(fps_st_list):.1f}]",
+                "values": fps_st_list,
+            },
+            "closed_loop_single_thread_ort_step_ms": {
+                "median": med_total_st,
+                "min": round(float(np.min(total_st_list)), 3),
+                "max": round(float(np.max(total_st_list)), 3),
+                "range": f"[{np.min(total_st_list):.3f}, {np.max(total_st_list):.3f}]",
+                "values": total_st_list,
+            },
+            "closed_loop_default_thread_ort_fps": {
+                "median": med_fps_mt,
+                "min": round(float(np.min(fps_mt_list)), 1),
+                "max": round(float(np.max(fps_mt_list)), 1),
+                "range": f"[{np.min(fps_mt_list):.1f}, {np.max(fps_mt_list):.1f}]",
+                "values": fps_mt_list,
+            },
+            "closed_loop_default_thread_ort_step_ms": {
+                "median": med_total_mt,
+                "min": round(float(np.min(total_mt_list)), 3),
+                "max": round(float(np.max(total_mt_list)), 3),
+                "range": f"[{np.min(total_mt_list):.3f}, {np.max(total_mt_list):.3f}]",
+                "values": total_mt_list,
+            },
         },
     }
+    with open("results/rollout_fps_audit.json", "w", encoding="utf-8") as f:
+        json.dump(audit_data, f, indent=2)
 
-    with open("results/rollout_fps_audit.json", "w") as f:
-        json.dump(main_data, f, indent=2)
-    print("Rollout FPS benchmark 5x complete.")
+    print(f"Synchronized 5x benchmark complete. Median Physics: {med_phys} ms ({pct_phys}%), Median Step: {med_total_st} ms ({med_fps_st} FPS). Closure: {closure_diff_pct}%.", flush=True)
 
 
 def run_5x_pipeline_latency():

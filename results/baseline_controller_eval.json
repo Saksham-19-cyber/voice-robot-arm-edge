@@ -41,7 +41,11 @@
     "success_rate_final_step": 1.0,
     "mean_steps_to_goal": 2.61,
     "mean_final_distance_m": 0.0018,
-    "max_final_distance_m": 0.0262
+    "max_final_distance_m": 0.0262,
+    "success_rate_final_within_5cm": 1.0,
+    "success_rate_final_within_2cm": 0.98,
+    "success_rate_final_within_1cm": 0.91,
+    "mean_final_distance_cm": 0.18
   },
   "nlu_goals_eval_600_episodes": {
     "n_episodes": 660,

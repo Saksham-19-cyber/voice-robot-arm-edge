@@ -9,15 +9,15 @@ This document records the exact, unrounded measurements produced by benchmark sc
 *Environment: FetchReach-v4. Measured on Windows laptop, Intel Core i5-1235U, GLFW rendering.*
 *Source: `results/reach_eval.json`, `results/quantization_eval.json`, `results/baseline_controller_eval.json`*
 
-| Controller / Policy Engine | Precision | Model Size | First-Reached (<5cm) | Final-Step Success | Mean Steps to Goal | Platform / Rendering |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Proportional Baseline Controller** | N/A (Linear) | n/a (hand-coded) | **100.0%** | **100.0%** | 2.61 steps | Windows / GLFW |
-| PyTorch SAC Actor | FP32 | 3.2 MB (SB3 .zip) | **100.0%** | **100.0%** | 2.65 ± 0.93 | Windows / GLFW |
-| ONNX Runtime | FP32 | 281.0 KB (.onnx) | **100.0%** | **100.0%** | 2.65 ± 0.93 | Windows / GLFW |
-| **ONNX Runtime (Edge)** | **INT8 Dynamic** | **78.5 KB (.onnx)** | **100.0%** | **100.0%** | **2.65 ± 0.93** | Windows / GLFW |
+| Controller / Policy Engine | Precision | Model Size | Success (<= 5 cm) | Success (<= 2 cm) | Success (<= 1 cm) | Mean Final Dist | Mean Steps to Goal | Platform / Rendering |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Proportional Baseline Controller** | N/A (Linear) | n/a (hand-coded) | **100.0%** | **98.0%** | **91.0%** | **0.18 cm** | 2.61 steps | Windows / GLFW |
+| PyTorch SAC Actor | FP32 | 3.2 MB (SB3 .zip) | **100.0%** | **96.0%** | **54.0%** | 1.08 cm | 2.65 ± 0.93 | Windows / GLFW |
+| ONNX Runtime | FP32 | 281.0 KB (.onnx) | **100.0%** | **96.0%** | **54.0%** | 1.08 cm | 2.65 ± 0.93 | Windows / GLFW |
+| **ONNX Runtime (Edge)** | **INT8 Dynamic** | **78.5 KB (.onnx)** | **100.0%** | **96.0%** | **56.0%** | **1.08 cm** | **2.65 ± 0.93** | Windows / GLFW |
 
-- **Dual Success Metric Finding:** Both success metrics ("first reached within 5 cm at any step" and "is_success at final step") are identical at **100.0%**. Once the arm reaches the goal, it holds its position at the goal through step 50.
-- **Baseline Controller Comparison:** FetchReach-v4 is an obstacle-free kinematic positioning task. The proportional controller achieves 100.0% success with mean 2.61 steps and 0.18 cm final distance. The learned SAC policy achieves 100.0% success with mean 2.65 steps on random goals (2.97 steps on NLU goals) and 1.01 cm final distance on random goals (1.08 cm on NLU goals). The proportional controller is more precise due to direct analytical error minimization; the SAC policy operates tabula rasa without manual gain tuning.
+- **Success Threshold Findings:** At the default FetchReach tolerance (<= 5 cm), all policies achieve 100.0% success. At <= 2 cm, INT8 matches FP32 at 96.0%. At the tightest <= 1 cm threshold, INT8 achieves 56.0% (vs FP32 54.0%), while the analytical proportional baseline reaches 91.0% due to continuous linear velocity correction.
+- **Baseline Controller Comparison:** FetchReach-v4 is an obstacle-free kinematic positioning task. The proportional controller achieves 100.0% success (<= 5 cm), 98.0% (<= 2 cm), and 91.0% (<= 1 cm) with mean final distance 0.18 cm. The learned SAC policy achieves 100.0% (<= 5 cm), 96.0% (<= 2 cm), and 56.0% (<= 1 cm) with mean final distance 1.08 cm. The proportional controller is more precise due to direct analytical error minimization; the SAC policy operates tabula rasa without manual gain tuning.
 - **Training Convergence:** Converges to 100.0% success at step 1,500; total training budget 4,000 steps completed in 363.27 s (~6.1 min on CPU).
 - **Max Absolute Action Difference:** PyTorch vs ONNX FP32: `7.79e-07`; ONNX FP32 vs INT8: `0.1640` across 1,000 random inputs.
 
@@ -25,16 +25,19 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 ## 2. High-Precision Policy Latency Microbenchmark
 
-*Single-thread pinned microbenchmark (`intra_op_num_threads=1, inter_op_num_threads=1`, 200 warm-up calls, 20,000 timed iterations).*
+*Single-thread pinned microbenchmark (`intra_op_num_threads=1, inter_op_num_threads=1`, 200 warm-up calls, 20,000 timed iterations per run across 5 repeated runs under High Performance power plan).*
 *Source: `results/policy_benchmark.json`*
 
-| Model Precision | Model Size | Single-Run p50 | 5-Run Median p50 | 5-Run Min-Max Range | Single-Run p95 | Single-Run p99 |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **ONNX FP32** | 281.0 KB | 114.7 µs | **34.7 µs** | [25.4, 61.9] µs | 168.3 µs | 217.3 µs |
-| **ONNX INT8** | 78.5 KB | 85.9 µs | **42.6 µs** | [38.4, 50.4] µs | 108.9 µs | 156.4 µs |
+| Run Number | ONNX FP32 p50 (µs) | ONNX INT8 p50 (µs) | Difference (FP32 minus INT8) (µs) |
+| :--- | :--- | :--- | :--- |
+| Run 1 | 61.9 µs | 45.4 µs | +16.5 µs |
+| Run 2 | 44.4 µs | 50.4 µs | -6.0 µs |
+| Run 3 | 34.7 µs | 38.6 µs | -3.9 µs |
+| Run 4 | 25.4 µs | 42.6 µs | -17.2 µs |
+| Run 5 | 26.6 µs | 38.4 µs | -11.8 µs |
+| **5-Run Median** | **34.7 µs** | **42.6 µs** | **-6.0 µs** |
 
-- **Bootstrap 95% Confidence Interval (FP32 p50 − INT8 p50):** `[28.2 µs, 29.4 µs]` (2,000 resamples).
-- **Repeated Runs Finding:** Across 5 independent 20,000-iteration runs under High Performance power plan, INT8 dynamic quantization yields a 3.58x smaller model (78.5 KB vs 281.0 KB) with no measurable latency difference on this CPU (median difference -6.0 µs, range: [-17.2, 16.5] µs spanning zero; cause not profiled).
+- **Latency Finding:** 3.58x smaller; no measurable latency difference on this CPU; run-to-run variation exceeds the difference; cause not profiled. (Direction: FP32 minus INT8, 5-run median difference: -6.0 µs, range [-17.2, 16.5] µs spanning zero).
 
 ---
 
@@ -42,19 +45,19 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 *Measured on Windows laptop, Intel Core i5-1235U. Source: `results/rollout_fps_audit.json`, `results/step_breakdown.json`*
 
-| Component / Mode | Execution Details | Single-Run Value | 5-Run Median Value | 5-Run Min-Max Range |
-| :--- | :--- | :--- | :--- | :--- |
-| **Pure MuJoCo Physics Step** | Raw 20 substeps of `mj_step` alone (no wrappers, no obs formatting, no inference) | 1.117 ms/step | **1.134 ms/step** | [1.117, 1.286] ms/step |
-| **Closed-Loop Rollout (1 Thread)** | Full simulation loop (`intra_op=1, inter_op=1`, no render) | 726.0 FPS | **683.5 FPS** | [671.0, 726.0] FPS |
-| **Closed-Loop Rollout (Default Threads)** | Full simulation loop (unconstrained threads, no render) | 880.8 FPS | **851.6 FPS** | [755.1, 919.7] FPS |
+| Component / Mode | Execution Details | 5-Run Median Value | 5-Run Min-Max Range |
+| :--- | :--- | :--- | :--- |
+| **Pure MuJoCo Physics Step** | Raw 20 substeps of `mj_step` alone (no wrappers, no obs formatting, no inference) | **0.907 ms/step** | [0.702, 0.973] ms/step |
+| **Closed-Loop Rollout (1 Thread)** | Full simulation loop (`intra_op=1, inter_op=1`, no render) | **580.2 FPS** | [527.0, 760.2] FPS |
+| **Closed-Loop Rollout (Default Threads)** | Full simulation loop (unconstrained threads, no render) | **609.6 FPS** | [478.4, 703.4] FPS |
 
 ### Detailed Step Time Breakdown (`results/step_breakdown.json`)
-*Single-thread INT8 closed-loop step (0.906 ms total median):*
-- **MuJoCo Physics (20 substeps):** 0.465 ms (51.4%)
-- **Gymnasium Environment Wrapper & Obs Dict Building:** 0.342 ms (37.8%)
-- **ONNX Policy Forward Pass:** 0.070 ms (7.8%)
-- **Observation Array Formatting & Flattening:** 0.005 ms (0.5%)
-- **Closure:** Sum of component medians is 0.883 ms (closure difference: 2.6% from closed-loop step, well within 5%).
+*Single-thread INT8 closed-loop step (1.724 ms total median):*
+- **MuJoCo Physics (20 substeps):** 0.907 ms (52.6%)
+- **Gymnasium Environment Wrapper & Obs Dict Building:** 0.656 ms (38.1%)
+- **ONNX Policy Forward Pass:** 0.118 ms (6.8%)
+- **Observation Array Formatting & Flattening:** 0.009 ms (0.5%)
+- **Closure:** Sum of component medians is 1.690 ms (closure difference: 2.0% from closed-loop step, well within 5%).
 
 ---
 
@@ -98,7 +101,7 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 | Evaluation Split | Sample Count | Rule Parser Intent Acc | Classifier Alone Intent Acc | Hybrid Parser Intent Acc | Hybrid End-to-End Acc |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Template Split (parser fixes were made after inspecting its failures; not held-out)** | N=80 | 97.5% | 100.0% | **100.0%** | **100.0%** |
+| **Template Split (tuned, not held-out)** | N=80 | 97.5% | 100.0% | **100.0%** | **100.0%** |
 | **Development Set (Agent-Written; tuned on dev set; not independent)** | N=50 | 60.0% | 70.0% | **76.0%** | **68.0%** |
 | **Human-Written Held-Out (`tests/nlu_heldout_human.json`)** | N=0 | not measured | not measured | not measured | not measured |
 
@@ -136,28 +139,32 @@ This document records the exact, unrounded measurements produced by benchmark sc
 
 ## 9. Server Process Memory Footprint (By Operating System)
 
-*Source: `results/streamlit_memory_v2.json`, `results/streamlit_memory_v3.json`, `results/streamlit_memory_v4.json`*
+*Source: `results/streamlit_memory_v3.json`, `results/streamlit_memory_v4.json`*
 
 ### Linux Ubuntu (CI Runner, Headless OSMesa)
 
-*Measured on Linux CI runner in headless server mode using OSMesa software rendering.*
+*Measured on Linux CI runner in headless server mode using OSMesa software rendering (`results/streamlit_memory_v4.json`). Evaluates the server Python process tree across 3 concurrent sessions each executing 3 presets plus 1 real audio transcription with faster-whisper INT8 loaded.*
 
 | Benchmark Condition | Idle Server RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
 | :--- | :--- | :--- | :--- | :--- |
-| 1 session (3 presets, OSMesa, ASR not cached) | 54.2 MB | 103.92 MB | 103.92 MB | >89% |
-| 3 concurrent sessions (3 presets, OSMesa, ASR not cached) | 54.2 MB | **193.65 MB** | **193.65 MB** | >80% |
-| 3 concurrent sessions (3 presets, OSMesa, faster-whisper INT8 loaded) | 54.5 MB | **187.06 MB** | **187.06 MB** | >80% |
-| 3 concurrent sessions + real transcription (OSMesa, faster-whisper INT8) | 54.3 MB | **185.59 MB** | **185.59 MB** | >80% |
+| Headless Server Baseline (OSMesa, no sessions) | 54.28 MB | 54.28 MB | 54.28 MB | >94% |
+| 1 session (3 presets + 1 real transcription, faster-whisper INT8) | 54.28 MB | 88.88 MB | 88.88 MB | >90% |
+| 3 concurrent sessions (3 presets + 1 real transcription, faster-whisper INT8) | 54.28 MB | **185.59 MB** | **185.59 MB** | >80% |
 
 ### Windows Laptop (Interactive Client, GLFW)
 
-*Measured on Windows laptop, Intel Core i5-1235U, interactive browser session with hardware-accelerated GLFW rendering.*
+*Measured on Windows laptop, Intel Core i5-1235U, interactive browser session with hardware-accelerated GLFW rendering (`results/streamlit_memory_v3.json`).*
 
 | Benchmark Condition | Idle Connected RSS | Peak RSS | Peak Working Set | Headroom Under 1 GB |
 | :--- | :--- | :--- | :--- | :--- |
-| Active browser session (Whisper loaded dynamically) | 127.1 MB | **205.1 MB** (+78.0 MB attributable ASR delta) | 291.7 MB | >70% |
+| Idle connected client session (GLFW, WebSocket connected) | 127.1 MB | 127.1 MB | 127.1 MB | >87% |
+| Active browser session with faster-whisper tiny.en INT8 loaded | 127.1 MB | **205.1 MB** (+78.0 MB attributable ASR delta) | 291.7 MB | >70% |
 
-- **Measurement Distinction:** Linux CI baseline (54.2-54.5 MB) measures the raw headless Streamlit Python process tree before browser connection. Windows idle baseline (127.1 MB) reflects a fully connected browser client session with frontend WebSocket connection, DOM element state, and GLFW OpenGL context initialized.
+- **What Each Measurement Means:**
+  - **Linux Baseline (54.28 MB):** The raw headless Streamlit Python process on Linux before any client connects, using OSMesa software rendering.
+  - **Linux 3 Concurrent Sessions + Real Transcription (185.59 MB peak):** Peak memory when 3 concurrent simulated sessions each execute 3 arm motion presets and 1 real audio transcription with `faster-whisper` INT8 loaded.
+  - **Windows Idle Connected Baseline (127.1 MB):** Reflects a full interactive browser session with active WebSocket client connection, Streamlit frontend state, and initialized GLFW OpenGL context.
+  - **Windows Active with ASR Cache (205.1 MB peak RSS, 291.7 MB working set):** Includes the connected browser session plus the dynamically cached `faster-whisper` `tiny.en` INT8 model (+78.0 MB attributable delta).
 
 ---
 

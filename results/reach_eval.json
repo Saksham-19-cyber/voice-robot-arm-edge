@@ -10,5 +10,9 @@
   "min_steps": 1,
   "max_steps": 4,
   "train_duration_sec": 363.27,
-  "total_timesteps": 4000
+  "total_timesteps": 4000,
+  "success_rate_final_within_5cm": 1.0,
+  "success_rate_final_within_2cm": 0.96,
+  "success_rate_final_within_1cm": 0.54,
+  "mean_final_distance_cm": 1.08
 }

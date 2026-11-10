@@ -1,0 +1,44 @@
+{
+  "closed_loop_step_ms": {
+    "median_ms": 1.7332,
+    "p50_ms": 1.7332,
+    "mean_ms": 2.1657,
+    "p95_ms": 2.8668,
+    "p99_ms": 24.2009,
+    "min_ms": 1.1603,
+    "max_ms": 32.0188,
+    "effective_fps": 577.0
+  },
+  "pure_mujoco_physics_ms": {
+    "median_ms": 0.9317,
+    "p50_ms": 0.9317,
+    "mean_ms": 1.2417,
+    "p95_ms": 1.5021,
+    "min_ms": 0.6362,
+    "max_ms": 30.706,
+    "pct_of_total": 53.8
+  },
+  "gymnasium_wrapper_ms": {
+    "median_ms": 0.6565,
+    "p50_ms": 0.6565,
+    "mean_ms": 0.7697,
+    "pct_of_total": 37.9
+  },
+  "onnx_inference_ms": {
+    "median_ms": 0.1185,
+    "p50_ms": 0.1185,
+    "mean_ms": 0.1442,
+    "pct_of_total": 6.8
+  },
+  "obs_formatting_ms": {
+    "median_ms": 0.0087,
+    "p50_ms": 0.0087,
+    "mean_ms": 0.0101,
+    "pct_of_total": 0.5
+  },
+  "closure": {
+    "sum_of_medians_ms": 1.7155,
+    "diff_from_closed_loop_pct": 1.02
+  },
+  "n_steps": 500
+}

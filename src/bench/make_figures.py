@@ -60,7 +60,7 @@ def plot_policy_latency():
 
     footnote = (
         "Footnote: Measured on Windows laptop, Intel Core i5-1235U (single thread pinned, intra_op=1, 20k iter/run).\n"
-        "3.58x smaller; no measurable latency difference on this CPU; cause not profiled."
+        "3.58x smaller; no measurable latency difference on this CPU; run-to-run variation exceeds the difference; cause not profiled."
     )
     plt.figtext(0.5, 0.01, footnote, ha="center", fontsize=7.5, color="#444444", style="italic")
     plt.tight_layout(rect=[0, 0.07, 1, 1])
@@ -384,9 +384,10 @@ def plot_memory():
 
     # Panel 2: Windows Laptop (GLFW)
     labels_w = ["Idle\nBaseline", "Active Session\n(Whisper Loaded)"]
+    win_m = win_data.get("windows_laptop_measurement", {}) or win_data.get("windows_laptop_live_browser", {})
     vals_w = [
-        win_data.get("windows_laptop_live_browser", {}).get("idle_server_rss_mb", 127.1),
-        win_data.get("windows_laptop_live_browser", {}).get("peak_rss_mb", 205.1),
+        win_m.get("idle_server_rss_mb", 127.1),
+        win_m.get("tiny_en_loaded_rss_mb", win_m.get("peak_rss_mb", 205.1)),
     ]
     colors_w = ["#C44E52", "#E1974C"]
     bars2 = ax2.bar(labels_w, vals_w, color=colors_w, edgecolor="black", linewidth=0.8, width=0.45)

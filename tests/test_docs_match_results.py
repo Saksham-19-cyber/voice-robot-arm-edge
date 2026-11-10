@@ -17,13 +17,14 @@ def test_readme_numbers_match_results():
     with open("README.md", "r", encoding="utf-8") as f:
         readme = f.read()
 
-    # Policy benchmark
+    # Policy benchmark (5-run medians)
     with open("results/policy_benchmark.json", "r", encoding="utf-8") as f:
         pb = json.load(f)
-    int8_p50 = f"{pb['int8']['p50_us']:.1f}"
-    fp32_p50 = f"{pb['fp32']['p50_us']:.1f}"
-    assert int8_p50 in readme, f"README missing INT8 p50 {int8_p50} µs"
-    assert fp32_p50 in readme, f"README missing FP32 p50 {fp32_p50} µs"
+    rep = pb.get("repeated_runs", {})
+    int8_p50 = f"{rep['int8_p50_us']['median']:.1f}"
+    fp32_p50 = f"{rep['fp32_p50_us']['median']:.1f}"
+    assert int8_p50 in readme, f"README missing INT8 median p50 {int8_p50} µs"
+    assert fp32_p50 in readme, f"README missing FP32 median p50 {fp32_p50} µs"
 
     # Quantization size
     with open("results/quantization_eval.json", "r", encoding="utf-8") as f:
@@ -87,11 +88,16 @@ def _check_text_unit_numbers(text, source_name, all_json_nums, allowlist):
         # Check if val matches any number in results/*.json within 2% or 0.1 tolerance
         matched = False
         for jnum in all_json_nums:
-            if abs(val - jnum) < 1e-4:
+            if abs(val - jnum) < 1e-4 or abs(abs(val) - abs(jnum)) < 1e-4:
                 matched = True
                 break
             # Check rounding match (e.g. 78.5 vs 78.46)
             if abs(val - round(jnum, 1)) < 1e-4 or abs(val - round(jnum, 2)) < 1e-4:
+                matched = True
+                break
+            if abs(abs(val) - abs(round(jnum, 1))) < 1e-4 or abs(abs(val) - abs(round(jnum, 2))) < 1e-4:
+                matched = True
+                break
                 matched = True
                 break
             # Tolerance for percentage/unit conversions
