@@ -75,6 +75,10 @@ def _check_text_unit_numbers(text, source_name, all_json_nums, allowlist):
         except ValueError:
             continue
 
+        # Skip URL percent-encodings (e.g. %20)
+        if unit == "%" and m.end() < len(text) and text[m.end():m.end()+2].isalnum():
+            continue
+
         pair_key = f"{raw_num} {unit}".lower()
         alt_key = f"{raw_num}{unit}".lower()
         if pair_key in allowlist or alt_key in allowlist:
