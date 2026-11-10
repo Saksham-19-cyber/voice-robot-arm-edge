@@ -21,7 +21,7 @@ A voice-directed robotics system translating spoken English commands into 3D Car
 | Metric | Reference / Baseline | Production (INT8 Edge) | Empirical Finding |
 | :--- | :--- | :--- | :--- |
 | **Actor Model Size** | 281.0 KB (FP32 ONNX) | **78.5 KB** (INT8 ONNX) | **3.58x compression** via post-training dynamic quantization |
-| **Reach Success (<= 5 cm)** | 100.0% (Proportional Baseline) | **100.0%** (SAC Actor) | Zero degradation at default FetchReach-v4 tolerance ($N=100$) |
+| **Reach Success (<= 5 cm)** | 100.0% (Proportional Baseline) | **100.0%** (SAC Actor) | No loss at 5 cm (default FetchReach-v4 tolerance, $N=100$) |
 | **Reach Success (<= 2 cm)** | 98.0% (Proportional Baseline) | **96.0%** (SAC Actor) | Exact parity with FP32 ONNX (96.0%); mean final distance 1.08 cm |
 | **Reach Success (<= 1 cm)** | 91.0% (Proportional Baseline) | **56.0%** (SAC Actor) | Within 2 percentage points of FP32 ONNX (54.0%); baseline error is 0.18 cm |
 | **Policy Latency p50** | 34.7 µs (FP32 ONNX) | **42.6 µs** (INT8 ONNX) | 5-run median diff -6.0 µs (range [-17.2, 16.5] µs spans zero; cause not profiled) |
@@ -249,11 +249,11 @@ Production serving completely excludes PyTorch from dependencies. Neural executi
 On Streamlit Community Cloud, offscreen graphics rendering runs via OSMesa (`MUJOCO_GL=osmesa`). Reusing a single simulation environment across Streamlit reruns causes OpenGL context leakage across worker threads, resulting in blank black video frames. To guarantee visual integrity, the application creates a fresh environment per user request via `run_onnx_rollout(..., env=None)` and closes both renderer and environment in a `try/finally` block.
 
 ### Linux pybind11 Enum Compatibility Fix
-In MuJoCo's Linux wheels, `model.jnt_type` returns NumPy scalar integers (`numpy.int32`). Pybind11 exposes C++ enums (`mujoco.mjtJoint.mjJNT_HINGE`, `mjJNT_SLIDE`) with custom equality operators where `numpy.int32(3) == HINGE` evaluates to `True`, but `HINGE == numpy.int32(3)` evaluates to `False`. When evaluating tuple membership:
+In MuJoCo's Linux wheels, `model.jnt_type` returns NumPy scalar integers (`numpy.int32`). Pybind11 exposes C++ enums (`mujoco.mjtJoint.mjJNT_HINGE`, `mjJNT_SLIDE`) with asymmetric equality: `numpy.int32(3) == HINGE` evaluates to `True`, but `HINGE == numpy.int32(3)` evaluates to `False`. When `gymnasium_robotics.utils.mujoco_utils` evaluates tuple membership:
 ```python
-raw_type in (HINGE, SLIDE)
+assert joint_type in (mjJNT_HINGE, mjJNT_SLIDE)
 ```
-Python iterates through the tuple and checks `item == raw_type` (e.g. `HINGE == raw_type`), which dispatches to pybind11's enum `__eq__` and fails with `ValueError: 'np.int32(3)' is not a valid joint type`. To fix this asymmetry, `src/rl/env_utils.py` monkey-patches `_safe_get_joint_qpos` and `_safe_set_joint_qpos` by coercing NumPy scalar integers to standard Python integers (`int(model.jnt_type[joint_id]) == int(mujoco.mjtJoint.mjJNT_FREE)`).
+Python iterates the tuple and dispatches `HINGE.__eq__(numpy.int32(3))` → pybind11 returns `NotImplemented`/`False`, so the membership test is `False` and raises `AssertionError` on Linux but not Windows. `src/rl/env_utils.py` monkey-patches `_safe_get_joint_qpos`, `_safe_set_joint_qpos`, `_safe_get_joint_qvel`, and `_safe_set_joint_qvel` in `gymnasium_robotics.utils.mujoco_utils` to coerce `joint_type = int(model.jnt_type[joint_id])` before every tuple membership check, restoring symmetric equality throughout.
 
 ---
 
